@@ -1,0 +1,22 @@
+# Claude session files
+.claude/
+
+# PowerShell scripts (작업용)
+assets/*.ps1
+assets/*.js
+assets/find_node.ps1
+assets/make_cert_img.*
+assets/copy_assets*.ps1
+
+# DRM-encrypted PDF (too large / encrypted)
+assets/iosa_certificate.pdf
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# macOS
+.DS_Store
+
+# Node
+node_modules/

@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IOSA 관리 포털 — 이스타항공</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- ═══════════════════ TOP NAV ═══════════════════ -->
+<nav id="top-nav">
+  <a class="nav-brand" onclick="navigate('dashboard')">
+    <div class="nav-brand-logo">
+      <span class="bl">ZE</span>
+      <span class="bl">IOSA</span>
+    </div>
+    <div class="nav-brand-text">
+      <span class="nav-brand-title">IOSA 포털</span>
+      <span class="nav-brand-sub">이스타항공 ZE / ESR</span>
+    </div>
+  </a>
+
+  <ul class="nav-items">
+    <li class="nav-item">
+      <span class="nav-link-top active" id="navbtn-dashboard" onclick="navigate('dashboard')">
+        대시보드
+      </span>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link-top" id="navbtn-cert" onclick="navigate('certification')">
+        인증관리 <i class="fas fa-chevron-down" style="font-size:0.55rem;opacity:0.6;"></i>
+      </span>
+      <div class="nav-dropdown">
+        <a data-section="certification" onclick="navigate('certification')">IOSA 인증 정보</a>
+        <a data-section="ism" onclick="navigate('ism')">ISM 개정 관리</a>
+        <a data-section="history" onclick="navigate('history')">심사 이력</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link-top" id="navbtn-prep" onclick="navigate('preparation')">
+        심사준비 <i class="fas fa-chevron-down" style="font-size:0.55rem;opacity:0.6;"></i>
+      </span>
+      <div class="nav-dropdown">
+        <a data-section="preparation" onclick="navigate('preparation')">준비 단계 관리</a>
+        <a data-section="internal" onclick="navigate('internal')">내부심사 / CR</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link-top" id="navbtn-audit" onclick="navigate('mainaudit')">
+        심사관리 <i class="fas fa-chevron-down" style="font-size:0.55rem;opacity:0.6;"></i>
+      </span>
+      <div class="nav-dropdown">
+        <a data-section="application" onclick="navigate('application')">IOSA 신청 관리</a>
+        <a data-section="coordination" onclick="navigate('coordination')">심사원 코디네이션</a>
+        <a data-section="mainaudit" onclick="navigate('mainaudit')">본점검 관리</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link-top" id="navbtn-cap" onclick="navigate('cap')">
+        CAP / FAT
+      </span>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link-top" id="navbtn-rbi" onclick="navigate('rbi')">
+        RBI 재인증
+        <span style="background:var(--eastar-red);color:white;font-size:0.58rem;font-weight:800;padding:1px 5px;border-radius:2px;letter-spacing:0.3px;">NEW</span>
+      </span>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link-top" id="navbtn-resources" onclick="navigate('manuals')">
+        자료실 <i class="fas fa-chevron-down" style="font-size:0.55rem;opacity:0.6;"></i>
+      </span>
+      <div class="nav-dropdown">
+        <a data-section="manuals" onclick="navigate('manuals')">매뉴얼 다운로드</a>
+        <a data-section="schedule" onclick="navigate('schedule')">연간 일정</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link-top" id="navbtn-pastresults" onclick="navigate('pastresults')">
+        심사 이력
+      </span>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link-top" id="navbtn-board" onclick="navigate('board')">
+        커뮤니티
+      </span>
+    </li>
+  </ul>
+
+  <div class="nav-actions">
+    <div id="nav-expiry-pill"></div>
+    <div id="nav-user-info" style="display:flex;flex-direction:column;align-items:flex-end;gap:1px;padding:0 4px;"></div>
+    <button class="nav-action-btn" onclick="showChangePassword()" title="비밀번호 변경">
+      <i class="fas fa-key"></i> 비밀번호
+    </button>
+    <button class="nav-action-btn" id="admin-toggle-btn" onclick="toggleAdmin()" title="관리자 모드" style="display:none;">
+      <i class="fas fa-lock" id="admin-icon"></i> 관리자
+    </button>
+    <button class="nav-action-btn admin-ctrl" id="admin-settings-btn" onclick="openAdminSettings()" title="데이터 편집" style="display:none;border-color:rgba(210,0,21,0.4);color:var(--eastar-red);">
+      <i class="fas fa-sliders-h"></i> 데이터 편집
+    </button>
+    <button class="nav-action-btn" onclick="doLogout()" title="로그아웃" style="border-color:rgba(210,0,21,0.3);color:var(--eastar-red);">
+      <i class="fas fa-sign-out-alt"></i> 로그아웃
+    </button>
+  </div>
+</nav>
+
+<!-- ═══════════════════ LOGIN OVERLAY ═══════════════════ -->
+<div id="login-overlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#f0f0f0;z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.12);width:100%;max-width:380px;overflow:hidden;">
+    <!-- Header -->
+    <div style="background:var(--eastar-red);padding:32px 32px 24px;text-align:center;">
+      <div style="display:inline-flex;flex-direction:column;align-items:center;gap:8px;">
+        <div style="background:rgba(255,255,255,0.2);border-radius:6px;padding:8px 14px;font-size:0.9rem;font-weight:900;color:#fff;letter-spacing:2px;">IOSA</div>
+        <div style="font-size:1.1rem;font-weight:800;color:#fff;letter-spacing:-0.3px;">이스타항공 IOSA 포털</div>
+        <div style="font-size:0.72rem;color:rgba(255,255,255,0.75);">EASTARJET Co., Ltd. ZE / ESR</div>
+      </div>
+    </div>
+    <!-- Form -->
+    <div style="padding:28px 32px 32px;">
+      <div style="margin-bottom:16px;">
+        <label style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888;display:block;margin-bottom:6px;">사번 (Employee ID)</label>
+        <input id="login-empid" type="text" placeholder="사번을 입력하세요" autocomplete="username"
+          style="width:100%;padding:10px 14px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:0.88rem;font-family:'Montserrat',sans-serif;outline:none;transition:border-color 200ms;"
+          onfocus="this.style.borderColor='#D20015'" onblur="this.style.borderColor='#e0e0e0'">
+      </div>
+      <div style="margin-bottom:8px;">
+        <label style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888;display:block;margin-bottom:6px;">비밀번호</label>
+        <input id="login-pw" type="password" placeholder="비밀번호 (초기: 1234)" autocomplete="current-password"
+          style="width:100%;padding:10px 14px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:0.88rem;font-family:'Montserrat',sans-serif;outline:none;transition:border-color 200ms;"
+          onfocus="this.style.borderColor='#D20015'" onblur="this.style.borderColor='#e0e0e0'">
+      </div>
+      <div id="login-error" style="display:none;font-size:0.75rem;color:#D20015;font-weight:600;padding:8px 0;"></div>
+      <button onclick="doLogin()"
+        style="width:100%;padding:12px;background:#D20015;color:#fff;border:none;border-radius:6px;font-size:0.88rem;font-weight:800;font-family:'Montserrat',sans-serif;cursor:pointer;margin-top:8px;transition:background 200ms;letter-spacing:0.3px;"
+        onmouseover="this.style.background='#9e000f'" onmouseout="this.style.background='#D20015'">
+        로그인
+      </button>
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0;font-size:0.68rem;color:#bbb;text-align:center;line-height:1.8;">
+        초기 비밀번호: <strong style="color:#888;">1234</strong> · 로그인 후 비밀번호 변경 가능<br>
+        문의: 안전보안실 (sh.jang@eastarjet.com)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ CHANGE PASSWORD MODAL ═══════════════════ -->
+<div class="modal fade" id="changePwModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-key me-2"></i>비밀번호 변경</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">현재 비밀번호</label>
+          <input type="password" class="iata-input" id="chpw-current" placeholder="현재 비밀번호">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">새 비밀번호</label>
+          <input type="password" class="iata-input" id="chpw-new" placeholder="새 비밀번호 (4자 이상)">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">새 비밀번호 확인</label>
+          <input type="password" class="iata-input" id="chpw-confirm" placeholder="새 비밀번호 재입력">
+        </div>
+        <div id="chpw-error" style="display:none;font-size:0.78rem;color:#D20015;font-weight:600;padding:6px 0;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline" data-bs-dismiss="modal">취소</button>
+        <button class="btn-primary" onclick="doChangePassword()"><i class="fas fa-save me-1"></i>변경</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ ADMIN SETTINGS MODAL ═══════════════════ -->
+<div class="modal fade" id="adminSettingsModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header" style="background:var(--eastar-red);color:#fff;">
+        <h5 class="modal-title"><i class="fas fa-sliders-h me-2"></i>관리자 데이터 편집</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:24px;">
+
+        <!-- 주요 날짜 -->
+        <div style="margin-bottom:24px;">
+          <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#aaa;margin-bottom:14px;padding-bottom:6px;border-bottom:2px solid #f0f0f0;">주요 날짜</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <label class="form-label">심사 시작일 (Audit Start)</label>
+              <input type="date" class="iata-input" id="as-auditStart">
+            </div>
+            <div>
+              <label class="form-label">심사 종료일 (Closing Meeting)</label>
+              <input type="date" class="iata-input" id="as-auditClose">
+            </div>
+            <div>
+              <label class="form-label">CAP 합의 마감일</label>
+              <input type="date" class="iata-input" id="as-capDeadline">
+            </div>
+            <div>
+              <label class="form-label">지적사항 종결 마감일</label>
+              <input type="date" class="iata-input" id="as-findingsClose">
+            </div>
+            <div>
+              <label class="form-label">재인증 윈도우 시작</label>
+              <input type="date" class="iata-input" id="as-renewalStart">
+            </div>
+            <div>
+              <label class="form-label">재인증 윈도우 종료</label>
+              <input type="date" class="iata-input" id="as-renewalEnd">
+            </div>
+            <div>
+              <label class="form-label">인증 만료일</label>
+              <input type="date" class="iata-input" id="as-expiry">
+            </div>
+          </div>
+        </div>
+
+        <!-- 심사 정보 -->
+        <div style="margin-bottom:24px;">
+          <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#aaa;margin-bottom:14px;padding-bottom:6px;border-bottom:2px solid #f0f0f0;">심사 정보</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <label class="form-label">IAR 번호</label>
+              <input type="text" class="iata-input" id="as-iar" placeholder="예: IOSA-ESR-IA-2025">
+            </div>
+            <div>
+              <label class="form-label">Lead Auditor</label>
+              <input type="text" class="iata-input" id="as-leadAuditor" placeholder="예: Perry Chou">
+            </div>
+            <div>
+              <label class="form-label">적용 ISM 에디션</label>
+              <input type="text" class="iata-input" id="as-ismEdition" placeholder="예: 17">
+            </div>
+            <div>
+              <label class="form-label">Total FINDINGS 수</label>
+              <input type="number" class="iata-input" id="as-totalFindings" min="0">
+            </div>
+            <div>
+              <label class="form-label">Total OBSERVATIONS 수</label>
+              <input type="number" class="iata-input" id="as-totalObs" min="0">
+            </div>
+          </div>
+        </div>
+
+        <!-- CAP / FAT 상태 -->
+        <div style="margin-bottom:24px;">
+          <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#aaa;margin-bottom:14px;padding-bottom:6px;border-bottom:2px solid #f0f0f0;">CAP / FAT 상태</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <label class="form-label">CAP 상태</label>
+              <select class="iata-input" id="as-capStatus">
+                <option value="not_started">미시작</option>
+                <option value="submitted">제출됨</option>
+                <option value="under_review">검토중 (IATA)</option>
+                <option value="approved">승인됨</option>
+                <option value="closed">전체 종결</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">FAT (Final Action Taken) 상태</label>
+              <select class="iata-input" id="as-fatStatus">
+                <option value="not_started">미시작</option>
+                <option value="in_progress">진행중</option>
+                <option value="submitted">제출됨</option>
+                <option value="approved">승인됨</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 부서별 사용자 추가 -->
+        <div style="margin-bottom:8px;">
+          <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#aaa;margin-bottom:14px;padding-bottom:6px;border-bottom:2px solid #f0f0f0;">부서 담당자 계정 관리</div>
+          <div id="as-users-list" style="margin-bottom:12px;"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;">
+            <div>
+              <label class="form-label">사번</label>
+              <input type="text" class="iata-input" id="as-new-empid" placeholder="예: 2240001">
+            </div>
+            <div>
+              <label class="form-label">이름</label>
+              <input type="text" class="iata-input" id="as-new-name" placeholder="예: 홍길동">
+            </div>
+            <div>
+              <label class="form-label">부서</label>
+              <select class="iata-input" id="as-new-dept">
+                <option>운항본부</option>
+                <option>종합통제실</option>
+                <option>정비본부</option>
+                <option>객실본부</option>
+                <option>운송본부</option>
+                <option>안전보안실</option>
+              </select>
+            </div>
+            <button class="btn-primary" onclick="adminAddUser()" style="white-space:nowrap;"><i class="fas fa-plus me-1"></i>추가</button>
+          </div>
+        </div>
+
+        <div id="as-save-msg" style="display:none;margin-top:8px;padding:8px 12px;background:#f0faf4;border-radius:4px;font-size:0.78rem;color:#1a7a4a;font-weight:700;">
+          <i class="fas fa-check-circle me-1"></i>저장 완료!
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline" data-bs-dismiss="modal">닫기</button>
+        <button class="btn-primary" onclick="saveAdminSettings()"><i class="fas fa-save me-1"></i>저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ SECTIONS ═══════════════════ -->
+<div id="app-container">
+  <span id="page-title" style="display:none;"></span>
+  <div class="page-section" id="section-dashboard"></div>
+  <div class="page-section" id="section-certification"></div>
+  <div class="page-section" id="section-ism"></div>
+  <div class="page-section" id="section-preparation"></div>
+  <div class="page-section" id="section-internal"></div>
+  <div class="page-section" id="section-application"></div>
+  <div class="page-section" id="section-coordination"></div>
+  <div class="page-section" id="section-mainaudit"></div>
+  <div class="page-section" id="section-cap"></div>
+  <div class="page-section" id="section-rbi"></div>
+  <div class="page-section" id="section-history"></div>
+  <div class="page-section" id="section-pastresults"></div>
+  <div class="page-section" id="section-schedule"></div>
+  <div class="page-section" id="section-manuals"></div>
+  <div class="page-section" id="section-board"></div>
+</div>
+
+<!-- ═══════════════════ MODALS ═══════════════════ -->
+<div class="modal fade" id="newPostModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-pen me-2"></i>새 게시물 작성</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">카테고리</label>
+          <select class="iata-select" id="post-cat">
+            <option value="question">❓ 질문</option>
+            <option value="notice">📢 공지</option>
+            <option value="discuss">💬 토론</option>
+            <option value="report">📊 공유</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">제목</label>
+          <input type="text" class="iata-input" id="post-title-input" placeholder="제목을 입력하세요">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">내용</label>
+          <textarea class="iata-textarea" id="post-body-input" rows="6" placeholder="내용을 입력하세요..."></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">작성자</label>
+          <input type="text" class="iata-input" id="post-author-input" value="장서희">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">소속</label>
+          <input type="text" class="iata-input" id="post-dept-input" value="이스타항공 안전보안실">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline" data-bs-dismiss="modal">취소</button>
+        <button class="btn-primary" onclick="submitNewPost()"><i class="fas fa-paper-plane me-1"></i>게시</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CAP Finding Modal -->
+<div class="modal fade" id="capFindingModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">CAR/OBS 상태 편집</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">CAR/OBS ID</label>
+          <input type="text" class="iata-input" id="cap-edit-id" readonly style="background:#f5f5f5;">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">ISARP</label>
+          <input type="text" class="iata-input" id="cap-edit-isarp" readonly style="background:#f5f5f5;">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">현재 상태</label>
+          <select class="iata-select" id="cap-edit-status">
+            <option value="open">Open — 진행중</option>
+            <option value="submitted">Submitted — 제출완료</option>
+            <option value="approved">Approved — 승인완료</option>
+            <option value="closed">Closed — 종결</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">담당부서</label>
+          <input type="text" class="iata-input" id="cap-edit-dept">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">조치 내용 요약</label>
+          <textarea class="iata-textarea" id="cap-edit-action" rows="3"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">FAT 제출일</label>
+          <input type="date" class="iata-input" id="cap-edit-fat">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline" data-bs-dismiss="modal">취소</button>
+        <button class="btn-primary" onclick="saveCapEdit()">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   EXTENDED APP — Dashboard, History, Schedule, Manuals, Board
+   ═══════════════════════════════════════════════════════════ */
+
+// ── AUTH ──────────────────────────────────────────────────
+// Default user registry — stored in localStorage
+const DEFAULT_USERS = [
+  { empId:'2240705', name:'장서희', dept:'안전보안실', password:'1234' },
+  // 다른 부문 사번은 추후 추가 예정
+];
+
+function getUsers() {
+  // DEFAULT_USERS is always the base list.
+  // Admin can add extra users via localStorage (adminAddUser).
+  // Merge: sync DEFAULT_USERS (preserve passwords) + any admin-added extra users.
+  const stored = JSON.parse(localStorage.getItem('iosa_users') || '[]');
+  // Sync defaults (preserve password changes)
+  const synced = DEFAULT_USERS.map(def => {
+    const existing = stored.find(u => u.empId === def.empId);
+    return existing ? { ...def, password: existing.password } : def;
+  });
+  // Append admin-added users (those not in DEFAULT_USERS)
+  const defaultIds = DEFAULT_USERS.map(u => u.empId);
+  const extras = stored.filter(u => !defaultIds.includes(u.empId));
+  const merged = [...synced, ...extras];
+  localStorage.setItem('iosa_users', JSON.stringify(merged));
+  return merged;
+}
+
+function saveUsers(users) { localStorage.setItem('iosa_users', JSON.stringify(users)); }
+
+function getCurrentUser() {
+  const s = localStorage.getItem('iosa_session');
+  return s ? JSON.parse(s) : null;
+}
+
+function isAdminRole() {
+  const u = getCurrentUser();
+  return u && u.dept === '안전보안실';
+}
+
+function getUserDept() {
+  const u = getCurrentUser();
+  return u ? u.dept : null;
+}
+
+// Dept → IOSA section mapping
+const DEPT_SECTIONS = {
+  '안전보안실': ['ORG','SEC','FLT','DSP','MNT','CAB','GRH','CGO'], // admin sees all
+  '운항본부':  ['FLT'],
+  '종합통제실': ['DSP'],
+  '정비본부':  ['MNT'],
+  '객실본부':  ['CAB'],
+  '운송본부':  ['GRH','CGO'],
+};
+
+function canViewSection(code) {
+  const dept = getUserDept();
+  if (!dept) return false;
+  const allowed = DEPT_SECTIONS[dept] || [];
+  return allowed.includes(code);
+}
+
+function showLogin() {
+  document.getElementById('login-overlay').style.display = 'flex';
+  document.getElementById('app-container').style.display = 'none';
+  document.getElementById('top-nav').style.display = 'none';
+}
+
+function hideLogin() {
+  document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('app-container').style.display = 'block';
+  document.getElementById('top-nav').style.display = 'flex';
+}
+
+function doLogin() {
+  const empId = document.getElementById('login-empid').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  const errEl = document.getElementById('login-error');
+  const users = getUsers();
+  const user = users.find(u => u.empId === empId && u.password === pw);
+  if (!user) {
+    errEl.textContent = '사번 또는 비밀번호가 올바르지 않습니다.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  localStorage.setItem('iosa_session', JSON.stringify({ empId: user.empId, name: user.name, dept: user.dept }));
+  hideLogin();
+  isAdmin = user.dept === '안전보안실';
+  updateNavUser();
+  navigate('dashboard');
+}
+
+function doLogout() {
+  localStorage.removeItem('iosa_session');
+  isAdmin = false;
+  showLogin();
+}
+
+function showChangePassword() {
+  document.getElementById('chpw-error').style.display = 'none';
+  document.getElementById('chpw-current').value = '';
+  document.getElementById('chpw-new').value = '';
+  document.getElementById('chpw-confirm').value = '';
+  const modal = new bootstrap.Modal(document.getElementById('changePwModal'));
+  modal.show();
+}
+
+function doChangePassword() {
+  const current = document.getElementById('chpw-current').value;
+  const newPw = document.getElementById('chpw-new').value;
+  const confirm = document.getElementById('chpw-confirm').value;
+  const errEl = document.getElementById('chpw-error');
+  const user = getCurrentUser();
+  if (!user) return;
+  const users = getUsers();
+  const idx = users.findIndex(u => u.empId === user.empId);
+  if (idx < 0 || users[idx].password !== current) {
+    errEl.textContent = '현재 비밀번호가 올바르지 않습니다.'; errEl.style.display = 'block'; return;
+  }
+  if (newPw.length < 4) {
+    errEl.textContent = '새 비밀번호는 4자 이상이어야 합니다.'; errEl.style.display = 'block'; return;
+  }
+  if (newPw !== confirm) {
+    errEl.textContent = '새 비밀번호가 일치하지 않습니다.'; errEl.style.display = 'block'; return;
+  }
+  users[idx].password = newPw;
+  saveUsers(users);
+  errEl.style.display = 'none';
+  bootstrap.Modal.getInstance(document.getElementById('changePwModal')).hide();
+  alert('비밀번호가 변경되었습니다.');
+}
+
+function updateNavUser() {
+  const user = getCurrentUser();
+  const el = document.getElementById('nav-user-info');
+  if (el && user) {
+    el.innerHTML = `<span style="font-size:0.7rem;font-weight:700;color:#333;">${user.name}</span><span style="font-size:0.62rem;color:#aaa;">${user.dept}</span>`;
+  }
+  const isAdminUser = user && user.dept === '안전보안실';
+  // Show admin toggle only for 안전보안실
+  const adminBtn = document.getElementById('admin-toggle-btn');
+  if (adminBtn) adminBtn.style.display = isAdminUser ? 'flex' : 'none';
+  // Show data edit button only for 안전보안실
+  const settingsBtn = document.getElementById('admin-settings-btn');
+  if (settingsBtn) settingsBtn.style.display = isAdminUser ? 'flex' : 'none';
+}
+
+// ── Admin Settings ─────────────────────────────────────────
+function openAdminSettings() {
+  const c = APP_DATA.certification;
+  const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+  setVal('as-auditStart',   c.auditStartDate);
+  setVal('as-auditClose',   c.auditCloseDate);
+  setVal('as-capDeadline',  c.capDeadline);
+  setVal('as-findingsClose',c.findingsCloseDeadline);
+  setVal('as-renewalStart', c.renewalWindowStart);
+  setVal('as-renewalEnd',   c.renewalWindowEnd);
+  setVal('as-expiry',       c.registrationExpiry);
+  setVal('as-ismEdition',   c.ismEdition);
+  setVal('as-iar',          APP_DATA.mainAudit?.results?.iarNumber || 'IOSA-ESR-IA-2025');
+  setVal('as-leadAuditor',  APP_DATA.mainAudit?.results?.leadAuditor || 'Perry Chou');
+  const tf = document.getElementById('as-totalFindings');
+  const to = document.getElementById('as-totalObs');
+  if (tf) tf.value = APP_DATA.cap.findings.length || 21;
+  if (to) to.value = APP_DATA.cap.findings.filter(f=>f.type==='obs').length || 7;
+  const cs = document.getElementById('as-capStatus');
+  if (cs) cs.value = APP_DATA.cap.status || 'closed';
+  const fs = document.getElementById('as-fatStatus');
+  if (fs) fs.value = APP_DATA.fat.status || 'approved';
+  // Render user list
+  renderAdminUserList();
+  document.getElementById('as-save-msg').style.display = 'none';
+  new bootstrap.Modal(document.getElementById('adminSettingsModal')).show();
+}
+
+function renderAdminUserList() {
+  const users = getUsers();
+  const el = document.getElementById('as-users-list');
+  if (!el) return;
+  if (users.length === 0) { el.innerHTML = '<div style="font-size:0.78rem;color:#bbb;padding:8px 0;">등록된 사용자가 없습니다.</div>'; return; }
+  el.innerHTML = users.map((u,i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:#f9f9f9;border-radius:4px;margin-bottom:6px;font-size:0.8rem;">
+      <span style="font-weight:700;width:80px;">${u.empId}</span>
+      <span style="width:70px;">${u.name}</span>
+      <span style="flex:1;color:#888;">${u.dept}</span>
+      ${u.empId === '2240705' ? '<span style="font-size:0.65rem;color:#aaa;">(관리자 고정)</span>' : `<button onclick="adminRemoveUser('${u.empId}')" style="border:none;background:#fff0f0;color:var(--eastar-red);border-radius:3px;padding:2px 8px;font-size:0.7rem;cursor:pointer;font-weight:700;">삭제</button>`}
+    </div>
+  `).join('');
+}
+
+function adminAddUser() {
+  const empId = document.getElementById('as-new-empid').value.trim();
+  const name  = document.getElementById('as-new-name').value.trim();
+  const dept  = document.getElementById('as-new-dept').value;
+  if (!empId || !name) { alert('사번과 이름을 입력하세요.'); return; }
+  // Add to DEFAULT_USERS equivalent via localStorage override
+  const stored = JSON.parse(localStorage.getItem('iosa_users') || '[]');
+  if (stored.find(u => u.empId === empId)) { alert('이미 등록된 사번입니다.'); return; }
+  stored.push({ empId, name, dept, password: '1234' });
+  localStorage.setItem('iosa_users', JSON.stringify(stored));
+  document.getElementById('as-new-empid').value = '';
+  document.getElementById('as-new-name').value = '';
+  renderAdminUserList();
+}
+
+function adminRemoveUser(empId) {
+  if (!confirm(`사번 ${empId} 사용자를 삭제하시겠습니까?`)) return;
+  const stored = JSON.parse(localStorage.getItem('iosa_users') || '[]');
+  localStorage.setItem('iosa_users', JSON.stringify(stored.filter(u => u.empId !== empId)));
+  renderAdminUserList();
+}
+
+function saveAdminSettings() {
+  const getVal = id => document.getElementById(id)?.value?.trim();
+  // Update certification dates
+  if (getVal('as-auditStart'))    APP_DATA.certification.auditStartDate          = getVal('as-auditStart');
+  if (getVal('as-auditClose'))    APP_DATA.certification.auditCloseDate          = getVal('as-auditClose');
+  if (getVal('as-capDeadline'))   APP_DATA.certification.capDeadline             = getVal('as-capDeadline');
+  if (getVal('as-findingsClose')) APP_DATA.certification.findingsCloseDeadline   = getVal('as-findingsClose');
+  if (getVal('as-renewalStart'))  APP_DATA.certification.renewalWindowStart      = getVal('as-renewalStart');
+  if (getVal('as-renewalEnd'))    APP_DATA.certification.renewalWindowEnd        = getVal('as-renewalEnd');
+  if (getVal('as-expiry'))        APP_DATA.certification.registrationExpiry      = getVal('as-expiry');
+  if (getVal('as-ismEdition'))    APP_DATA.certification.ismEdition              = getVal('as-ismEdition');
+  // Update CAP/FAT status
+  APP_DATA.cap.status = getVal('as-capStatus') || APP_DATA.cap.status;
+  APP_DATA.fat.status = getVal('as-fatStatus') || APP_DATA.fat.status;
+  // Save
+  DB.save(APP_DATA);
+  document.getElementById('as-save-msg').style.display = 'block';
+  // Re-render current section
+  setTimeout(() => {
+    const active = document.querySelector('.page-section.active');
+    if (active) renderSectionAll(active.id.replace('section-', ''));
+  }, 300);
+}
+
+// ── Admin Mode ────────────────────────────────────────────
+let isAdmin = false;
+function toggleAdmin() {
+  isAdmin = !isAdmin;
+  document.body.classList.toggle('admin-mode', isAdmin);
+  const btn = document.getElementById('admin-toggle-btn');
+  const ico = document.getElementById('admin-icon');
+  if (isAdmin) {
+    btn.classList.add('admin-on');
+    ico.className = 'fas fa-unlock';
+  } else {
+    btn.classList.remove('admin-on');
+    ico.className = 'fas fa-lock';
+  }
+  // Re-render current section
+  const active = document.querySelector('.page-section.active');
+  if (active) renderSectionAll(active.id.replace('section-', ''));
+}
+
+// ── Navigation ────────────────────────────────────────────
+function navigate(section) {
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-link-top').forEach(l => l.classList.remove('active'));
+  const el = document.getElementById('section-' + section);
+  if (el) el.classList.add('active');
+  const btn = document.getElementById('navbtn-' + section);
+  if (btn) btn.classList.add('active');
+  const dropLink = document.querySelector(`.nav-dropdown a[data-section="${section}"]`);
+  if (dropLink) dropLink.closest('.nav-item').querySelector('.nav-link-top').classList.add('active');
+  renderSectionAll(section);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderSectionAll(s) {
+  const map = {
+    dashboard: renderDashboardNew,
+    certification: renderCertification,
+    ism: renderISM,
+    preparation: renderPreparation,
+    internal: renderInternal,
+    application: renderApplication,
+    coordination: renderCoordination,
+    mainaudit: renderMainAudit,
+    cap: renderCAP,
+    rbi: renderRBI,
+    history: renderHistory,
+    pastresults: renderPastResults,
+    schedule: renderSchedule,
+    manuals: renderManuals,
+    board: renderBoard,
+  };
+  if (map[s]) map[s]();
+}
+
+// ══════════════════════════════════════════════════════════
+//  DASHBOARD — IATA Connect style
+// ══════════════════════════════════════════════════════════
+function renderDashboardNew() {
+  const c = APP_DATA.certification;
+  const daysToExpiry   = DateUtil.daysUntil(c.registrationExpiry);
+  const daysToRenewal  = DateUtil.daysUntil(c.renewalWindowStart);
+  const rbiDone  = APP_DATA.rbiPrep.prepTasks.filter(t=>t.status==='completed').length;
+  const rbiTotal = APP_DATA.rbiPrep.prepTasks.length;
+
+  const navCards = [
+    {
+      icon:'fa-certificate', title:'인증관리',
+      desc:'IOSA 인증 정보, ISM 개정 이력, 연도별 심사 이력을 확인합니다.',
+      links:[
+        {label:'IOSA 인증 정보', section:'certification'},
+        {label:'심사 이력',      section:'history'},
+      ]
+    },
+    {
+      icon:'fa-clipboard-check', title:'심사준비',
+      desc:'초도·재인증 준비 단계 관리, ISM 내부심사 및 CR 작성을 관리합니다.',
+      links:[
+        {label:'준비 단계 관리',  section:'preparation'},
+        {label:'내부심사 / CR', section:'internal'},
+      ]
+    },
+    {
+      icon:'fa-search', title:'심사관리',
+      desc:'IOSA 신청, 심사원 코디네이션, 본점검 일정 및 결과를 관리합니다.',
+      links:[
+        {label:'IOSA 신청 관리',    section:'application'},
+        {label:'본점검 관리',        section:'mainaudit'},
+      ]
+    },
+    {
+      icon:'fa-tasks', title:'CAP / FAT',
+      desc:'초도심사 지적사항(Findings·OBS) 시정조치 계획 및 Final Action Taken (FAT)을 관리합니다.',
+      badge:'전체 종결 완료',
+      links:[
+        {label:'CAP / FAT 현황', section:'cap'},
+      ]
+    },
+    {
+      icon:'fa-sync-alt', title:'RBI 재인증',
+      desc:'2027년 Risk-Based Inspection 재인증 준비 — Maturity Assessment 및 준비 Task를 관리합니다.',
+      badge:'D-' + daysToRenewal,
+      links:[
+        {label:'RBI 준비 현황', section:'rbi'},
+      ]
+    },
+    {
+      icon:'fa-folder-open', title:'자료실',
+      desc:'ISM, IPM, IAH, RBI Criteria 등 IOSA 관련 공식 매뉴얼 및 심사 자료를 다운로드합니다.',
+      links:[
+        {label:'매뉴얼 다운로드', section:'manuals'},
+        {label:'연간 일정',      section:'schedule'},
+      ]
+    },
+  ];
+
+  document.getElementById('section-dashboard').innerHTML = `
+
+<!-- ══════════════════════════════════════════════════════
+     HERO — Certificate + Current Status
+════════════════════════════════════════════════════════ -->
+<div style="display:grid;grid-template-columns:1fr 380px;gap:0;margin-top:24px;margin-bottom:28px;border-radius:6px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.10);">
+
+  <!-- LEFT: Certificate panel -->
+  <div style="background:#fff;padding:40px 44px;border-bottom:1px solid #eee;">
+
+    <!-- IOSA badge -->
+    <div style="display:inline-flex;align-items:center;gap:10px;
+      background:var(--eastar-red);color:#fff;
+      padding:6px 16px 6px 10px;border-radius:4px;margin-bottom:24px;">
+      <div style="background:rgba(255,255,255,0.2);border-radius:2px;padding:3px 7px;font-size:0.55rem;font-weight:900;letter-spacing:2px;">IOSA</div>
+      <span style="font-size:0.72rem;font-weight:800;letter-spacing:1.5px;">REGISTERED</span>
+    </div>
+
+    <!-- Airline name -->
+    <div style="font-size:2rem;font-weight:900;color:#111;letter-spacing:-0.5px;line-height:1.1;margin-bottom:6px;">
+      이스타항공 IOSA 포털
+    </div>
+    <div style="font-size:1rem;font-weight:500;color:#777;margin-bottom:28px;letter-spacing:0.3px;">
+      EASTARJET Co., Ltd. &nbsp;·&nbsp; ZE / ESR
+    </div>
+
+    <!-- Divider line (IATA Connect style) -->
+    <div style="width:40px;height:3px;background:var(--eastar-red);margin-bottom:24px;border-radius:2px;"></div>
+
+    <!-- Key details -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 32px;margin-bottom:32px;">
+      ${[
+        ['심사 완료','2025년 8월 1일'],
+        ['IAR 번호','IOSA-ESR-IA-2025'],
+        ['인증 만료','2027년 8월 1일'],
+        ['Lead Auditor','Perry Chou'],
+        ['적용 ISM','ISM Ed.17 (17.1)'],
+        ['Findings / FAT','21건 Findings · 전체 종결 ✓'],
+      ].map(([k,v])=>`
+        <div>
+          <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#aaa;margin-bottom:3px;">${k}</div>
+          <div style="font-size:0.88rem;font-weight:700;color:#111;">${v}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- CTA buttons -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="../../IOSA (7.28~8.1)/EASTAR JET Co., Ltd. - IOSA Certificate.pdf"
+         target="_blank"
+         style="display:inline-flex;align-items:center;gap:7px;
+           padding:10px 22px;background:var(--eastar-red);color:#fff;
+           border-radius:4px;font-size:0.78rem;font-weight:800;
+           text-decoration:none;letter-spacing:0.3px;transition:opacity 200ms;"
+         onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+        <i class="fas fa-file-pdf"></i> 인증서 열기
+      </a>
+      <a href="https://www.iata.org/en/programs/safety/audit/iosa/registry/"
+         target="_blank"
+         style="display:inline-flex;align-items:center;gap:7px;
+           padding:10px 22px;background:#fff;color:#111;
+           border:1.5px solid #ddd;border-radius:4px;
+           font-size:0.78rem;font-weight:700;text-decoration:none;
+           letter-spacing:0.3px;transition:border-color 200ms;"
+         onmouseover="this.style.borderColor='#111'" onmouseout="this.style.borderColor='#ddd'">
+        <i class="fas fa-external-link-alt"></i> IOSA Registry
+      </a>
+    </div>
+  </div>
+
+  <!-- RIGHT: IOSA Certificate -->
+  <div style="background:#e8e8e8;border-left:1px solid #ddd;display:flex;align-items:center;justify-content:center;padding:18px 16px;">
+
+    <!-- Certificate card -->
+    <div style="background:#fff;width:100%;max-width:360px;border:1px solid #d0d0d0;border-radius:1px;padding:32px 30px 24px;position:relative;overflow:hidden;box-shadow:0 6px 32px rgba(0,0,0,0.18);font-family:Arial,sans-serif;">
+
+      <!-- Watermark diamond (background) -->
+      <div style="position:absolute;left:50%;top:52%;transform:translate(-50%,-50%) rotate(0deg);width:340px;height:340px;opacity:0.055;pointer-events:none;z-index:0;">
+        <div style="width:200px;height:200px;border:36px solid #bbb;transform:rotate(45deg) translate(70px,-10px);border-radius:6px;"></div>
+        <div style="position:absolute;top:60px;left:60px;width:100px;height:100px;border:20px solid #bbb;transform:rotate(45deg);border-radius:3px;"></div>
+      </div>
+
+      <!-- Top logos row -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;position:relative;z-index:1;">
+        <!-- LEFT: Official IOSA Registered Operator stamp -->
+        <img src="/assets/iosa_stamp.png" alt="IOSA Registered Operator" style="width:72px;height:72px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">
+        <!-- RIGHT: IATA blue logo -->
+        <img src="/assets/iata_logo_blue.png" alt="IATA" style="width:70px;object-fit:contain;flex-shrink:0;margin-top:4px;" onerror="this.style.display='none'">
+      </div>
+
+      <!-- Certificate title — blue italic serif -->
+      <div style="position:relative;z-index:1;font-family:Georgia,'Times New Roman',serif;font-style:italic;color:#003580;font-size:1.55rem;line-height:1.18;margin-bottom:14px;font-weight:400;">
+        Certificate<br>of Registration
+      </div>
+
+      <!-- Subtitle -->
+      <div style="position:relative;z-index:1;font-size:0.68rem;color:#444;margin-bottom:12px;font-weight:400;">IATA is proud to recognize that</div>
+
+      <!-- Company name -->
+      <div style="position:relative;z-index:1;font-size:1.15rem;font-weight:700;color:#111;margin-bottom:12px;letter-spacing:-0.2px;font-family:Arial,sans-serif;">EASTAR JET Co., Ltd.</div>
+
+      <!-- Body text -->
+      <div style="position:relative;z-index:1;font-size:0.68rem;color:#333;line-height:1.75;margin-bottom:14px;">
+        has been successfully registered as an IOSA Operator<br>
+        under the IATA Operational Safety Audit program (IOSA),<br>
+        in accordance with the provisions of the IOSA Program Manual.
+      </div>
+
+      <!-- Valid until -->
+      <div style="position:relative;z-index:1;font-size:0.72rem;color:#111;margin-bottom:22px;"><span style="font-weight:400;">Valid until: </span>&nbsp;<strong>1 Aug 2027</strong></div>
+
+      <!-- Divider -->
+      <div style="position:relative;z-index:1;border-top:0.5px solid #ccc;margin-bottom:14px;"></div>
+
+      <!-- Signature -->
+      <div style="position:relative;z-index:1;margin-bottom:14px;">
+        <div style="font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:1.25rem;color:#222;line-height:1.2;margin-bottom:6px;">Nick Careen</div>
+        <div style="border-top:1px solid #555;width:100px;margin-bottom:6px;"></div>
+        <div style="font-size:0.6rem;color:#555;line-height:1.7;">Nick Careen<br>Senior Vice President,<br>Operations, Safety and Security</div>
+      </div>
+
+      <!-- Bottom fine print + IATA IOSA badge -->
+      <div style="position:relative;z-index:1;margin-top:auto;padding-top:12px;border-top:0.5px solid #ddd;">
+        <div style="font-size:0.48rem;color:#aaa;line-height:1.65;margin-bottom:10px;">Please note: this is a ceremonial certificate only and is not proof of IOSA Registration. Official IOSA Registration is only shown on the IOSA Registry (ic.iata.org/registry/iosa) and IATA is the official custodian of all IOSA Audit Reports.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:0.5rem;color:#999;letter-spacing:0.5px;">SAR.F16&nbsp;&nbsp;&nbsp;22-JAN-2025&nbsp;&nbsp;&nbsp;NM-1681</div>
+          <div style="display:flex;align-items:stretch;background:#003580;border-radius:2px;overflow:hidden;">
+            <div style="display:flex;align-items:center;gap:3px;padding:5px 8px;">
+              <div style="font-size:0.55rem;font-weight:900;color:#fff;letter-spacing:0.5px;">IATA</div>
+            </div>
+            <div style="width:1px;background:rgba(255,255,255,0.25);"></div>
+            <div style="display:flex;align-items:center;padding:5px 8px;">
+              <div style="font-size:0.6rem;font-weight:900;color:#fff;letter-spacing:1px;">IOSA</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Status stats row below hero -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+  ${[
+    {icon:'fa-clock',        label:'인증 만료까지',  val:'D-'+daysToExpiry,                   sub:DateUtil.format(c.registrationExpiry),     red:true},
+    {icon:'fa-redo',         label:'재인증 윈도우',  val:'D-'+Math.max(0,daysToRenewal),       sub:DateUtil.format(c.renewalWindowStart)+' 개시', red:false},
+    {icon:'fa-check-circle', label:'Findings / FAT', val:'전체 종결',                          sub:'21 Findings · 7 Observations 완료',    red:false},
+    {icon:'fa-tasks',        label:'RBI 준비',      val:Math.round(rbiDone/rbiTotal*100)+'%', sub:rbiDone+'/'+rbiTotal+' 태스크',           red:false},
+  ].map(s=>`
+    <div style="background:#fff;border:1px solid #eee;border-radius:6px;padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+      <div style="width:36px;height:36px;background:${s.red?'rgba(210,0,21,0.08)':'#f5f5f5'};border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fas ${s.icon}" style="font-size:0.9rem;color:${s.red?'var(--eastar-red)':'#888'};"></i>
+      </div>
+      <div>
+        <div style="font-size:0.58rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#aaa;">${s.label}</div>
+        <div style="font-size:0.95rem;font-weight:900;color:${s.red?'var(--eastar-red)':'#111'};">${s.val}</div>
+        <div style="font-size:0.62rem;color:#888;">${s.sub}</div>
+      </div>
+    </div>
+  `).join('')}
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     8 IOSA SECTION CARDS — IATA.org style
+════════════════════════════════════════════════════════ -->
+<div style="margin-bottom:8px;font-size:0.6rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#aaa;">IOSA 심사 부문 (2025 INITIAL AUDIT 결과)</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px;">
+  ${[
+    { code:'ORG', name:'조직 및 안전관리', icon:'fa-sitemap',      f:7, o:4, dept:'안전보안실',    section:'cap' },
+    { code:'FLT', name:'운항',            icon:'fa-plane',        f:7, o:0, dept:'운항본부',      section:'cap' },
+    { code:'DSP', name:'운항통제',         icon:'fa-headset',      f:1, o:0, dept:'종합통제실',    section:'cap' },
+    { code:'MNT', name:'항공기 정비',      icon:'fa-tools',        f:5, o:1, dept:'정비본부',      section:'cap' },
+    { code:'CAB', name:'객실 운항',        icon:'fa-chair',        f:0, o:0, dept:'객실본부',      section:'cap' },
+    { code:'GRH', name:'지상 조업',        icon:'fa-dolly',        f:1, o:1, dept:'운송본부',      section:'cap' },
+    { code:'CGO', name:'화물 운항',        icon:'fa-pallet',       f:0, o:0, dept:'운송본부',      section:'cap' },
+    { code:'SEC', name:'보안',             icon:'fa-user-shield',  f:0, o:1, dept:'안전보안실',    section:'cap' },
+  ].map(s => {
+    const canView = typeof canViewSection === 'function' ? canViewSection(s.code) : true;
+    const hasF = s.f > 0;
+    const hasO = s.o > 0;
+    const clean = s.f === 0 && s.o === 0;
+    const badgeF = hasF ? '<span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:2px 7px;border-radius:3px;font-size:0.6rem;font-weight:800;">'+s.f+' FINDING'+(s.f>1?'S':'')+'</span>' : '';
+    const badgeO = hasO ? '<span style="background:#f9f4e8;color:#7a5e1c;border:1px solid rgba(152,123,55,0.3);padding:2px 7px;border-radius:3px;font-size:0.6rem;font-weight:800;">'+s.o+' OBSERVATION'+(s.o>1?'S':'')+'</span>' : '';
+    const badgeClean = clean ? '<span style="background:#f0faf4;color:#1a7a4a;border:1px solid rgba(26,122,74,0.2);padding:2px 7px;border-radius:3px;font-size:0.6rem;font-weight:700;">✓ Clean</span>' : '';
+    return (
+      '<div onclick="navigate(\''+s.section+'\')" '+
+      'style="background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:20px 16px 16px;'+
+      (!canView ? 'opacity:0.35;filter:grayscale(1);pointer-events:none;' : '') +
+      'text-align:center;cursor:pointer;'+
+      'transition:box-shadow 200ms,transform 200ms,border-color 200ms;'+
+      'box-shadow:0 1px 4px rgba(0,0,0,0.05);"'+
+      ' onmouseover="this.style.boxShadow=\'0 6px 20px rgba(210,0,21,0.12)\';this.style.transform=\'translateY(-2px)\';this.style.borderColor=\'var(--eastar-red)\';"'+
+      ' onmouseout="this.style.boxShadow=\'0 1px 4px rgba(0,0,0,0.05)\';this.style.transform=\'\';this.style.borderColor=\'#e8e8e8\';">'+
+      '<div style="width:52px;height:52px;background:rgba(210,0,21,0.06);border-radius:6px;'+
+      'display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">'+
+      '<i class="fas '+s.icon+'" style="font-size:1.3rem;color:var(--eastar-red);opacity:0.7;"></i></div>'+
+      '<div style="font-size:0.65rem;font-weight:900;letter-spacing:2px;color:var(--eastar-red);margin-bottom:3px;">'+s.code+'</div>'+
+      '<div style="font-size:0.75rem;font-weight:700;color:#111;margin-bottom:10px;line-height:1.3;">'+s.name+'</div>'+
+      '<div style="font-size:0.6rem;color:#aaa;font-weight:600;margin-bottom:10px;">'+s.dept+'</div>'+
+      '<div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;">'+badgeF+badgeO+badgeClean+'</div>'+
+      '</div>'
+    );
+  }).join('')}
+</div>
+`;
+}
+
+// ══════════════════════════════════════════════════════════
+//  HISTORY (Year-based tabs)
+// ══════════════════════════════════════════════════════════
+const AUDIT_HISTORY = {
+  '2025': {
+    year: 2025, type: 'INITIAL', ism: 'Ed.17 (17.1)',
+    dates: '2025.07.28 ~ 2025.08.01', auditor: 'Perry Chou',
+    iar: 'IOSA-ESR-IA-2025', status: 'REGISTERED',
+    expiry: '2027.08.01',
+    fleet: 'B737-800 ×10 / B737 MAX 8 ×5',
+    auditors: [
+      { name: 'Perry Chou',       role: 'Lead Auditor',   sections: 'ORG · FLT · DSP',     nationality: '—' },
+      { name: '—',                role: 'Auditor',        sections: 'MNT',                  nationality: '—' },
+      { name: '—',                role: 'Auditor',        sections: 'CAB · GRH · CGO · SEC', nationality: '—' },
+    ],
+    sections: [
+      {code:'ORG',name:'조직 및 안전',    f:7, o:4, na:4},
+      {code:'FLT',name:'운항',            f:7, o:0, na:26},
+      {code:'DSP',name:'종합통제',        f:1, o:0, na:14},
+      {code:'MNT',name:'정비',            f:5, o:1, na:3},
+      {code:'CAB',name:'객실',            f:0, o:0, na:10},
+      {code:'GRH',name:'운송',            f:1, o:1, na:7},
+      {code:'CGO',name:'화물운송',        f:0, o:0, na:16},
+      {code:'SEC',name:'항공보안',        f:0, o:1, na:3},
+    ],
+    totalF: 21, totalO: 7, totalNA: 83,
+    keyCARs: [
+      {id:'93285', isarp:'ORG 1.5.3',  desc:'안전관리 목표 및 성과지표 문서화 미흡'},
+      {id:'93286', isarp:'ORG 2.1.2',  desc:'품질보증 프로그램 운영 절차 부적합'},
+      {id:'93288', isarp:'ORG 2.4.3',  desc:'내부심사 계획 수립 및 실시 방법 미흡'},
+      {id:'93289', isarp:'ORG 2.4.4',  desc:'내부심사 Follow-up 절차 및 기록 미흡'},
+      {id:'93291', isarp:'MNT 3.1.1',  desc:'정비프로그램 문서 개정 관리 절차 미흡'},
+      {id:'93292', isarp:'FLT 2.1.1A', desc:'비행승무원 자격 관리 절차 적합성'},
+    ],
+    files: [
+      {label:'IAR (Final)', path:'../../IOSA (7.28~8.1)/RESULT/IOSA-ESR-IA-2025_Final.pdf'},
+      {label:'인증서',       path:'../../IOSA (7.28~8.1)/EASTAR JET Co., Ltd. - IOSA Certificate.pdf'},
+    ],
+  },
+  '2018': {
+    year: 2018, type: 'RENEWAL', ism: 'Ed.?',
+    dates: '2018', auditor: '—',
+    iar: '—', status: 'EXPIRED', expiry: '2020',
+    fleet: '—', auditors: [], sections: [],
+    totalF: null, totalO: null, totalNA: null,
+    keyCARs: [], files: [], placeholder: true
+  },
+  '2016': {
+    year: 2016, type: 'RENEWAL', ism: 'Ed.?',
+    dates: '2016', auditor: '—',
+    iar: '—', status: 'EXPIRED', expiry: '2018',
+    fleet: '—', auditors: [], sections: [],
+    totalF: null, totalO: null, totalNA: null,
+    keyCARs: [], files: [], placeholder: true
+  },
+  '2015': {
+    year: 2015, type: 'RENEWAL', ism: 'Ed.?',
+    dates: '2015', auditor: '—',
+    iar: '—', status: 'EXPIRED', expiry: '2017',
+    fleet: '—', auditors: [], sections: [],
+    totalF: null, totalO: null, totalNA: null,
+    keyCARs: [], files: [], placeholder: true
+  },
+  '2010': {
+    year: 2010, type: 'INITIAL', ism: 'Ed.?',
+    dates: '2010', auditor: '—',
+    iar: '—', status: 'EXPIRED', expiry: '2012',
+    fleet: '—', auditors: [], sections: [],
+    totalF: null, totalO: null, totalNA: null,
+    keyCARs: [], files: [], placeholder: true
+  }
+};
+
+let historyTab = '2025';
+function renderHistory() {
+  const years = ['2025','2018','2016','2015','2010'];
+  const a = AUDIT_HISTORY[historyTab];
+
+  document.getElementById('section-history').innerHTML = `
+<div class="sect-header">
+  <div>
+    <h2 class="sect-title">심사 이력</h2>
+    <p class="sect-sub">이스타항공 IOSA 심사 전체 이력 — 연도별 조회</p>
+  </div>
+  <div class="sect-actions">
+    <a href="https://ic.iata.org/group/6949" target="_blank" class="btn-outline btn-outline-sm">
+      <i class="fas fa-external-link-alt"></i> IATA Connect
+    </a>
+    ${isAdmin ? `<button class="btn-primary btn-primary-sm admin-ctrl" style="display:inline-flex;" onclick="alert('과거 심사 데이터 직접 편집은 아래 IATA Connect 링크를 통해 확인 후 여기에 입력하세요.')"><i class="fas fa-pen"></i> 편집</button>` : ''}
+  </div>
+</div>
+
+<!-- Year tabs -->
+<div class="tab-nav">
+  ${years.map(y => {
+    const d = AUDIT_HISTORY[y];
+    return `<button class="tab-btn ${historyTab===y?'active':''}" onclick="historyTab='${y}';renderHistory();">
+      ${y}
+      <span class="pill ${d.status==='REGISTERED'?'pill-red':'pill-gray'}" style="font-size:0.58rem;margin-left:4px;">${d.type}</span>
+    </button>`;
+  }).join('')}
+</div>
+
+${a.placeholder ? `
+<!-- Placeholder -->
+<div class="w-card">
+  <div class="w-card-body" style="text-align:center;padding:48px 24px;">
+    <div style="font-size:3rem;font-weight:900;color:#f0f0f0;margin-bottom:12px;">${a.year}</div>
+    <div class="pill pill-gray" style="margin-bottom:16px;">${a.type}</div>
+    <div style="font-size:0.88rem;color:var(--text-mid);max-width:480px;margin:0 auto 24px;">
+      ${a.notes}
+    </div>
+    <a href="https://ic.iata.org/group/6949" target="_blank" class="btn-primary">
+      <i class="fas fa-external-link-alt"></i> IATA Connect에서 확인
+    </a>
+    ${isAdmin ? `
+    <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+      <div style="font-size:0.78rem;color:var(--text-light);margin-bottom:12px;"><i class="fas fa-lock-open me-1"></i>관리자 모드 — 데이터 직접 입력 가능</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:left;max-width:600px;margin:0 auto;">
+        <div><label class="form-label">심사 기간</label><input class="iata-input" placeholder="예: 2018.06.10~14"></div>
+        <div><label class="form-label">Lead Auditor</label><input class="iata-input" placeholder="심사원 이름"></div>
+        <div><label class="form-label">적용 ISM</label><input class="iata-input" placeholder="예: Ed.10"></div>
+        <div><label class="form-label">총 CAR</label><input class="iata-input" type="number" placeholder="0"></div>
+        <div><label class="form-label">총 OBS</label><input class="iata-input" type="number" placeholder="0"></div>
+        <div><label class="form-label">IAR ID</label><input class="iata-input" placeholder="IOSA-ESR-..."></div>
+      </div>
+      <button class="btn-primary btn-primary-sm" style="margin-top:12px;">저장 (준비중)</button>
+    </div>` : ''}
+  </div>
+</div>
+` : `
+<!-- Full Data header bar -->
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+  <span class="pill pill-red">${a.type}</span>
+  <span style="font-size:0.8rem;color:var(--text-mid);">${a.dates}</span>
+  <span style="color:#ddd;">|</span>
+  <span style="font-size:0.8rem;color:var(--text-mid);">Lead Auditor: <strong>${a.auditor}</strong></span>
+  <span style="color:#ddd;">|</span>
+  <span style="font-size:0.8rem;color:var(--text-mid);">ISM ${a.ism}</span>
+  <span style="color:#ddd;">|</span>
+  <span style="font-size:0.8rem;color:var(--text-mid);">IAR: ${a.iar}</span>
+  ${isAdmin ? a.files.map(f=>`<a href="${f.path}" target="_blank" class="btn-outline btn-outline-sm"><i class="fas fa-file-pdf me-1"></i>${f.label}</a>`).join('') : ''}
+</div>
+
+<!-- Totals -->
+<div class="stats-row mb-4">
+  <div class="stat-box red">
+    <div class="stat-box-label">Total FINDINGS</div>
+    <div class="stat-box-num">${a.totalF}</div>
+    <div class="stat-box-sub">시정조치 필요</div>
+  </div>
+  <div class="stat-box gold">
+    <div class="stat-box-label">Total OBSERVATIONS</div>
+    <div class="stat-box-num">${a.totalO}</div>
+    <div class="stat-box-sub">권고 사항</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-box-label">Not Applicable (N/A)</div>
+    <div class="stat-box-num">${a.totalNA}</div>
+    <div class="stat-box-sub">해당 없음</div>
+  </div>
+  <div class="stat-box green">
+    <div class="stat-box-label">인증 상태</div>
+    <div class="stat-box-num" style="font-size:1rem;margin-top:4px;">REGISTERED</div>
+    <div class="stat-box-sub">만료 ${a.expiry}</div>
+  </div>
+</div>
+
+<!-- Section Breakdown -->
+<div class="w-card mb-3">
+  <div class="w-card-header">
+    <span class="w-card-title">부문별 심사 결과</span>
+    <span style="font-size:0.78rem;color:var(--text-light);">FINDINGS · OBSERVATIONS · N/A</span>
+  </div>
+  <div class="w-card-body">
+    <div class="result-grid">
+      ${a.sections.map(s => {
+        const cls = s.f>0?'has-findings':s.o>0?'has-obs':'clean';
+        return `<div class="result-card ${cls}">
+          <div class="result-card-code">${s.code}</div>
+          <div style="font-size:0.72rem;color:var(--text-light);margin-bottom:8px;">${s.name}</div>
+          <div class="result-card-nums">
+            <span class="result-card-f">${s.f}</span>
+            <div>
+              <div class="result-card-label" style="color:var(--eastar-red);">FINDINGS</div>
+              <div style="display:flex;gap:6px;align-items:baseline;margin-top:2px;">
+                <span class="result-card-o">${s.o}</span>
+                <span class="result-card-label" style="color:var(--eastar-gold);">OBS.</span>
+              </div>
+            </div>
+          </div>
+          <div class="result-card-na">${s.na} N/A</div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <!-- Bar chart -->
+    <div style="margin-top:16px;border-top:1px solid var(--border-light);padding-top:16px;">
+      <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-light);margin-bottom:10px;">FINDINGS 분포</div>
+      ${a.sections.sort((x,y)=>y.f-x.f).map(s => `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">
+          <div style="width:32px;font-size:0.7rem;font-weight:800;color:var(--text-light);">${s.code}</div>
+          <div style="flex:1;background:#f5f5f5;height:16px;position:relative;">
+            ${s.f>0?`<div style="width:${s.f/7*100}%;background:var(--eastar-red);height:100%;display:flex;align-items:center;padding-left:6px;">
+              <span style="font-size:0.65rem;font-weight:800;color:white;">${s.f}</span>
+            </div>`:`<span style="font-size:0.65rem;color:#ccc;line-height:16px;padding-left:6px;">0</span>`}
+          </div>
+          ${s.o>0?`<span style="font-size:0.68rem;font-weight:700;color:var(--eastar-gold);">${s.o} OBS.</span>`:`<span style="font-size:0.68rem;color:#ddd;">—</span>`}
+        </div>
+      `).join('')}
+    </div>
+  </div>
+</div>
+
+<!-- Key CARs -->
+<div class="row g-3">
+  <div class="col-md-7">
+    <div class="w-card h-100">
+      <div class="w-card-header">
+        <span class="w-card-title">주요 FINDINGS</span>
+        <span class="pill pill-red">총 ${a.totalF}건</span>
+      </div>
+      <div>
+        <table class="iata-table">
+          <thead><tr><th>Finding ID</th><th>ISARP</th><th>내용</th><th>상태</th></tr></thead>
+          <tbody>
+            ${a.keyCARs.map(car => {
+              const capF = (APP_DATA.cap.findings||[]).find(f=>f.id===car.id);
+              const status = capF ? capF.status : 'open';
+              const stMap = {open:'pill-red', submitted:'pill-gold', approved:'pill-navy', closed:'pill-green'};
+              const stLabel = {open:'미결', submitted:'제출', approved:'승인', closed:'종결'};
+              return `<tr>
+                <td><strong style="color:var(--eastar-red);">${car.id}</strong></td>
+                <td><span style="font-size:0.76rem;font-weight:700;color:var(--iata-navy);">${car.isarp}</span></td>
+                <td style="font-size:0.78rem;">${car.desc}</td>
+                <td>
+                  <span class="pill ${stMap[status]||'pill-gray'}" style="cursor:pointer;" onclick="navigate('cap')">${stLabel[status]||'미결'}</span>
+                </td>
+              </tr>`;
+            }).join('')}
+            <tr><td colspan="4" style="font-size:0.74rem;color:#bbb;text-align:center;padding:10px;">+ ${a.totalF - a.keyCARs.length}건 추가 → CAP/FAT 섹션 참조</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <div class="w-card h-100">
+      <div class="w-card-header">
+        <span class="w-card-title">심사 세부 정보</span>
+      </div>
+      <div class="w-card-body">
+        <table style="width:100%;font-size:0.82rem;border-collapse:collapse;">
+          ${[
+            ['IAR ID',   a.iar],
+            ['심사 기간', a.dates],
+            ['적용 ISM', a.ism],
+            ['운항 기종', a.fleet],
+            ['인증 만료', a.expiry],
+          ].map(([k,v]) => `<tr>
+            <td style="padding:8px 0;color:var(--text-light);border-bottom:1px solid var(--border-light);width:42%;font-size:0.75rem;">${k}</td>
+            <td style="padding:8px 0;font-weight:600;border-bottom:1px solid var(--border-light);">${v}</td>
+          </tr>`).join('')}
+        </table>
+        ${isAdmin && a.files.length > 0 ? `
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+          ${a.files.map(f=>`<a href="${f.path}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:var(--eastar-red);color:#fff;border-radius:3px;font-size:0.72rem;font-weight:700;text-decoration:none;"><i class="fas fa-file-pdf"></i> ${f.label}</a>`).join('')}
+        </div>` : ''}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AUDITOR LIST -->
+<div class="w-card mt-3">
+  <div class="w-card-header">
+    <span class="w-card-title"><i class="fas fa-users me-2" style="color:var(--eastar-red);"></i>AUDITOR LIST</span>
+    <span style="font-size:0.75rem;color:var(--text-light);">ISM ${a.ism} 적용</span>
+  </div>
+  <div class="w-card-body" style="padding:0;">
+    <table class="iata-table" style="margin:0;">
+      <thead>
+        <tr>
+          <th style="width:22%;">Name</th>
+          <th style="width:20%;">Role</th>
+          <th style="width:38%;">Assigned Sections</th>
+          <th style="width:20%;">Nationality</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${(a.auditors && a.auditors.length > 0) ? a.auditors.map(au => `
+          <tr>
+            <td><strong>${au.name}</strong></td>
+            <td><span style="font-size:0.72rem;font-weight:700;color:var(--iata-navy);background:#f0f4ff;padding:2px 8px;border-radius:3px;">${au.role}</span></td>
+            <td style="font-size:0.78rem;color:#555;">${au.sections}</td>
+            <td style="font-size:0.78rem;color:#888;">${au.nationality}</td>
+          </tr>
+        `).join('') : `<tr><td colspan="4" style="text-align:center;color:#bbb;padding:20px;">심사원 정보가 없습니다</td></tr>`}
+      </tbody>
+    </table>
+  </div>
+</div>
+`}
+`;
+}
+
+// ══════════════════════════════════════════════════════════
+//  SCHEDULE
+// ══════════════════════════════════════════════════════════
+function renderSchedule() {
+  const SCHED = {
+    '2025': {
+      color: 'var(--text-dark)', status: '완료',
+      items: [
+        {period:'2025.01~03', done:true,  title:'IATA 외부교육 이수', desc:'ISM Ed.17 기반 심사원 교육\n(IATA Authorized Training Center)', chips:['교육','심사원']},
+        {period:'2025.03~05', done:true,  title:'전파교육 & 부문별 심사원 발령', desc:'전 부서 IOSA 전파교육\n부문별 담당 내부심사원 발령', chips:['전파교육']},
+        {period:'2025.05~06', done:true,  title:'내부심사 & Conformance Report', desc:'ISM Ed.17 기준 전 부문 내부심사\nCR 작성 완료', chips:['내부심사','CR']},
+        {period:'2025.06', done:true,  title:'IOSA 심사 신청 & 서류 제출', desc:'IATA에 심사 신청\n요구 서류 일체 제출', chips:['신청']},
+        {period:'2025.07', done:true,  title:'심사원 코디네이션', desc:'Perry Chou 외 심사팀\n항공권·호텔·비자 준비', chips:['코디']},
+        {period:'2025.07.28', done:true, title:'본점검 — Documentation / Implementation', desc:'문서·구현 단계 심사 시작', chips:['본점검']},
+        {period:'2025.07.29~31', done:true, title:'본점검 — 현장 (On-site)', desc:'공항·격납고·훈련센터 현장 심사', chips:['On-site']},
+        {period:'2025.08.01', done:true, title:'Closing Meeting', desc:'CAR 21건 / OBS 7건 확인\n심사 공식 종결', chips:['종결']},
+        {period:'2025.09.15', done:true, title:'CAP 합의 마감', desc:'Closing Meeting + 45일\n부문별 시정조치계획 합의', chips:['CAP','D+45']},
+        {period:'2025.10~12', done:false, active:true, title:'FAT 이행 & 증빙 제출', desc:'부문별 FAT 작성 및 증빙자료 제출\n→ IATA QC 검토', chips:['FAT','증빙']},
+      ]
+    },
+    '2026': {
+      color: 'var(--eastar-red)', status: '진행중',
+      items: [
+        {period:'2026.01.01', done:true,  title:'ISM Ed.18 발효', desc:'ISM Ed.18 Rev.1 공식 발효\n재인증 심사 시 Ed.18 적용', chips:['ISM Ed.18']},
+        {period:'2026.01~03', done:true,  title:'ISM Ed.17→18 Gap 분석', desc:'전 부문 Gap 분석\n변경사항 문서 개정 우선순위 도출', chips:['Gap분석']},
+        {period:'2026.04~06', done:false, active:true, title:'부문별 문서 개정', desc:'[현재] 운항규정/정비규정 등\nEd.18 기준으로 개정 진행', chips:['문서개정','진행중']},
+        {period:'2026.07.17', done:false, warn:true, title:'모든 CAR 종결 마감 ⚠️', desc:'초도심사 지적사항 전체 종결 필수\n(IAR 발행 최소 15일 전)', chips:['CAR종결','마감']},
+        {period:'2026.08.01', done:false, title:'IATA Connect 프로파일 갱신', desc:'6개월 주기 의무 갱신\n(미이행 시 등록 일시정지)', chips:['IATA Connect','의무']},
+        {period:'2026.09', done:false, title:'ISM Ed.18 기반 CR 작성', desc:'Conformance Report Ed.18 버전\n전 부문 CR 갱신', chips:['CR','Ed.18']},
+        {period:'2026.10', done:false, title:'내부심사원 역량강화 교육', desc:'5일 기본 + 5일 IOSA 과정\n(ORG 2.1.9 요건)', chips:['교육','심사원']},
+        {period:'2026.11', done:false, title:'RBI 기반 내부심사 실시', desc:'ISM Ed.18 기준 전 부문 내부심사\n+ Maturity Assessment 자가평가', chips:['내부심사','RBI']},
+        {period:'2026.12.01', done:false, title:'Audit Validity 만료', desc:'초도심사 유효기간 만료\n(Closing + 16개월)', chips:['유효기간']},
+      ]
+    },
+    '2027': {
+      color: '#888', status: '예정',
+      items: [
+        {period:'2027.01', done:false, title:'RBI 재인증 신청', desc:'IATA에 재인증 신청\nISM Ed.18 + RBI Criteria Ed.3', chips:['RBI','신청']},
+        {period:'2027.02.02', done:false, title:'재인증 윈도우 개시 (T-180)', desc:'인증 만료 180일 전 — 재인증 심사 가능', chips:['T-180']},
+        {period:'2027.03', done:false, title:'Offsite 단계 — 문서 사전 심사', desc:'초도심사 없던 단계\nRBI 전용 원격 문서 검토', chips:['Offsite','RBI특징']},
+        {period:'2027.04', done:false, title:'Maturity Assessment 제출', desc:'25개 Key ISARPs 성숙도 자가평가\nEstablished / Mature / Leading', chips:['Maturity']},
+        {period:'2027.05~06', done:false, title:'RBI 본점검 (On-site)', desc:'우선순위 기반 ISARP 집중 점검\n성숙도 평가 인터뷰 포함', chips:['On-site']},
+        {period:'2027.06', done:false, title:'RBI Closing Meeting', desc:'재인증 결과 확인\nCAP 협의 (있을 경우)', chips:['종결']},
+        {period:'2027.08.01', done:false, title:'현재 인증 만료 / 재인증 완료', desc:'RBI 완료 후 새 인증서 발급\n유효기간 24개월 자동 갱신', chips:['재인증']},
+      ]
+    }
+  };
+
+  const years = ['2025','2026','2027'];
+  let schedTab = window._schedTab || '2025';
+
+  document.getElementById('section-schedule').innerHTML = `
+<div class="sect-header">
+  <div>
+    <h2 class="sect-title">연간 일정</h2>
+    <p class="sect-sub">이스타항공 IOSA 초도인증 → 사후관리 → RBI 재인증 전체 로드맵</p>
+  </div>
+</div>
+
+<div class="tab-nav">
+  ${years.map(y => {
+    const d = SCHED[y];
+    return `<button class="tab-btn ${schedTab===y?'active':''}" onclick="window._schedTab='${y}';renderSchedule();">
+      ${y} <span class="pill pill-${y==='2025'?'green':y==='2026'?'red':'gray'}" style="font-size:0.58rem;margin-left:4px;">${d.status}</span>
+    </button>`;
+  }).join('')}
+</div>
+
+<div class="row g-3">
+  <div class="col-md-7">
+    <div class="w-card">
+      <div class="w-card-header">
+        <span class="w-card-title">${schedTab}년 주요 일정</span>
+        <span class="pill pill-${schedTab==='2025'?'green':schedTab==='2026'?'red':'gray'}">${SCHED[schedTab].status}</span>
+      </div>
+      <div class="w-card-body">
+        <div class="timeline">
+          ${SCHED[schedTab].items.map(i => `
+            <div class="tl-item">
+              <div class="tl-dot ${i.done?'done':i.active?'active':i.warn?'warn':'future'}"></div>
+              <div>
+                <div class="tl-period">${i.period}</div>
+                <div class="tl-title" style="${i.done?'color:#aaa;':i.active?'color:var(--eastar-red);':i.warn?'color:var(--eastar-gold);':''}">${i.title}</div>
+                <div class="tl-desc">${i.desc}</div>
+                <div class="tl-chips">${i.chips.map(c=>`<span class="tl-chip">${c}</span>`).join('')}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <div class="w-card mb-3">
+      <div class="w-card-header"><span class="w-card-title">RBI vs 초도심사 비교</span></div>
+      <div class="w-card-body">
+        <table class="iata-table">
+          <thead><tr><th>구분</th><th>초도 (2025)</th><th>RBI (2027)</th></tr></thead>
+          <tbody>
+            ${[
+              ['ISARP 심사', '전수 (100%)', '우선순위 기반'],
+              ['Maturity', '없음', '필수 (25개)'],
+              ['Offsite 단계', '없음', '문서 사전 심사'],
+              ['성숙도 레벨', '해당없음', 'Est/Mature/Leading'],
+              ['IAR 종류', 'IAR', 'IAR + MAR'],
+              ['적용 ISM', 'Ed.17', 'Ed.18'],
+            ].map(r=>`<tr>
+              <td style="font-weight:700;font-size:0.78rem;">${r[0]}</td>
+              <td style="font-size:0.78rem;color:var(--text-light);">${r[1]}</td>
+              <td style="font-size:0.78rem;font-weight:600;color:var(--eastar-red);">${r[2]}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="w-card">
+      <div class="w-card-header"><span class="w-card-title">Maturity 레벨 안내</span></div>
+      <div class="w-card-body">
+        ${[
+          {level:'Established', color:'#1a7a4a', bg:'#f0faf4', border:'#a8d8b8', desc:'프로세스 정립 및 일관된 실행'},
+          {level:'Mature', color:'var(--iata-navy)', bg:'#f0f4ff', border:'#c0cce8', desc:'데이터 기반 모니터링 + 지속 개선'},
+          {level:'Leading', color:'#7a5e1c', bg:'#fdf8ee', border:'#e8d8a0', desc:'산업 선도 수준, 예측적 접근'},
+        ].map(m=>`
+          <div style="background:${m.bg};border:1px solid ${m.border};border-radius:2px;padding:12px;margin-bottom:8px;">
+            <div style="font-weight:800;color:${m.color};font-size:0.82rem;">${m.level}</div>
+            <div style="font-size:0.78rem;color:var(--text-mid);margin-top:3px;">${m.desc}</div>
+          </div>
+        `).join('')}
+        <div style="font-size:0.74rem;color:var(--text-light);margin-top:12px;padding:10px;background:#f9f9f9;border:1px solid var(--border);">
+          <i class="fas fa-info-circle me-1"></i>RBI Maturity Criteria Ed.3 (2025.06.01 발효) 적용
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+}
+
+// ══════════════════════════════════════════════════════════
+//  MANUALS — IndexedDB upload storage
+// ══════════════════════════════════════════════════════════
+const MANUAL_DB_NAME = 'iosa_manual_files';
+const MANUAL_DB_VERSION = 1;
+const MANUAL_STORE = 'files';
+
+function openManualDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(MANUAL_DB_NAME, MANUAL_DB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(MANUAL_STORE)) {
+        db.createObjectStore(MANUAL_STORE, { keyPath: 'id', autoIncrement: true });
+      }
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+async function saveManualFile(file, desc) {
+  const db = await openManualDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(MANUAL_STORE, 'readwrite');
+    const store = tx.objectStore(MANUAL_STORE);
+    const record = { name: file.name, desc: desc || '', size: file.size, type: file.type, blob: file, uploadedAt: new Date().toISOString() };
+    const req = store.add(record);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+async function getManualFiles() {
+  const db = await openManualDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(MANUAL_STORE, 'readonly');
+    const store = tx.objectStore(MANUAL_STORE);
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+async function deleteManualFile(id) {
+  const db = await openManualDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(MANUAL_STORE, 'readwrite');
+    const store = tx.objectStore(MANUAL_STORE);
+    const req = store.delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+function openUploadedFile(id) {
+  openManualDB().then(db => {
+    const tx = db.transaction(MANUAL_STORE, 'readonly');
+    const store = tx.objectStore(MANUAL_STORE);
+    const req = store.get(id);
+    req.onsuccess = () => {
+      const record = req.result;
+      if (!record) return;
+      const url = URL.createObjectURL(record.blob);
+      window.open(url, '_blank');
+    };
+  });
+}
+
+async function handleManualUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const desc = prompt(`"${file.name}" 파일 설명을 입력하세요 (선택사항):`, '') || '';
+  try {
+    await saveManualFile(file, desc);
+    input.value = '';
+    renderManuals();
+  } catch(e) {
+    alert('업로드 실패: ' + e.message);
+  }
+}
+
+async function removeUploadedManual(id) {
+  if (!confirm('이 파일을 삭제하시겠습니까?')) return;
+  await deleteManualFile(id);
+  renderManuals();
+}
+
+async function renderManuals() {
+  const manuals = [
+    {name:'ISM Ed.18 Rev.1', full:'IOSA Standards Manual Ed.18 Rev.1', desc:'현행 기준. 2026.01.01 발효. 재인증 적용', tag:'현행', tagClass:'pill-red', color:'red', icon:'fa-book', path:'../IATA Connect Manuals/IOSA Standards Manual (ISM) ED 18 Rev1.pdf'},
+    {name:'ISM Ed.17', full:'IOSA Standards Manual Ed.17', desc:'초도심사 적용 버전 (2025). 2024.10.01 발효', tag:'이전', tagClass:'pill-gray', color:'', icon:'fa-book', path:'../IATA Connect Manuals/(ISM) IOSA Standards Manual Ed. 17.pdf'},
+    {name:'IPM Ed.17', full:'IOSA Program Manual Ed.17', desc:'IOSA 프로그램 운영 절차 및 요건 안내', tag:'필수', tagClass:'pill-navy', color:'navy', icon:'fa-clipboard-list', path:'../IATA Connect Manuals/(IPM) IOSA program Manual Ed. 17.pdf'},
+    {name:'IRM Ed.15', full:'IATA Reference Manual Ed.15', desc:'용어 정의, 약어 등 기준서 (최신)', tag:'참조', tagClass:'pill-gold', color:'gold', icon:'fa-atlas', path:'../IATA Connect Manuals/IATA Reference Manual (IRM) Ed15 (1).pdf'},
+    {name:'IRM Ed.14', full:'IATA Reference Manual Ed.14', desc:'이전 버전 (초도심사 참조용)', tag:'이전', tagClass:'pill-gray', color:'', icon:'fa-atlas', path:'../IATA Connect Manuals/(IRM) IATA Reference Manual Ed. 14.pdf'},
+    {name:'IAH Ed.18', full:'IOSA Audit Handbook Ed.18 (Tables & Mandatory Obs.)', desc:'심사 테이블 + 필수 관찰사항 (최신)', tag:'심사', tagClass:'pill-green', color:'green', icon:'fa-search', path:'../IATA Connect Manuals/IOSA Audit Handbook - Tables and Mandatory Observations (IAH) Ed. 18.pdf'},
+    {name:'IAH Ed.13', full:'IOSA Audit Handbook Procedures Ed.13', desc:'심사 절차 안내서 이전 버전', tag:'이전', tagClass:'pill-gray', color:'', icon:'fa-search', path:'../IATA Connect Manuals/(IAH) IOSA Audit Handbook Procedures and Guidance Ed. 13.pdf'},
+    {name:'RBIISM Ed.3', full:'RBI ISM Maturity Criteria Ed.3', desc:'RBI 성숙도 평가 기준. 2025.06.01 발효', tag:'RBI필수', tagClass:'pill-red', color:'red', icon:'fa-chart-line', path:'../IATA Connect Manuals/RBIISM-ED03-2025.pdf'},
+    {name:'CR Template (ORG)', full:'Conformance Report Template — ORG (ISM Ed.17 v59)', desc:'ORG 부문 CR 양식', tag:'양식', tagClass:'pill-green', color:'green', icon:'fa-file-excel', path:'../IATA Connect Manuals/(ORG)-Conformance Report-Template-ISM-Ed-17(v59).xlsm'},
+    {name:'IAR — IOSA-ESR-IA-2025', full:'2025 초도심사 최종 보고서 (Final)', desc:'Lead Auditor: Perry Chou · FINDING 21건 / OBS 7건', tag:'내부', tagClass:'pill-red', color:'red', icon:'fa-file-pdf', path:'../../IOSA (7.28~8.1)/RESULT/IOSA-ESR-IA-2025_Final.pdf'},
+    {name:'IOSA 인증서', full:'EASTAR JET IOSA Certificate', desc:'이스타항공 초도 인증서 · 만료 2027.08.01', tag:'인증서', tagClass:'pill-gold', color:'gold', icon:'fa-certificate', path:'../../IOSA (7.28~8.1)/EASTAR JET Co., Ltd. - IOSA Certificate.pdf'},
+  ];
+
+  // Load uploaded files from IndexedDB
+  let uploaded = [];
+  try { uploaded = await getManualFiles(); } catch(e) {}
+
+  const adminMode = typeof isAdmin !== 'undefined' && isAdmin;
+
+  document.getElementById('section-manuals').innerHTML = `
+<div class="sect-header">
+  <div>
+    <h2 class="sect-title">매뉴얼 다운로드</h2>
+    <p class="sect-sub">IOSA 관련 공식 매뉴얼 및 이스타항공 심사 자료</p>
+  </div>
+  ${adminMode ? `
+  <div class="sect-actions">
+    <label style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--eastar-red);color:#fff;border-radius:4px;font-size:0.78rem;font-weight:700;cursor:pointer;white-space:nowrap;">
+      <i class="fas fa-upload"></i> 파일 업로드
+      <input type="file" style="display:none;" accept=".pdf,.xlsx,.xlsm,.docx,.doc,.zip" onchange="handleManualUpload(this)">
+    </label>
+  </div>` : ''}
+</div>
+
+${uploaded.length > 0 ? `
+<div style="margin-bottom:24px;">
+  <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #eee;">
+    <i class="fas fa-upload me-1" style="color:var(--eastar-red);"></i> 업로드된 파일 (${uploaded.length}개)
+  </div>
+  <div class="manual-grid">
+    ${uploaded.map(f => {
+      const ext = f.name.split('.').pop().toUpperCase();
+      const iconMap = { PDF:'fa-file-pdf', XLSX:'fa-file-excel', XLSM:'fa-file-excel', DOCX:'fa-file-word', DOC:'fa-file-word', ZIP:'fa-file-archive' };
+      const icon = iconMap[ext] || 'fa-file';
+      const sizeMB = (f.size / 1024 / 1024).toFixed(1);
+      const dateStr = new Date(f.uploadedAt).toLocaleDateString('ko-KR', { year:'numeric', month:'short', day:'numeric' });
+      return `
+      <div class="manual-card">
+        <div class="manual-icon" style="color:var(--eastar-red);"><i class="fas ${icon}"></i></div>
+        <div style="flex:1;">
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+            <span class="pill pill-green" style="font-size:0.6rem;">업로드</span>
+            <span style="font-size:0.6rem;color:#aaa;">${ext} · ${sizeMB}MB</span>
+          </div>
+          <div class="manual-name" style="word-break:break-all;">${f.name}</div>
+          ${f.desc ? `<div class="manual-desc" style="color:var(--text-light);">${f.desc}</div>` : ''}
+          <div style="font-size:0.62rem;color:#bbb;margin-top:4px;">${dateStr} 업로드</div>
+          <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+            <button onclick="openUploadedFile(${f.id})" class="manual-dl-btn" style="cursor:pointer;border:none;">
+              <i class="fas fa-eye"></i> 열기
+            </button>
+            ${adminMode ? `<button onclick="removeUploadedManual(${f.id})" style="padding:5px 10px;background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);border-radius:3px;font-size:0.72rem;font-weight:700;cursor:pointer;">
+              <i class="fas fa-trash"></i>
+            </button>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+</div>` : ''}
+
+<div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #eee;">
+  <i class="fas fa-folder-open me-1"></i> 공식 매뉴얼 (${manuals.length}개)
+</div>
+<div class="manual-grid">
+  ${manuals.map(m=>`
+    <div class="manual-card ${m.color}">
+      <div class="manual-icon"><i class="fas ${m.icon}"></i></div>
+      <div style="flex:1;">
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+          <span class="pill ${m.tagClass}" style="font-size:0.6rem;">${m.tag}</span>
+        </div>
+        <div class="manual-name">${m.name}</div>
+        <div class="manual-desc">${m.full}</div>
+        <div class="manual-desc" style="color:var(--text-light);">${m.desc}</div>
+        <a href="${m.path}" target="_blank" class="manual-dl-btn mt-2">
+          <i class="fas fa-download"></i> 열기
+        </a>
+      </div>
+    </div>
+  `).join('')}
+</div>
+${adminMode ? `
+<div style="margin-top:20px;padding:14px 18px;background:#f0faf4;border:1px solid rgba(26,122,74,0.2);border-left:3px solid #1a7a4a;font-size:0.8rem;color:#1a7a4a;">
+  <i class="fas fa-info-circle me-1"></i>
+  <strong>파일 업로드 안내:</strong> 위 "파일 업로드" 버튼으로 업로드한 파일은 이 브라우저에 저장됩니다. 포털에 접속하는 모든 사용자가 파일에 접근하려면 파일을 <code style="background:rgba(0,0,0,0.05);padding:1px 5px;">IOSA_Portal/</code> 폴더에 직접 복사한 후 경로를 코드에 추가하세요.
+</div>` : ''}
+`;
+}
+
+// ══════════════════════════════════════════════════════════
+//  BOARD (Admin-only post management)
+// ══════════════════════════════════════════════════════════
+const BOARD_KEY = 'iosa_board_v3';
+function getBoardPosts() {
+  try { const s = localStorage.getItem(BOARD_KEY); if (s) return JSON.parse(s); } catch(e) {}
+  return []; // Start empty — admin fills in
+}
+function saveBoardPosts(posts) { localStorage.setItem(BOARD_KEY, JSON.stringify(posts)); }
+let boardFilter = 'all';
+
+function renderBoard() {
+  const posts = getBoardPosts();
+  const catMap = {
+    question: {label:'질문', cls:'cat-question', icon:'fa-question-circle'},
+    notice:   {label:'공지', cls:'cat-notice',   icon:'fa-bullhorn'},
+    discuss:  {label:'토론', cls:'cat-discuss',  icon:'fa-comments'},
+    report:   {label:'공유', cls:'cat-report',   icon:'fa-chart-bar'},
+  };
+  let filtered = posts;
+  if (boardFilter !== 'all') filtered = posts.filter(p => p.cat === boardFilter);
+
+  document.getElementById('section-board').innerHTML = `
+<div class="sect-header">
+  <div>
+    <h2 class="sect-title">커뮤니티 게시판</h2>
+    <p class="sect-sub">IOSA 관련 Q&A · 정보 공유 · 공지</p>
+  </div>
+  <div class="sect-actions">
+    ${isAdmin ? `<button class="btn-primary" onclick="openNewPost()"><i class="fas fa-pen me-1"></i>새 글쓰기</button>` : `<span style="font-size:0.78rem;color:var(--text-light);"><i class="fas fa-lock me-1"></i>관리자만 게시 가능</span>`}
+  </div>
+</div>
+
+<div class="board-layout">
+  <div>
+    <div class="board-toolbar">
+      <div class="filter-chips">
+        <span class="filter-chip ${boardFilter==='all'?'active':''}" onclick="boardFilter='all';renderBoard();">전체</span>
+        <span class="filter-chip ${boardFilter==='notice'?'active':''}" onclick="boardFilter='notice';renderBoard();">공지</span>
+        <span class="filter-chip ${boardFilter==='question'?'active':''}" onclick="boardFilter='question';renderBoard();">질문</span>
+        <span class="filter-chip ${boardFilter==='discuss'?'active':''}" onclick="boardFilter='discuss';renderBoard();">토론</span>
+        <span class="filter-chip ${boardFilter==='report'?'active':''}" onclick="boardFilter='report';renderBoard();">공유</span>
+      </div>
+      <span style="font-size:0.76rem;color:var(--text-light);">${filtered.length}개 게시물</span>
+    </div>
+
+    ${filtered.length === 0 ? `
+      <div class="w-card">
+        <div class="empty-state">
+          <i class="fas fa-comments"></i>
+          <p>게시물이 없습니다</p>
+          ${isAdmin ? `<button class="btn-primary btn-primary-sm" onclick="openNewPost()" style="margin-top:12px;"><i class="fas fa-pen me-1"></i>첫 게시물 작성</button>` : `<p style="font-size:0.76rem;color:#bbb;margin-top:8px;">관리자가 첫 글을 올리면 여기에 표시됩니다.</p>`}
+        </div>
+      </div>
+    ` : filtered.slice().reverse().map(post => {
+      const cat = catMap[post.cat] || catMap.discuss;
+      return `
+      <div class="post-card" id="post-${post.id}">
+        <div class="post-header">
+          <div class="post-avatar">${post.author.substring(0,2)}</div>
+          <div class="post-meta">
+            <div class="post-author">${post.author}</div>
+            <div class="post-author-dept">${post.dept}</div>
+            <div class="post-time">${post.time}</div>
+          </div>
+          <span class="post-cat ${cat.cls}"><i class="fas ${cat.icon} me-1"></i>${cat.label}</span>
+          ${isAdmin ? `<button class="btn-danger-sm admin-ctrl" style="display:inline-flex;" onclick="deletePost(${post.id})"><i class="fas fa-trash"></i></button>` : ''}
+        </div>
+        <div class="post-body">
+          <div class="post-title" onclick="togglePost(${post.id})">${post.title}</div>
+          <div class="post-content" id="postcontent-${post.id}">${post.body}</div>
+        </div>
+        <div class="post-footer">
+          <button class="post-action-btn ${post.liked?'liked':''}" onclick="likePost(${post.id})">
+            <i class="fas fa-heart"></i> ${post.likes}
+          </button>
+          <button class="post-action-btn" onclick="toggleComments(${post.id})">
+            <i class="fas fa-comment"></i> 댓글 ${post.comments.length}
+          </button>
+          <button class="post-action-btn" onclick="togglePost(${post.id})">
+            <i class="fas fa-chevron-down"></i> 본문
+          </button>
+        </div>
+        <div class="comments-area" id="comments-${post.id}" style="display:none;">
+          ${post.comments.map(c=>`
+            <div class="comment-item">
+              <div class="comment-avatar">${c.author.substring(0,2)}</div>
+              <div>
+                <div class="comment-author">${c.author} <span style="font-weight:400;color:var(--text-light);font-size:0.7rem;">${c.dept}</span></div>
+                <div class="comment-text">${c.text}</div>
+                <div class="comment-time">${c.time}</div>
+              </div>
+            </div>
+          `).join('')}
+          <div class="comment-input-row">
+            <input type="text" id="comment-input-${post.id}" placeholder="댓글 입력..." onkeydown="if(event.key==='Enter')submitComment(${post.id})">
+            <button class="btn-primary btn-primary-sm" onclick="submitComment(${post.id})"><i class="fas fa-paper-plane"></i></button>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <!-- Sidebar -->
+  <div>
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-header">안내</div>
+      <div class="sidebar-widget-body">
+        <p style="font-size:0.78rem;color:var(--text-mid);line-height:1.6;">
+          이 게시판은 IOSA 관련 질문, 정보 공유, 공지를 위한 공간입니다.<br><br>
+          ${isAdmin ? '<span style="color:var(--eastar-red);font-weight:700;"><i class="fas fa-check-circle me-1"></i>관리자 권한 — 게시물을 작성할 수 있습니다.</span>' : '<span style="color:#aaa;font-size:0.76rem;">게시물 작성은 안전보안실 관리자만 가능합니다.</span>'}
+        </p>
+      </div>
+    </div>
+    <div class="sidebar-widget">
+      <div class="sidebar-widget-header">주요 데드라인</div>
+      <div class="sidebar-widget-body">
+        ${[
+          {label:'CAR 종결', date:'2026.07.17', warn:true},
+          {label:'IATA Connect 갱신', date:'2026.08.01', warn:false},
+          {label:'RBI 내부심사', date:'2026.11.01', warn:false},
+          {label:'인증 만료', date:'2027.08.01', warn:false},
+        ].map(d=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border-light);font-size:0.78rem;">
+            <span style="font-weight:600;">${d.label}</span>
+            <span style="font-size:0.72rem;${d.warn?'color:var(--eastar-red);font-weight:700;':'color:var(--text-light);'}">${d.date}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  </div>
+</div>
+`;
+}
+
+function togglePost(id) {
+  const el = document.getElementById('postcontent-' + id);
+  if (el) el.style.display = el.style.display === 'none' || !el.style.display ? 'block' : 'none';
+}
+function toggleComments(id) {
+  const el = document.getElementById('comments-' + id);
+  if (el) el.style.display = el.style.display === 'none' || !el.style.display ? 'block' : 'none';
+}
+function likePost(id) {
+  const posts = getBoardPosts();
+  const post = posts.find(p => p.id === id);
+  if (!post) return;
+  post.liked = !post.liked;
+  post.likes += post.liked ? 1 : -1;
+  saveBoardPosts(posts);
+  renderBoard();
+}
+function deletePost(id) {
+  if (!confirm('이 게시물을 삭제하시겠습니까?')) return;
+  saveBoardPosts(getBoardPosts().filter(p => p.id !== id));
+  renderBoard();
+}
+function submitComment(postId) {
+  const input = document.getElementById('comment-input-' + postId);
+  if (!input || !input.value.trim()) return;
+  const posts = getBoardPosts();
+  const post = posts.find(p => p.id === postId);
+  if (!post) return;
+  const cu = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  post.comments.push({
+    author: cu ? cu.name : '익명',
+    dept: cu ? cu.dept : '',
+    text: input.value.trim(),
+    time: new Date().toLocaleDateString('ko-KR')
+  });
+  saveBoardPosts(posts);
+  renderBoard();
+  setTimeout(() => { const el = document.getElementById('comments-'+postId); if (el) el.style.display='block'; }, 30);
+}
+function openNewPost() {
+  if (!isAdmin) { alert('관리자 모드에서만 게시물을 작성할 수 있습니다.'); return; }
+  new bootstrap.Modal(document.getElementById('newPostModal')).show();
+}
+function submitNewPost() {
+  const cat = document.getElementById('post-cat').value;
+  const title = document.getElementById('post-title-input').value.trim();
+  const body = document.getElementById('post-body-input').value.trim();
+  const author = document.getElementById('post-author-input').value.trim() || '장서희';
+  const dept = document.getElementById('post-dept-input').value.trim() || '이스타항공 안전보안실';
+  if (!title || !body) { alert('제목과 내용을 입력해주세요.'); return; }
+  const posts = getBoardPosts();
+  posts.push({ id: Date.now(), cat, title, body, author, dept,
+    time: new Date().toLocaleDateString('ko-KR'), likes: 0, liked: false, comments: [] });
+  saveBoardPosts(posts);
+  bootstrap.Modal.getInstance(document.getElementById('newPostModal')).hide();
+  renderBoard();
+}
+
+// ══════════════════════════════════════════════════════════
+//  CAP Edit (admin helper)
+// ══════════════════════════════════════════════════════════
+let _capEditId = null;
+function openCapEdit(id) {
+  if (!isAdmin) return;
+  const f = (APP_DATA.cap.findings||[]).find(x=>x.id===id);
+  if (!f) return;
+  _capEditId = id;
+  document.getElementById('cap-edit-id').value = f.id;
+  document.getElementById('cap-edit-isarp').value = f.isarp || '';
+  document.getElementById('cap-edit-status').value = f.status || 'open';
+  document.getElementById('cap-edit-dept').value = f.dept || '';
+  document.getElementById('cap-edit-action').value = f.action || '';
+  document.getElementById('cap-edit-fat').value = f.fatDate || '';
+  new bootstrap.Modal(document.getElementById('capFindingModal')).show();
+}
+function saveCapEdit() {
+  const findings = APP_DATA.cap.findings || [];
+  let f = findings.find(x=>x.id===_capEditId);
+  if (!f) return;
+  f.status = document.getElementById('cap-edit-status').value;
+  f.dept   = document.getElementById('cap-edit-dept').value;
+  f.action = document.getElementById('cap-edit-action').value;
+  f.fatDate = document.getElementById('cap-edit-fat').value;
+  DB.save(APP_DATA);
+  bootstrap.Modal.getInstance(document.getElementById('capFindingModal')).hide();
+  renderCAP();
+}
+
+// ══════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════
+(function init() {
+
+  // Nav expiry pill
+  const c = APP_DATA.certification;
+  const daysLeft = DateUtil.daysUntil(c.registrationExpiry);
+  const pill = document.getElementById('nav-expiry-pill');
+  if (daysLeft !== null) {
+    const isRed = daysLeft <= 180;
+    pill.innerHTML = `<span onclick="navigate('certification')" style="cursor:pointer;background:${isRed?'var(--eastar-red)':'#1a7a4a'};color:white;font-size:0.7rem;font-weight:800;padding:3px 10px;border-radius:2px;letter-spacing:0.3px;">D-${daysLeft}</span>`;
+  }
+
+  // Seed CAP findings — force re-seed if desc field is missing (schema v2)
+  // v3: all findings closed + FAT completed
+  const needsReseed = !APP_DATA.cap.findings || APP_DATA.cap.findings.length === 0 ||
+                      !APP_DATA.cap.findings[0].desc ||
+                      APP_DATA.cap.findings[0].status !== 'closed';
+  if (needsReseed) {
+    APP_DATA.cap.findings = [
+      // ORG (7 CAR / 4 OBS)
+      {id:'93285',type:'CAR',isarp:'ORG 1.5.3',dept:'안전보안실',desc:'안전관리 목표 및 성과지표 문서화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93286',type:'CAR',isarp:'ORG 2.1.2',dept:'안전보안실',desc:'품질보증 프로그램 운영 절차 부적합',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93287',type:'CAR',isarp:'ORG 2.1.6',dept:'안전보안실',desc:'불안전 상황 보고 프로세스 문서화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93288',type:'CAR',isarp:'ORG 2.4.3',dept:'안전보안실',desc:'내부심사 계획 수립 및 실시 방법 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93289',type:'CAR',isarp:'ORG 2.4.4',dept:'안전보안실',desc:'내부심사 Follow-up 절차 및 기록 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93290',type:'CAR',isarp:'ORG 3.1.1',dept:'안전보안실',desc:'위험 관리 프로세스 문서화 및 실행 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93295',type:'CAR',isarp:'ORG 4.1.2',dept:'안전보안실',desc:'비상대응 훈련 기록 관리 절차 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93296',type:'OBS',isarp:'ORG 1.2.1',dept:'안전보안실',desc:'안전문화 증진 프로그램 개선 권고',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93297',type:'OBS',isarp:'ORG 2.3.1',dept:'안전보안실',desc:'안전정보 공유 체계 강화 권고',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93298',type:'OBS',isarp:'ORG 3.2.1',dept:'안전보안실',desc:'위험식별 방법론 다양화 권고',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93299',type:'OBS',isarp:'ORG 4.2.1',dept:'안전보안실',desc:'비상절차 검토 주기 단축 권고',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      // FLT (7 CAR)
+      {id:'93291',type:'CAR',isarp:'MNT 3.1.1',dept:'정비본부',desc:'정비프로그램 문서 개정 관리 절차 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93292',type:'CAR',isarp:'FLT 2.1.1A',dept:'운항본부',desc:'비행승무원 자격 관리 절차 적합성 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93300',type:'CAR',isarp:'FLT 2.1.2',dept:'운항본부',desc:'운항승무원 자격심사 절차 문서화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93301',type:'CAR',isarp:'FLT 3.1.1',dept:'운항본부',desc:'운항 절차서 개정 관리 체계 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93302',type:'CAR',isarp:'FLT 4.1.2',dept:'운항본부',desc:'비행 전 브리핑 절차 일관성 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93303',type:'CAR',isarp:'FLT 5.2.1',dept:'운항본부',desc:'항공기 중량 및 평형 관리 절차 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93304',type:'CAR',isarp:'FLT 8.1.3',dept:'운항본부',desc:'악기상 운항 절차 문서화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      // DSP (1 CAR), MNT (5 CAR / 1 OBS), GRH (1 CAR / 1 OBS), SEC (1 OBS)
+      {id:'93305',type:'CAR',isarp:'DSP 2.1.1',dept:'종합통제실',desc:'운항통제 절차서 현행화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93306',type:'CAR',isarp:'MNT 1.1.2',dept:'정비본부',desc:'정비 조직 구조 및 책임 문서화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93307',type:'CAR',isarp:'MNT 2.1.1',dept:'정비본부',desc:'정비 훈련 프로그램 요건 미충족',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93308',type:'OBS',isarp:'MNT 2.3.1',dept:'정비본부',desc:'정비 기술 자료 접근 절차 개선 권고',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93309',type:'CAR',isarp:'GRH 3.2.1',dept:'운송본부',desc:'지상조업 감독 절차 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93310',type:'OBS',isarp:'GRH 2.1.1',dept:'운송본부',desc:'지상조업 위험 평가 절차 개선 권고',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93311',type:'OBS',isarp:'SEC 2.3.1',dept:'안전보안실',desc:'보안 위협 대응 훈련 주기 강화 권고',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+    ];
+    DB.save(APP_DATA);
+  } // end needsReseed
+
+  // Auth-aware init
+  const user = getCurrentUser();
+  if (!user) {
+    showLogin();
+  } else {
+    hideLogin();
+    isAdmin = user.dept === '안전보안실';
+    updateNavUser();
+    navigate('dashboard');
+  }
+
+  // Login form enter key
+  document.getElementById('login-pw')?.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+})();
+</script>
+</body>
+</html>
