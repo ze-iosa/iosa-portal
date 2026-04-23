@@ -792,7 +792,7 @@ function renderDashboardNew() {
 <div style="position:relative;margin-top:24px;margin-bottom:28px;border-radius:8px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.12);">
 
   <!-- Background: dark navy gradient with subtle pattern -->
-  <div style="background:linear-gradient(135deg,#00214f 0%,#003580 50%,#004aad 100%);padding:44px 52px;position:relative;overflow:hidden;">
+  <div style="background:linear-gradient(135deg,#111111 0%,#1a1a1a 60%,#222222 100%);padding:44px 52px;position:relative;overflow:hidden;">
 
     <!-- Decorative circles (background) -->
     <div style="position:absolute;right:-60px;top:-60px;width:320px;height:320px;border-radius:50%;border:40px solid rgba(255,255,255,0.04);pointer-events:none;"></div>
@@ -833,10 +833,10 @@ function renderDashboardNew() {
 
         <!-- Buttons -->
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <a href="../../IOSA (7.28~8.1)/EASTAR JET Co., Ltd. - IOSA Certificate.pdf" target="_blank"
-             style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;background:var(--eastar-red);color:#fff;border-radius:4px;font-size:0.78rem;font-weight:800;text-decoration:none;">
+          <button onclick="openOrUploadFile('iosa_cert','IOSA 인증서')"
+             style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;background:var(--eastar-red);color:#fff;border-radius:4px;font-size:0.78rem;font-weight:800;border:none;cursor:pointer;">
             <i class="fas fa-file-pdf"></i> 인증서 열기
-          </a>
+          </button>
           <a href="https://www.iata.org/en/programs/safety/audit/iosa/registry/" target="_blank"
              style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.25);border-radius:4px;font-size:0.78rem;font-weight:700;text-decoration:none;">
             <i class="fas fa-external-link-alt"></i> IOSA Registry
@@ -889,8 +889,8 @@ function renderDashboardNew() {
     { code:'FLT', name:'운항',           icon:'fa-plane',            f:7, o:0, dept:'운항본부',      section:'cap' },
     { code:'DSP', name:'종합통제',        icon:'fa-display',          f:1, o:0, dept:'종합통제실',    section:'cap' },
     { code:'MNT', name:'정비',           icon:'fa-tools',            f:5, o:1, dept:'정비본부',      section:'cap' },
-    { code:'CAB', name:'객실',           icon:'fa-bell-concierge',   f:0, o:0, dept:'객실본부',      section:'cap' },
-    { code:'GRH', name:'운송',           icon:'fa-plane-arrival',    f:1, o:1, dept:'운송본부',      section:'cap' },
+    { code:'CAB', name:'객실',           icon:'fa-life-ring',        f:0, o:0, dept:'객실본부',      section:'cap' },
+    { code:'GRH', name:'운송',           icon:'fa-dolly',            f:1, o:1, dept:'운송본부',      section:'cap' },
     { code:'CGO', name:'화물',           icon:'fa-boxes-stacked',    f:0, o:0, dept:'운송본부',      section:'cap' },
     { code:'SEC', name:'항공보안',        icon:'fa-shield-halved',    f:0, o:1, dept:'안전보안실',    section:'cap' },
   ].map(s => {
@@ -1366,6 +1366,62 @@ function renderSchedule() {
   </div>
 </div>
 `;
+}
+
+// ══════════════════════════════════════════════════════════
+//  SPECIAL FILES (인증서, IAR 보고서 등 업로드)
+// ══════════════════════════════════════════════════════════
+const SPECIAL_FILE_DB = 'iosa_special_files';
+function openSpecialDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(SPECIAL_FILE_DB, 1);
+    req.onupgradeneeded = e => {
+      if (!e.target.result.objectStoreNames.contains('files'))
+        e.target.result.createObjectStore('files', { keyPath: 'key' });
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror = e => reject(e.target.error);
+  });
+}
+async function saveSpecialFile(key, file) {
+  const db = await openSpecialDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('files', 'readwrite');
+    tx.objectStore('files').put({ key, name: file.name, size: file.size, blob: file });
+    tx.oncomplete = resolve;
+    tx.onerror = e => reject(e.target.error);
+  });
+}
+async function getSpecialFile(key) {
+  const db = await openSpecialDB();
+  return new Promise((resolve, reject) => {
+    const req = db.transaction('files', 'readonly').objectStore('files').get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = e => reject(e.target.error);
+  });
+}
+async function openOrUploadFile(key, label) {
+  const adminMode = typeof isAdmin !== 'undefined' && isAdmin;
+  const record = await getSpecialFile(key);
+  if (record) {
+    const url = URL.createObjectURL(record.blob);
+    window.open(url, '_blank');
+    // Admin: offer re-upload option
+    if (adminMode && confirm(`현재 파일: "${record.name}"\n새 파일로 교체하시겠습니까?`)) {
+      const inp = document.createElement('input');
+      inp.type = 'file'; inp.accept = '.pdf,.doc,.docx,.xlsx';
+      inp.onchange = async () => { if (inp.files[0]) { await saveSpecialFile(key, inp.files[0]); alert(label + ' 교체 완료!'); } };
+      inp.click();
+    }
+  } else if (adminMode) {
+    if (!confirm(`"${label}" 파일이 아직 없습니다.\n지금 업로드하시겠습니까?`)) return;
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = '.pdf,.doc,.docx,.xlsx';
+    inp.onchange = async () => { if (inp.files[0]) { await saveSpecialFile(key, inp.files[0]); alert(label + ' 업로드 완료! 다음부터 바로 열립니다.'); } };
+    inp.click();
+  } else {
+    alert('파일이 아직 업로드되지 않았습니다.\n관리자에게 문의하세요.');
+  }
 }
 
 // ══════════════════════════════════════════════════════════
