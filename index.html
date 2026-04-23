@@ -836,14 +836,19 @@ function renderDashboardNew() {
         </div>
       </div>
 
-      <!-- Right: D-day counter -->
-      <div style="text-align:center;flex-shrink:0;">
-        <div style="width:140px;height:140px;border-radius:50%;border:3px solid rgba(210,0,21,0.2);display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff8f8;">
-          <div style="font-size:0.55rem;font-weight:700;letter-spacing:2px;color:#aaa;text-transform:uppercase;margin-bottom:2px;">만료까지</div>
-          <div style="font-size:2.4rem;font-weight:900;color:var(--eastar-red);line-height:1;">D-${daysToExpiry}</div>
-          <div style="font-size:0.6rem;color:#bbb;margin-top:2px;">일 남음</div>
+      <!-- Right: expiry block -->
+      <div style="flex-shrink:0;display:flex;flex-direction:column;gap:0;align-items:stretch;min-width:180px;">
+        <!-- D-day card -->
+        <div style="background:var(--eastar-red);border-radius:8px 8px 0 0;padding:18px 24px;text-align:center;">
+          <div style="font-size:0.58rem;font-weight:800;letter-spacing:2.5px;color:rgba(255,255,255,0.7);text-transform:uppercase;margin-bottom:6px;">인증 만료까지</div>
+          <div style="font-size:3rem;font-weight:900;color:#fff;line-height:1;letter-spacing:-2px;">D-${daysToExpiry}</div>
+          <div style="font-size:0.68rem;color:rgba(255,255,255,0.65);margin-top:6px;font-weight:600;">일 남음</div>
         </div>
-        <div style="margin-top:12px;font-size:0.65rem;color:#aaa;">Valid until 1 Aug 2027</div>
+        <!-- Expiry date strip -->
+        <div style="background:#1a1a1a;border-radius:0 0 8px 8px;padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:7px;">
+          <i class="fas fa-calendar-alt" style="color:rgba(255,255,255,0.4);font-size:0.7rem;"></i>
+          <span style="font-size:0.7rem;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:0.5px;">Valid until 1 Aug 2027</span>
+        </div>
       </div>
     </div>
   </div>
