@@ -788,10 +788,10 @@ function renderDashboardNew() {
 <!-- ══════════════════════════════════════════════════════
      HERO — Certificate + Current Status
 ════════════════════════════════════════════════════════ -->
-<div style="display:grid;grid-template-columns:1fr;gap:0;margin-top:24px;margin-bottom:28px;border-radius:6px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.10);">
+<div style="display:grid;grid-template-columns:1fr 340px;gap:0;margin-top:24px;margin-bottom:28px;border-radius:6px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.10);">
 
-  <!-- Certificate panel (full width) -->
-  <div style="background:#fff;padding:40px 44px;border-bottom:1px solid #eee;">
+  <!-- LEFT: Info panel -->
+  <div style="background:#fff;padding:40px 44px;">
 
     <!-- IOSA badge -->
     <div style="display:inline-flex;align-items:center;gap:10px;
@@ -809,7 +809,7 @@ function renderDashboardNew() {
       EASTARJET Co., Ltd. &nbsp;·&nbsp; ZE / ESR
     </div>
 
-    <!-- Divider line (IATA Connect style) -->
+    <!-- Divider line -->
     <div style="width:40px;height:3px;background:var(--eastar-red);margin-bottom:24px;border-radius:2px;"></div>
 
     <!-- Key details -->
@@ -833,23 +833,36 @@ function renderDashboardNew() {
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
       <a href="../../IOSA (7.28~8.1)/EASTAR JET Co., Ltd. - IOSA Certificate.pdf"
          target="_blank"
-         style="display:inline-flex;align-items:center;gap:7px;
-           padding:10px 22px;background:var(--eastar-red);color:#fff;
-           border-radius:4px;font-size:0.78rem;font-weight:800;
-           text-decoration:none;letter-spacing:0.3px;transition:opacity 200ms;"
+         style="display:inline-flex;align-items:center;gap:7px;padding:10px 22px;background:var(--eastar-red);color:#fff;border-radius:4px;font-size:0.78rem;font-weight:800;text-decoration:none;letter-spacing:0.3px;"
          onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
         <i class="fas fa-file-pdf"></i> 인증서 열기
       </a>
-      <a href="https://www.iata.org/en/programs/safety/audit/iosa/registry/"
-         target="_blank"
-         style="display:inline-flex;align-items:center;gap:7px;
-           padding:10px 22px;background:#fff;color:#111;
-           border:1.5px solid #ddd;border-radius:4px;
-           font-size:0.78rem;font-weight:700;text-decoration:none;
-           letter-spacing:0.3px;transition:border-color 200ms;"
+      <a href="https://www.iata.org/en/programs/safety/audit/iosa/registry/" target="_blank"
+         style="display:inline-flex;align-items:center;gap:7px;padding:10px 22px;background:#fff;color:#111;border:1.5px solid #ddd;border-radius:4px;font-size:0.78rem;font-weight:700;text-decoration:none;"
          onmouseover="this.style.borderColor='#111'" onmouseout="this.style.borderColor='#ddd'">
         <i class="fas fa-external-link-alt"></i> IOSA Registry
       </a>
+    </div>
+  </div>
+
+  <!-- RIGHT: IOSA Registration Status Panel -->
+  <div style="background:linear-gradient(160deg,#003580 0%,#00214f 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 28px;gap:20px;position:relative;overflow:hidden;">
+    <!-- Background watermark text -->
+    <div style="position:absolute;bottom:-20px;right:-10px;font-size:7rem;font-weight:900;color:rgba(255,255,255,0.04);letter-spacing:-4px;line-height:1;pointer-events:none;">IOSA</div>
+    <!-- IOSA stamp image -->
+    <img src="assets/iosa_stamp.png" alt="IOSA Registered Operator"
+         style="width:130px;height:130px;object-fit:contain;filter:drop-shadow(0 4px 16px rgba(0,0,0,0.3));">
+    <!-- Status text -->
+    <div style="text-align:center;">
+      <div style="font-size:0.6rem;font-weight:800;letter-spacing:3px;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:6px;">Registration Status</div>
+      <div style="font-size:1.1rem;font-weight:900;color:#fff;letter-spacing:1px;margin-bottom:4px;">IOSA REGISTERED</div>
+      <div style="font-size:0.72rem;color:rgba(255,255,255,0.6);">EASTAR JET Co., Ltd.</div>
+    </div>
+    <!-- Valid until badge -->
+    <div style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:12px 20px;text-align:center;width:100%;">
+      <div style="font-size:0.58rem;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:4px;">Valid Until</div>
+      <div style="font-size:1rem;font-weight:900;color:#fff;">1 Aug 2027</div>
+      <div style="font-size:0.65rem;color:rgba(255,255,255,0.45);margin-top:2px;">D-${daysToExpiry} days remaining</div>
     </div>
   </div>
 </div>
