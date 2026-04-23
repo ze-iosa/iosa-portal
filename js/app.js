@@ -2084,57 +2084,338 @@ function renderPastYearContent(year) {
 //  CONFORMANCE REPORT (CR) — 부문별 ISARP 적합성 검토
 // ══════════════════════════════════════════════════════════
 let crSection = 'ORG';
-let crEditId  = null;
 
 const CR_SECTIONS = ['ORG','FLT','DSP','MNT','CAB','GRH','CGO','SEC'];
 const CR_SECTION_NAMES = {ORG:'조직 및 안전',FLT:'운항',DSP:'종합통제',MNT:'정비',CAB:'객실',GRH:'운송',CGO:'화물',SEC:'항공보안'};
-const CR_STATUS_MAP = {
-  conform:     {label:'적합 (C)',       color:'#1a7a4a', bg:'#f0faf4', border:'rgba(26,122,74,0.2)'},
-  non_conform: {label:'부적합 (NC)',    color:'#dc3545', bg:'#fff0f0', border:'rgba(220,53,69,0.2)'},
-  na:          {label:'해당없음 (NA)',  color:'#888',    bg:'#f5f5f5', border:'#e0e0e0'},
-  pending:     {label:'검토 중',        color:'#7a5e1c', bg:'#fdf8ee', border:'rgba(152,123,55,0.25)'},
+const CR_STATUS_VALUES = ['C','NC','N/A','Partial','Not Audited'];
+const CR_STATUS_STYLE = {
+  'C':           {color:'#1a7a4a', bg:'#f0faf4', border:'rgba(26,122,74,0.25)'},
+  'NC':          {color:'#dc3545', bg:'#fff0f0', border:'rgba(220,53,69,0.25)'},
+  'N/A':         {color:'#888',    bg:'#f5f5f5', border:'#e0e0e0'},
+  'Partial':     {color:'#d97706', bg:'#fffbeb', border:'rgba(217,119,6,0.25)'},
+  'Not Audited': {color:'#6b7280', bg:'#f9fafb', border:'#e5e7eb'},
+  '':            {color:'#aaa',    bg:'#fafafa', border:'#e8e8e8'},
 };
 
-function renderCR() {
-  if (!APP_DATA.cr) APP_DATA.cr = { entries: [] };
-  const entries = APP_DATA.cr.entries.filter(e => e.section === crSection);
-  const allEntries = APP_DATA.cr.entries;
-  const adminView = typeof isAdmin !== 'undefined' && isAdmin;
+// ─── IndexedDB: CR Template ───────────────────────────────
+const CR_TEMPLATE_DB = 'iosa_cr_template';
+
+function openCRTemplateDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(CR_TEMPLATE_DB, 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('template')) {
+        db.createObjectStore('template', { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function saveCRTemplate(file) {
+  const db = await openCRTemplateDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('template', 'readwrite');
+    tx.objectStore('template').put({
+      id: 'cr_template',
+      file,
+      name: file.name,
+      uploadedAt: new Date().toISOString(),
+    });
+    tx.oncomplete = () => resolve();
+    tx.onerror    = e => reject(e.target.error);
+  });
+}
+
+async function getCRTemplate() {
+  const db = await openCRTemplateDB();
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction('template', 'readonly');
+    const req = tx.objectStore('template').get('cr_template');
+    req.onsuccess = e => resolve(e.target.result || null);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function deleteCRTemplate() {
+  const db = await openCRTemplateDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('template', 'readwrite');
+    tx.objectStore('template').delete('cr_template');
+    tx.oncomplete = () => resolve();
+    tx.onerror    = e => reject(e.target.error);
+  });
+}
+
+// ─── IndexedDB: CR Data ───────────────────────────────────
+const CR_DATA_DB = 'iosa_cr_data';
+
+function openCRDataDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(CR_DATA_DB, 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('entries')) {
+        const store = db.createObjectStore('entries', { keyPath: 'id' });
+        store.createIndex('section', 'section', { unique: false });
+      }
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function saveCRDataEntry(entry) {
+  const db = await openCRDataDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('entries', 'readwrite');
+    tx.objectStore('entries').put(entry);
+    tx.oncomplete = () => resolve();
+    tx.onerror    = e => reject(e.target.error);
+  });
+}
+
+async function getCRDataEntries(section) {
+  const db = await openCRDataDB();
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction('entries', 'readonly');
+    const req = tx.objectStore('entries').getAll();
+    req.onsuccess = e => {
+      let results = e.target.result || [];
+      if (section) results = results.filter(r => r.section === section);
+      resolve(results);
+    };
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+async function deleteCRDataEntry(id) {
+  const db = await openCRDataDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('entries', 'readwrite');
+    tx.objectStore('entries').delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror    = e => reject(e.target.error);
+  });
+}
+
+async function clearCRData() {
+  const db = await openCRDataDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('entries', 'readwrite');
+    tx.objectStore('entries').clear();
+    tx.oncomplete = () => resolve();
+    tx.onerror    = e => reject(e.target.error);
+  });
+}
+
+// ─── Parse CR xlsx ────────────────────────────────────────
+async function parseCRTemplate(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async e => {
+      try {
+        const data  = new Uint8Array(e.target.result);
+        const wb    = XLSX.read(data, { type: 'array' });
+
+        // Find "Conformance Report" sheet (case-insensitive partial match)
+        const sheetName = wb.SheetNames.find(n =>
+          n.toLowerCase().includes('conformance') || n.toLowerCase().includes('cr')
+        ) || wb.SheetNames[0];
+
+        const ws   = wb.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+        const entries = [];
+        const isarpCodeRe = /^([A-Z]{2,3}\s+[\d.]+[A-Z]?)\s/;
+        const sanitize = s => s.replace(/[^A-Za-z0-9_]/g, '_');
+
+        // Row 0 = header, start from row 1
+        for (let i = 1; i < rows.length; i++) {
+          const row = rows[i];
+          const colC = (row[2] || '').toString().trim();
+          if (!colC) continue;
+
+          const colA = (row[0] || '').toString().trim();
+          const colB = (row[1] || '').toString().trim();
+
+          // Determine section from col A, or derive from ISARP code
+          let section = colA.toUpperCase();
+          if (!CR_SECTIONS.includes(section)) {
+            const prefixMatch = (colB || colC).match(/^([A-Z]{2,3})\s/);
+            section = prefixMatch ? prefixMatch[1] : '';
+          }
+          if (!CR_SECTIONS.includes(section)) continue;
+
+          // Parse ISARP code from col B first, then from start of col C text
+          let isarpCode = colB.trim();
+          if (!isarpCode) {
+            const m = colC.match(isarpCodeRe);
+            isarpCode = m ? m[1] : '';
+          }
+          if (!isarpCode) continue;
+
+          const id = sanitize(section + '_' + isarpCode);
+
+          entries.push({
+            id,
+            section,
+            isarpCode,
+            requirementText:  colC,
+            auditDate:        '',
+            auditorName:      '',
+            docRef:           '',
+            status:           '',
+            ncDesc:           '',
+            rootCause:        '',
+            correctiveAction: '',
+            aa: {
+              AA1:'',AA2:'',AA3:'',AA4:'',AA5:'',
+              AA6:'',AA7:'',AA8:'',AA9:'',AA10:'',
+              AA11:'',AA12:'',AA13:'',AA14:'',AA15:'',
+              AAOther:'',
+            },
+            updatedAt: '',
+          });
+        }
+
+        // Save to IndexedDB
+        await clearCRData();
+        for (const entry of entries) {
+          await saveCRDataEntry(entry);
+        }
+
+        resolve(entries.length);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = () => reject(new Error('파일 읽기 실패'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// ─── Debounce helper ─────────────────────────────────────
+let _crSaveTimers = {};
+function debouncedCRSave(entry) {
+  clearTimeout(_crSaveTimers[entry.id]);
+  _crSaveTimers[entry.id] = setTimeout(() => saveCRDataEntry(entry), 500);
+}
+
+// ─── In-memory entry cache ────────────────────────────────
+let _crEntryCache = {};  // id -> entry object
+
+// ─── Escape helper ────────────────────────────────────────
+function _esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ─── renderCR ────────────────────────────────────────────
+async function renderCR() {
+  const container = document.getElementById('section-cr');
+  if (!container) return;
+
+  container.innerHTML = `
+<div class="sect-header">
+  <div>
+    <h2 class="sect-title">Conformance Report (CR)</h2>
+    <p class="sect-sub">데이터를 불러오는 중...</p>
+  </div>
+</div>
+<div style="text-align:center;padding:60px 0;color:#bbb;">
+  <i class="fas fa-spinner fa-spin" style="font-size:2rem;margin-bottom:12px;display:block;"></i>
+  <div style="font-size:0.85rem;">로딩 중...</div>
+</div>`;
+
+  try {
+    const tmpl       = await getCRTemplate();
+    const allEntries = await getCRDataEntries();
+    allEntries.forEach(e => { _crEntryCache[e.id] = e; });
+    _renderCRContent(container, tmpl, allEntries);
+  } catch (err) {
+    container.innerHTML += `<div style="color:red;padding:20px;">오류: ${err.message}</div>`;
+  }
+}
+
+function _renderCRContent(container, tmpl, allEntries) {
+  const hasTemplate    = !!tmpl;
+  const sectionEntries = allEntries.filter(e => e.section === crSection);
 
   // Section stats
   const sectionStats = CR_SECTIONS.map(s => {
-    const se = allEntries.filter(e => e.section === s);
-    return { s, total: se.length, c: se.filter(e=>e.status==='conform').length, nc: se.filter(e=>e.status==='non_conform').length, v: se.filter(e=>e.verified).length };
+    const se    = allEntries.filter(e => e.section === s);
+    const c     = se.filter(e => e.status === 'C').length;
+    const nc    = se.filter(e => e.status === 'NC').length;
+    const na    = se.filter(e => e.status === 'N/A').length;
+    const empty = se.filter(e => !e.status).length;
+    return { s, total: se.length, c, nc, na, empty };
   });
 
-  document.getElementById('section-cr').innerHTML = `
+  const totalAll  = allEntries.length;
+  const filledAll = allEntries.filter(e => e.status).length;
+  const pct       = totalAll > 0 ? Math.round(filledAll / totalAll * 100) : 0;
+
+  container.innerHTML = `
 <div class="sect-header">
   <div>
-    <h2 class="sect-title">Conformance Report (CR) 작성</h2>
-    <p class="sect-sub">ISARP 적합성 검토 · 매뉴얼 근거 기록 · 엑셀 추출</p>
+    <h2 class="sect-title">Conformance Report (CR)</h2>
+    <p class="sect-sub">${hasTemplate
+      ? `CR 템플릿 업로드 완료 · ${_esc(tmpl.name)} · ${new Date(tmpl.uploadedAt).toLocaleDateString('ko-KR')} 업로드`
+      : 'CR 템플릿이 업로드되지 않았습니다'}</p>
   </div>
-  <div class="sect-actions" style="display:flex;gap:8px;flex-wrap:wrap;">
-    ${adminView ? `
-    <label style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#f0f0f0;color:#333;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;">
-      <i class="fas fa-upload"></i> 매뉴얼 업로드
-      <input type="file" style="display:none;" accept=".pdf,.docx,.doc" onchange="handleCRManualUpload(this)">
+  <div class="sect-actions" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+    <label style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:var(--eastar-red);color:#fff;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;">
+      <i class="fas fa-upload"></i> CR 템플릿 업로드
+      <input type="file" style="display:none;" accept=".xlsx" onchange="handleCRTemplateUpload(this)">
     </label>
-    <button onclick="openCREntryModal(null)" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--eastar-red);color:#fff;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;">
-      <i class="fas fa-plus"></i> ISARP 추가
-    </button>` : ''}
-    <button onclick="exportCRExcel()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#1a7a4a;color:#fff;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;">
-      <i class="fas fa-file-excel"></i> Excel 추출
+    ${hasTemplate ? `
+    <button onclick="handleDeleteCRTemplate()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#fff;color:#dc3545;border:1.5px solid rgba(220,53,69,0.3);border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;">
+      <i class="fas fa-trash"></i> 템플릿 삭제
     </button>
+    <button onclick="exportCRExcel()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#1a7a4a;color:#fff;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;">
+      <i class="fas fa-file-excel"></i> Excel 내보내기
+    </button>` : ''}
   </div>
 </div>
 
-<!-- 섹션별 진행 요약 -->
-<div style="display:flex;gap:8px;overflow-x:auto;margin-bottom:20px;padding-bottom:4px;">
-  ${sectionStats.map(st=>`
-    <div onclick="crSection='${st.s}';renderCR();" style="flex-shrink:0;padding:10px 14px;background:${crSection===st.s?'var(--eastar-red)':'#fff'};color:${crSection===st.s?'#fff':'#333'};border:1.5px solid ${crSection===st.s?'var(--eastar-red)':'#e0e0e0'};border-radius:6px;cursor:pointer;text-align:center;min-width:72px;transition:all 150ms;">
+${!hasTemplate ? `
+<div style="background:#fff;border:1.5px dashed #d0d5dd;border-radius:10px;padding:56px 32px;text-align:center;margin-top:16px;">
+  <i class="fas fa-file-excel" style="font-size:3rem;color:#1a7a4a;opacity:0.35;margin-bottom:18px;display:block;"></i>
+  <div style="font-size:1rem;font-weight:800;color:#333;margin-bottom:8px;">CR 템플릿 xlsx 파일을 업로드하세요</div>
+  <div style="font-size:0.82rem;color:#888;margin-bottom:24px;max-width:440px;margin-left:auto;margin-right:auto;line-height:1.7;">
+    IATA에서 제공한 CR 템플릿 xlsx 파일을 업로드하면 모든 ISARP 항목이<br>자동으로 불러와집니다. (900개 이상의 항목 지원)
+  </div>
+  <label style="display:inline-flex;align-items:center;gap:8px;padding:11px 28px;background:var(--eastar-red);color:#fff;border-radius:5px;font-size:0.82rem;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(210,0,21,0.15);">
+    <i class="fas fa-upload"></i> CR 템플릿 xlsx 업로드
+    <input type="file" style="display:none;" accept=".xlsx" onchange="handleCRTemplateUpload(this)">
+  </label>
+</div>` : `
+
+<!-- 전체 진행률 바 -->
+<div style="background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:14px 18px;margin-bottom:16px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <span style="font-size:0.75rem;font-weight:800;color:#555;">전체 입력 진행률</span>
+    <span style="font-size:0.75rem;font-weight:700;color:#333;">${filledAll} / ${totalAll} 항목 (${pct}%)</span>
+  </div>
+  <div style="height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden;">
+    <div style="height:100%;width:${pct}%;background:${pct===100?'#1a7a4a':'var(--eastar-red)'};border-radius:4px;transition:width 0.4s;"></div>
+  </div>
+</div>
+
+<!-- 섹션 탭 -->
+<div style="display:flex;gap:8px;overflow-x:auto;margin-bottom:20px;padding-bottom:4px;scrollbar-width:none;">
+  ${sectionStats.map(st => `
+    <div onclick="crSection='${st.s}';renderCR();" style="flex-shrink:0;padding:10px 14px;background:${crSection===st.s?'var(--eastar-red)':'#fff'};color:${crSection===st.s?'#fff':'#333'};border:1.5px solid ${crSection===st.s?'var(--eastar-red)':'#e0e0e0'};border-radius:6px;cursor:pointer;text-align:center;min-width:80px;transition:all 150ms;">
       <div style="font-size:0.65rem;font-weight:900;letter-spacing:1.5px;${crSection===st.s?'':'color:#888;'}">${st.s}</div>
       <div style="font-size:0.72rem;font-weight:700;margin-top:3px;">${st.total > 0 ? st.total+'항목' : '—'}</div>
-      ${st.total>0?`<div style="font-size:0.6rem;margin-top:2px;opacity:0.8;">C:${st.c} NC:${st.nc}</div>`:''}
+      ${st.total > 0 ? `<div style="font-size:0.58rem;margin-top:2px;opacity:0.85;">C:${st.c} NC:${st.nc} 미:${st.empty}</div>` : ''}
     </div>
   `).join('')}
 </div>
@@ -2144,278 +2425,318 @@ function renderCR() {
   <div>
     <span style="font-size:0.65rem;font-weight:900;letter-spacing:2px;color:var(--eastar-red);">${crSection}</span>
     <span style="font-size:0.9rem;font-weight:800;color:#111;margin-left:8px;">${CR_SECTION_NAMES[crSection]}</span>
-    <span style="font-size:0.75rem;color:#aaa;margin-left:8px;">${entries.length}개 ISARP 항목</span>
+    <span style="font-size:0.75rem;color:#aaa;margin-left:8px;">${sectionEntries.length}개 ISARP</span>
   </div>
   <div style="display:flex;gap:12px;font-size:0.72rem;">
-    <span style="color:#1a7a4a;font-weight:700;"><i class="fas fa-check me-1"></i>C: ${entries.filter(e=>e.status==='conform').length}</span>
-    <span style="color:#dc3545;font-weight:700;"><i class="fas fa-times me-1"></i>NC: ${entries.filter(e=>e.status==='non_conform').length}</span>
-    <span style="color:#888;font-weight:700;">NA: ${entries.filter(e=>e.status==='na').length}</span>
-    <span style="color:#7a5e1c;font-weight:700;">검토중: ${entries.filter(e=>e.status==='pending'||!e.status).length}</span>
+    <span style="color:#1a7a4a;font-weight:700;">C: ${sectionEntries.filter(e=>e.status==='C').length}</span>
+    <span style="color:#dc3545;font-weight:700;">NC: ${sectionEntries.filter(e=>e.status==='NC').length}</span>
+    <span style="color:#888;font-weight:700;">N/A: ${sectionEntries.filter(e=>e.status==='N/A').length}</span>
+    <span style="color:#d97706;font-weight:700;">Partial: ${sectionEntries.filter(e=>e.status==='Partial').length}</span>
+    <span style="color:#aaa;font-weight:700;">미입력: ${sectionEntries.filter(e=>!e.status).length}</span>
   </div>
 </div>
 
-<!-- 매뉴얼 업로드 안내 -->
-<div id="cr-manual-status" style="margin-bottom:14px;"></div>
-
 <!-- ISARP 항목 목록 -->
-${entries.length === 0 ? `
+${sectionEntries.length === 0 ? `
 <div style="background:#f9f9f9;border:1px dashed #ddd;border-radius:8px;padding:48px 32px;text-align:center;">
   <i class="fas fa-clipboard-list" style="font-size:2.5rem;color:#ddd;margin-bottom:12px;display:block;"></i>
-  <div style="font-size:0.9rem;font-weight:700;color:#aaa;margin-bottom:6px;">${crSection} 부문 ISARP 항목이 없습니다</div>
-  <div style="font-size:0.78rem;color:#bbb;margin-bottom:16px;">ISARP 코드와 요건을 입력하여 CR 항목을 추가하세요</div>
-  ${adminView ? `<button onclick="openCREntryModal(null)" style="padding:9px 22px;background:var(--eastar-red);color:#fff;border:none;border-radius:4px;font-size:0.78rem;font-weight:700;cursor:pointer;"><i class="fas fa-plus me-1"></i>첫 번째 ISARP 추가</button>` : ''}
+  <div style="font-size:0.9rem;font-weight:700;color:#aaa;">${crSection} 부문 ISARP 항목이 없습니다</div>
 </div>` : `
-<div style="display:flex;flex-direction:column;gap:10px;">
-  ${entries.map(e => {
-    const st = CR_STATUS_MAP[e.status] || CR_STATUS_MAP.pending;
-    return `
-    <div style="background:#fff;border:1px solid #e8e8e8;border-left:4px solid ${st.color};border-radius:6px;padding:16px 18px;">
-      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
-        <div style="flex:1;">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
-            <span style="background:#f5f5f5;color:#444;padding:2px 10px;border-radius:3px;font-size:0.68rem;font-weight:900;letter-spacing:0.5px;">${e.isarp}</span>
-            <span style="background:${st.bg};color:${st.color};border:1px solid ${st.border};padding:2px 8px;border-radius:3px;font-size:0.65rem;font-weight:800;">${st.label}</span>
-            ${e.verified?`<span style="background:#f0faf4;color:#1a7a4a;border:1px solid rgba(26,122,74,0.2);padding:2px 8px;border-radius:3px;font-size:0.65rem;font-weight:800;"><i class="fas fa-check-circle me-1"></i>검토완료</span>`:''}
-          </div>
-          <div style="font-size:0.82rem;font-weight:600;color:#111;margin-bottom:6px;">${e.requirement||'—'}</div>
-        </div>
-        ${adminView ? `
-        <div style="display:flex;gap:6px;flex-shrink:0;">
-          <button onclick="openCREntryModal('${e.id}')" style="padding:4px 10px;background:#f5f5f5;border:1px solid #ddd;border-radius:3px;font-size:0.68rem;font-weight:700;cursor:pointer;color:#444;"><i class="fas fa-pen"></i></button>
-          <button onclick="deleteCREntry('${e.id}')" style="padding:4px 10px;background:#fff0f0;border:1px solid rgba(210,0,21,0.2);border-radius:3px;font-size:0.68rem;font-weight:700;cursor:pointer;color:var(--eastar-red);"><i class="fas fa-trash"></i></button>
-        </div>` : ''}
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
-        <div>
-          <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;color:#aaa;margin-bottom:3px;">매뉴얼 근거</div>
-          <div style="font-size:0.78rem;color:#333;background:#f8f8f8;padding:6px 10px;border-radius:4px;min-height:28px;">${e.manualRef||'<span style="color:#bbb;">미입력</span>'}</div>
-        </div>
-        <div>
-          <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;color:#aaa;margin-bottom:3px;">적합성 근거 (Evidence)</div>
-          <div style="font-size:0.78rem;color:#333;background:#f8f8f8;padding:6px 10px;border-radius:4px;min-height:28px;">${e.evidence||'<span style="color:#bbb;">미입력</span>'}</div>
-        </div>
-      </div>
-
-      ${e.verificationNote ? `
-      <div style="background:#fef3c7;border:1px solid rgba(251,191,36,0.4);border-radius:4px;padding:7px 10px;font-size:0.75rem;color:#78350f;">
-        <i class="fas fa-comment-alt me-1"></i><strong>검토의견:</strong> ${e.verificationNote}
-      </div>` : ''}
-
-      ${adminView ? `
-      <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
-        ${Object.entries(CR_STATUS_MAP).map(([k,v])=>`
-          <button onclick="setCRStatus('${e.id}','${k}')" style="padding:3px 10px;border-radius:3px;font-size:0.65rem;font-weight:700;cursor:pointer;border:1.5px solid ${e.status===k?v.color:'#ddd'};background:${e.status===k?v.bg:'#fff'};color:${e.status===k?v.color:'#888'};">${v.label}</button>
-        `).join('')}
-        <button onclick="toggleCRVerified('${e.id}')" style="margin-left:auto;padding:3px 12px;border-radius:3px;font-size:0.65rem;font-weight:800;cursor:pointer;border:1.5px solid ${e.verified?'#1a7a4a':'#ddd'};background:${e.verified?'#f0faf4':'#fff'};color:${e.verified?'#1a7a4a':'#aaa'};">
-          <i class="fas fa-check-circle me-1"></i>${e.verified?'검토완료':'검토완료 표시'}
-        </button>
-      </div>` : ''}
-    </div>`;
-  }).join('')}
+<div style="display:flex;flex-direction:column;gap:12px;" id="cr-entries-list">
+  ${sectionEntries.map(e => _renderCRCard(e)).join('')}
 </div>`}
+`}`;
+}
 
-<!-- CR Entry Modal -->
-<div class="modal fade" id="modal-cr-entry" tabindex="-1">
-  <div class="modal-dialog modal-lg"><div class="modal-content">
-    <div class="modal-header">
-      <h5 class="modal-title fw-bold" id="cr-modal-title">ISARP 항목 추가</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+function _renderCRCard(e) {
+  const st      = CR_STATUS_STYLE[e.status] || CR_STATUS_STYLE[''];
+  const req     = e.requirementText || '';
+  const preview = req.length > 200 ? req.slice(0, 200) + '…' : req;
+  const isNC    = e.status === 'NC' || e.status === 'Partial';
+  const showAA  = e.status !== '' && e.status !== null && e.status !== undefined;
+
+  const statusOptions = `<option value="" ${!e.status?'selected':''}>미입력</option>` +
+    CR_STATUS_VALUES.map(v =>
+      `<option value="${v}" ${e.status===v?'selected':''}>${v}</option>`
+    ).join('');
+
+  const aaGrid = showAA ? `
+<div style="margin-top:12px;">
+  <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;color:#aaa;margin-bottom:6px;">Auditor Actions (AA)</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px;">
+    ${[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map(i => {
+      const k = 'AA'+i;
+      const v = (e.aa && e.aa[k]) || '';
+      return `<div style="background:#f8f8f8;border:1px solid #eee;border-radius:4px;padding:4px 6px;display:flex;align-items:center;justify-content:space-between;gap:4px;">
+        <span style="font-size:0.6rem;font-weight:700;color:#666;">${k}</span>
+        <select style="font-size:0.6rem;border:none;background:transparent;padding:0;color:#333;cursor:pointer;"
+          onchange="_crFieldChanged('${e.id}','aa.${k}',this.value)">
+          <option value="" ${v===''?'selected':''}>—</option>
+          <option value="Yes" ${v==='Yes'?'selected':''}>Yes</option>
+          <option value="No"  ${v==='No'?'selected':''}>No</option>
+        </select>
+      </div>`;
+    }).join('')}
+    <div style="background:#f8f8f8;border:1px solid #eee;border-radius:4px;padding:4px 6px;grid-column:span 2;">
+      <span style="font-size:0.6rem;font-weight:700;color:#666;display:block;margin-bottom:2px;">AA Other</span>
+      <input type="text" value="${_esc((e.aa&&e.aa.AAOther)||'')}"
+        style="width:100%;font-size:0.65rem;border:none;background:transparent;outline:none;"
+        placeholder="기타 조치"
+        onblur="_crFieldChanged('${e.id}','aa.AAOther',this.value)">
     </div>
-    <div class="modal-body">
-      <div class="row g-3">
-        <div class="col-md-3">
-          <label class="form-label fw-bold" style="font-size:0.78rem;">부문</label>
-          <select class="form-control" id="cr-e-section" onchange="crSection=this.value;">
-            ${CR_SECTIONS.map(s=>`<option value="${s}" ${s===crSection?'selected':''}>${s} — ${CR_SECTION_NAMES[s]}</option>`).join('')}
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label fw-bold" style="font-size:0.78rem;">ISARP 코드</label>
-          <input type="text" class="form-control" id="cr-e-isarp" placeholder="예: ORG 2.1.1">
-        </div>
-        <div class="col-md-3">
-          <label class="form-label fw-bold" style="font-size:0.78rem;">적합성 상태</label>
-          <select class="form-control" id="cr-e-status">
-            ${Object.entries(CR_STATUS_MAP).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('')}
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label fw-bold" style="font-size:0.78rem;">검토완료</label>
-          <select class="form-control" id="cr-e-verified">
-            <option value="0">미완료</option>
-            <option value="1">검토완료 ✓</option>
-          </select>
-        </div>
-        <div class="col-12">
-          <label class="form-label fw-bold" style="font-size:0.78rem;">ISARP 요건 (Requirements)</label>
-          <textarea class="form-control" id="cr-e-requirement" rows="3" placeholder="ISARP 원문 요건 내용을 입력하세요"></textarea>
-        </div>
-        <div class="col-12">
-          <label class="form-label fw-bold" style="font-size:0.78rem;">매뉴얼 근거 (Manual Reference)</label>
-          <input type="text" class="form-control" id="cr-e-manualref" placeholder="예: OM Part A 5.3.1, SMS Manual 3.2">
-        </div>
-        <div class="col-12">
-          <label class="form-label fw-bold" style="font-size:0.78rem;">적합성 근거 / Evidence</label>
-          <textarea class="form-control" id="cr-e-evidence" rows="3" placeholder="매뉴얼 근거가 ISARP 요건을 충족하는 이유, 증빙자료 등"></textarea>
-        </div>
-        <div class="col-12">
-          <label class="form-label fw-bold" style="font-size:0.78rem;">검토 의견 (Verification Note)</label>
-          <textarea class="form-control" id="cr-e-verificationnote" rows="2" placeholder="검토 시 발견된 사항, 개선 필요 부분 등"></textarea>
-        </div>
-      </div>
+  </div>
+</div>` : '';
+
+  return `
+<div id="cr-card-${e.id}" style="background:#fff;border:1px solid #e8e8e8;border-left:4px solid ${st.color||'#ddd'};border-radius:6px;padding:16px 18px;">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+    <span style="background:#f5f5f5;color:#444;padding:3px 10px;border-radius:3px;font-size:0.7rem;font-weight:900;letter-spacing:0.5px;flex-shrink:0;">${_esc(e.isarpCode)}</span>
+    <select style="font-size:0.72rem;font-weight:700;padding:3px 8px;border:1.5px solid ${st.border||'#ddd'};border-radius:4px;background:${st.bg||'#fff'};color:${st.color||'#555'};cursor:pointer;"
+      onchange="_crStatusChanged('${e.id}',this.value)">
+      ${statusOptions}
+    </select>
+  </div>
+
+  <div style="margin-bottom:12px;">
+    <div id="cr-req-short-${e.id}" style="font-size:0.78rem;color:#444;line-height:1.6;">
+      ${_esc(preview)}
+      ${req.length > 200 ? `<button onclick="_crExpandReq('${e.id}')" style="background:none;border:none;color:var(--eastar-red);font-size:0.7rem;font-weight:700;cursor:pointer;margin-left:4px;">더 보기 ▾</button>` : ''}
     </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-      <button type="button" class="btn btn-danger fw-bold" onclick="saveCREntry()">저장</button>
+    <div id="cr-req-full-${e.id}" style="display:none;font-size:0.78rem;color:#444;line-height:1.6;">
+      ${_esc(req)}
+      <button onclick="_crCollapseReq('${e.id}')" style="background:none;border:none;color:var(--eastar-red);font-size:0.7rem;font-weight:700;cursor:pointer;margin-left:4px;">접기 ▴</button>
     </div>
-  </div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px;">
+    <div>
+      <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;color:#aaa;margin-bottom:3px;">심사일 (Date of Last Audit)</div>
+      <input type="date" value="${_esc(e.auditDate||'')}"
+        style="width:100%;font-size:0.75rem;padding:5px 8px;border:1px solid #e0e0e0;border-radius:4px;outline:none;"
+        onblur="_crFieldChanged('${e.id}','auditDate',this.value)">
+    </div>
+    <div>
+      <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;color:#aaa;margin-bottom:3px;">심사원 (Name of Last Auditor)</div>
+      <input type="text" value="${_esc(e.auditorName||'')}"
+        style="width:100%;font-size:0.75rem;padding:5px 8px;border:1px solid #e0e0e0;border-radius:4px;outline:none;"
+        placeholder="심사원 이름"
+        onblur="_crFieldChanged('${e.id}','auditorName',this.value)">
+    </div>
+    <div style="grid-column:span 2;">
+      <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;color:#aaa;margin-bottom:3px;">매뉴얼 근거 (Documentation References)</div>
+      <textarea rows="2"
+        style="width:100%;font-size:0.75rem;padding:5px 8px;border:1px solid #e0e0e0;border-radius:4px;outline:none;resize:vertical;"
+        placeholder="예: OM Part A 5.3.1, SMS Manual 3.2"
+        onblur="_crFieldChanged('${e.id}','docRef',this.value)">${_esc(e.docRef||'')}</textarea>
+    </div>
+    <div style="grid-column:span 2;">
+      <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;color:#aaa;margin-bottom:3px;">부적합 설명 (Description of NC/N/A)</div>
+      <textarea rows="2"
+        style="width:100%;font-size:0.75rem;padding:5px 8px;border:${isNC?'1.5px solid rgba(220,53,69,0.4)':'1px solid #e0e0e0'};border-radius:4px;outline:none;resize:vertical;${isNC?'background:#fff8f8;':''}"
+        placeholder="부적합 사항 또는 N/A 사유 기술"
+        onblur="_crFieldChanged('${e.id}','ncDesc',this.value)">${_esc(e.ncDesc||'')}</textarea>
+    </div>
+    <div>
+      <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;color:#aaa;margin-bottom:3px;">근본원인 (Root Cause)</div>
+      <textarea rows="2"
+        style="width:100%;font-size:0.75rem;padding:5px 8px;border:1px solid #e0e0e0;border-radius:4px;outline:none;resize:vertical;"
+        placeholder="근본원인 분석"
+        onblur="_crFieldChanged('${e.id}','rootCause',this.value)">${_esc(e.rootCause||'')}</textarea>
+    </div>
+    <div>
+      <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;color:#aaa;margin-bottom:3px;">시정조치 (Corrective Action Taken)</div>
+      <textarea rows="2"
+        style="width:100%;font-size:0.75rem;padding:5px 8px;border:1px solid #e0e0e0;border-radius:4px;outline:none;resize:vertical;"
+        placeholder="시정조치 내용"
+        onblur="_crFieldChanged('${e.id}','correctiveAction',this.value)">${_esc(e.correctiveAction||'')}</textarea>
+    </div>
+  </div>
+
+  ${aaGrid}
 </div>`;
+}
 
-  // Load uploaded manual status
-  getManualFiles().then(files => {
-    const el = document.getElementById('cr-manual-status');
-    if (!el) return;
-    if (files.length > 0) {
-      el.innerHTML = `<div style="background:#f0faf4;border:1px solid rgba(26,122,74,0.2);border-radius:6px;padding:10px 14px;font-size:0.76rem;color:#1a7a4a;display:flex;align-items:center;gap:8px;">
-        <i class="fas fa-book me-1"></i>
-        <span>업로드된 매뉴얼 <strong>${files.length}개</strong> (${files.map(f=>f.name).join(', ')}) — 매뉴얼 근거 입력 시 이 파일들을 참조하세요</span>
-      </div>`;
-    } else {
-      el.innerHTML = `<div style="background:#fdf8ee;border:1px solid rgba(152,123,55,0.2);border-radius:6px;padding:10px 14px;font-size:0.76rem;color:#7a5e1c;display:flex;align-items:center;gap:8px;">
-        <i class="fas fa-exclamation-triangle me-1"></i>
-        <span>업로드된 매뉴얼이 없습니다. 상단 <strong>'매뉴얼 업로드'</strong>로 참조 매뉴얼을 업로드하면 근거 확인 시 활용할 수 있습니다.</span>
-      </div>`;
+// ─── Expand / collapse requirement text ──────────────────
+function _crExpandReq(id) {
+  const s = document.getElementById('cr-req-short-'+id);
+  const f = document.getElementById('cr-req-full-'+id);
+  if (s) s.style.display = 'none';
+  if (f) f.style.display = 'block';
+}
+function _crCollapseReq(id) {
+  const s = document.getElementById('cr-req-short-'+id);
+  const f = document.getElementById('cr-req-full-'+id);
+  if (s) s.style.display = 'block';
+  if (f) f.style.display = 'none';
+}
+
+// ─── Field / status change handlers ──────────────────────
+function _crFieldChanged(id, field, value) {
+  const entry = _crEntryCache[id];
+  if (!entry) return;
+  if (field.startsWith('aa.')) {
+    const key = field.slice(3);
+    if (!entry.aa) entry.aa = {};
+    entry.aa[key] = value;
+  } else {
+    entry[field] = value;
+  }
+  entry.updatedAt = new Date().toISOString();
+  debouncedCRSave(entry);
+}
+
+function _crStatusChanged(id, value) {
+  const entry = _crEntryCache[id];
+  if (!entry) return;
+  const prevShowAA = entry.status !== '' && entry.status !== null && entry.status !== undefined;
+  entry.status    = value;
+  entry.updatedAt = new Date().toISOString();
+
+  // Update left border color
+  const card = document.getElementById('cr-card-'+id);
+  if (card) {
+    const st = CR_STATUS_STYLE[value] || CR_STATUS_STYLE[''];
+    card.style.borderLeftColor = st.color || '#ddd';
+
+    // Update NC desc field highlight
+    const allTextareas = card.querySelectorAll('textarea');
+    if (allTextareas.length >= 2) {
+      const ncField = allTextareas[1];
+      const isNC    = value === 'NC' || value === 'Partial';
+      ncField.style.border     = isNC ? '1.5px solid rgba(220,53,69,0.4)' : '1px solid #e0e0e0';
+      ncField.style.background = isNC ? '#fff8f8' : '';
     }
-  }).catch(()=>{});
-}
 
-function openCREntryModal(id) {
-  crEditId = id;
-  const title = document.getElementById('cr-modal-title');
-  if (title) title.textContent = id ? 'ISARP 항목 수정' : 'ISARP 항목 추가';
-
-  if (id) {
-    const e = (APP_DATA.cr.entries||[]).find(x=>x.id===id);
-    if (!e) return;
-    document.getElementById('cr-e-section').value          = e.section || crSection;
-    document.getElementById('cr-e-isarp').value            = e.isarp || '';
-    document.getElementById('cr-e-status').value           = e.status || 'pending';
-    document.getElementById('cr-e-verified').value         = e.verified ? '1' : '0';
-    document.getElementById('cr-e-requirement').value      = e.requirement || '';
-    document.getElementById('cr-e-manualref').value        = e.manualRef || '';
-    document.getElementById('cr-e-evidence').value         = e.evidence || '';
-    document.getElementById('cr-e-verificationnote').value = e.verificationNote || '';
-  } else {
-    document.getElementById('cr-e-section').value          = crSection;
-    document.getElementById('cr-e-isarp').value            = '';
-    document.getElementById('cr-e-status').value           = 'pending';
-    document.getElementById('cr-e-verified').value         = '0';
-    document.getElementById('cr-e-requirement').value      = '';
-    document.getElementById('cr-e-manualref').value        = '';
-    document.getElementById('cr-e-evidence').value         = '';
-    document.getElementById('cr-e-verificationnote').value = '';
+    // Re-render card only if AA section visibility changes
+    const nowShowAA = value !== '' && value !== null && value !== undefined;
+    if (prevShowAA !== nowShowAA) {
+      const newHtml = _renderCRCard(entry);
+      const tmp     = document.createElement('div');
+      tmp.innerHTML = newHtml;
+      card.parentNode.replaceChild(tmp.firstElementChild, card);
+    }
   }
-  new bootstrap.Modal(document.getElementById('modal-cr-entry')).show();
+
+  debouncedCRSave(entry);
 }
 
-function saveCREntry() {
-  if (!APP_DATA.cr) APP_DATA.cr = { entries: [] };
-  const newEntry = {
-    id:               crEditId || 'cr_' + Date.now(),
-    section:          document.getElementById('cr-e-section').value,
-    isarp:            document.getElementById('cr-e-isarp').value.trim(),
-    status:           document.getElementById('cr-e-status').value,
-    verified:         document.getElementById('cr-e-verified').value === '1',
-    requirement:      document.getElementById('cr-e-requirement').value.trim(),
-    manualRef:        document.getElementById('cr-e-manualref').value.trim(),
-    evidence:         document.getElementById('cr-e-evidence').value.trim(),
-    verificationNote: document.getElementById('cr-e-verificationnote').value.trim(),
-    updatedAt:        new Date().toISOString(),
-  };
-  crSection = newEntry.section;
-  if (crEditId) {
-    const idx = APP_DATA.cr.entries.findIndex(x=>x.id===crEditId);
-    if (idx >= 0) APP_DATA.cr.entries[idx] = newEntry;
-  } else {
-    APP_DATA.cr.entries.push(newEntry);
-  }
-  DB.save(APP_DATA);
-  bootstrap.Modal.getInstance(document.getElementById('modal-cr-entry')).hide();
-  crEditId = null;
-  renderCR();
-}
-
-function deleteCREntry(id) {
-  if (!confirm('이 ISARP 항목을 삭제하시겠습니까?')) return;
-  APP_DATA.cr.entries = APP_DATA.cr.entries.filter(e=>e.id!==id);
-  DB.save(APP_DATA);
-  renderCR();
-}
-
-function setCRStatus(id, status) {
-  const e = (APP_DATA.cr.entries||[]).find(x=>x.id===id);
-  if (!e) return;
-  e.status = status;
-  DB.save(APP_DATA);
-  renderCR();
-}
-
-function toggleCRVerified(id) {
-  const e = (APP_DATA.cr.entries||[]).find(x=>x.id===id);
-  if (!e) return;
-  e.verified = !e.verified;
-  DB.save(APP_DATA);
-  renderCR();
-}
-
-function handleCRManualUpload(input) {
+// ─── Template upload / delete handlers ───────────────────
+async function handleCRTemplateUpload(input) {
   if (!input.files || !input.files[0]) return;
-  // Reuse the existing manual upload system
-  handleManualUpload(input);
-  setTimeout(() => renderCR(), 500);
+  const file = input.files[0];
+
+  const container = document.getElementById('section-cr');
+  if (container) {
+    container.innerHTML = `
+<div class="sect-header"><div><h2 class="sect-title">Conformance Report (CR)</h2><p class="sect-sub">파싱 중...</p></div></div>
+<div style="text-align:center;padding:60px 0;color:#bbb;">
+  <i class="fas fa-spinner fa-spin" style="font-size:2rem;margin-bottom:12px;display:block;"></i>
+  <div style="font-size:0.85rem;">CR 템플릿 파싱 중... 잠시 기다려 주세요.</div>
+</div>`;
+  }
+
+  try {
+    await saveCRTemplate(file);
+    const count = await parseCRTemplate(file);
+    _crEntryCache = {};
+    alert(`CR 템플릿 가져오기 완료: ${count}개 ISARP 항목이 불러와졌습니다.`);
+  } catch (err) {
+    alert('CR 템플릿 파싱 오류: ' + err.message);
+    console.error(err);
+  }
+
+  await renderCR();
 }
 
-function exportCRExcel() {
-  if (typeof XLSX === 'undefined') { alert('Excel 라이브러리 로딩 중입니다. 잠시 후 다시 시도하세요.'); return; }
-  const entries = APP_DATA.cr.entries;
-  if (entries.length === 0) { alert('내보낼 CR 항목이 없습니다.'); return; }
+async function handleDeleteCRTemplate() {
+  if (!confirm('CR 템플릿과 모든 입력 데이터를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
+  await deleteCRTemplate();
+  await clearCRData();
+  _crEntryCache = {};
+  await renderCR();
+}
+
+// ─── exportCRExcel ────────────────────────────────────────
+async function exportCRExcel() {
+  if (typeof XLSX === 'undefined') {
+    alert('Excel 라이브러리 로딩 중입니다. 잠시 후 다시 시도하세요.');
+    return;
+  }
+
+  const entries = await getCRDataEntries();
+  if (entries.length === 0) {
+    alert('내보낼 CR 항목이 없습니다. 먼저 CR 템플릿을 업로드하세요.');
+    return;
+  }
 
   const wb = XLSX.utils.book_new();
-  const statusLabels = {conform:'적합 (C)',non_conform:'부적합 (NC)',na:'해당없음 (NA)',pending:'검토 중'};
-  const secNames = {ORG:'조직 및 안전',FLT:'운항',DSP:'종합통제',MNT:'정비',CAB:'객실',GRH:'운송',CGO:'화물',SEC:'항공보안'};
 
-  // Sheet 1: 전체 CR 목록
-  const allRows = [
-    ['부문', 'ISARP', 'ISARP 요건', '매뉴얼 근거', '적합성 근거/Evidence', '적합성 상태', '검토의견', '검토완료', '최종수정일']
+  const header = [
+    'Section',
+    'ISARP Code',
+    'ISM EDITION 18 REV 1',
+    'Date of Last Audit',
+    'Name of Last Auditor',
+    'Documentation References',
+    'Assessment/Status of Conformity',
+    'Description of Nonconformity or Reason for N/A',
+    'Root Cause',
+    'Corrective Action Taken',
+    'AA1','AA2','AA3','AA4','AA5','AA6','AA7','AA8','AA9','AA10',
+    'AA11','AA12','AA13','AA14','AA15',
+    'AA Other Action',
   ];
-  entries.forEach(e => {
-    allRows.push([
-      (secNames[e.section]||e.section),
-      e.isarp,
-      e.requirement,
-      e.manualRef,
-      e.evidence,
-      (statusLabels[e.status]||e.status),
-      e.verificationNote,
-      e.verified ? '완료 ✓' : '',
-      e.updatedAt ? new Date(e.updatedAt).toLocaleDateString('ko-KR') : '',
+
+  const rows = [header];
+  for (const e of entries) {
+    const aa = e.aa || {};
+    rows.push([
+      e.section,
+      e.isarpCode,
+      e.requirementText,
+      e.auditDate,
+      e.auditorName,
+      e.docRef,
+      e.status,
+      e.ncDesc,
+      e.rootCause,
+      e.correctiveAction,
+      aa.AA1||'', aa.AA2||'', aa.AA3||'', aa.AA4||'', aa.AA5||'',
+      aa.AA6||'', aa.AA7||'', aa.AA8||'', aa.AA9||'', aa.AA10||'',
+      aa.AA11||'', aa.AA12||'', aa.AA13||'', aa.AA14||'', aa.AA15||'',
+      aa.AAOther||'',
     ]);
-  });
-  const ws1 = XLSX.utils.aoa_to_sheet(allRows);
-  ws1['!cols'] = [{wch:12},{wch:14},{wch:40},{wch:25},{wch:40},{wch:14},{wch:25},{wch:8},{wch:12}];
-  XLSX.utils.book_append_sheet(wb, ws1, '전체 CR');
+  }
 
-  // Sheet per section
-  CR_SECTIONS.forEach(sec => {
-    const secEntries = entries.filter(e=>e.section===sec);
-    if (secEntries.length === 0) return;
-    const rows = [['ISARP','요건','매뉴얼 근거','Evidence','상태','검토의견','검토완료']];
-    secEntries.forEach(e => rows.push([e.isarp, e.requirement, e.manualRef, e.evidence, statusLabels[e.status]||e.status, e.verificationNote, e.verified?'완료':'']));
-    const ws = XLSX.utils.aoa_to_sheet(rows);
-    ws['!cols'] = [{wch:14},{wch:40},{wch:25},{wch:40},{wch:14},{wch:25},{wch:8}];
-    XLSX.utils.book_append_sheet(wb, ws, sec);
-  });
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [
+    {wch:8},{wch:14},{wch:60},{wch:16},{wch:20},{wch:30},
+    {wch:18},{wch:35},{wch:30},{wch:35},
+    ...Array(15).fill({wch:8}),
+    {wch:20},
+  ];
+  XLSX.utils.book_append_sheet(wb, ws, 'Conformance Report');
 
-  XLSX.writeFile(wb, `CR_이스타항공_${new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'')}.xlsx`);
+  // Summary sheet
+  const summaryHeader = ['Section','Total','C','NC','N/A','Partial','Not Audited','미입력'];
+  const summaryRows   = [summaryHeader];
+  for (const s of CR_SECTIONS) {
+    const se = entries.filter(e => e.section === s);
+    summaryRows.push([
+      s,
+      se.length,
+      se.filter(e=>e.status==='C').length,
+      se.filter(e=>e.status==='NC').length,
+      se.filter(e=>e.status==='N/A').length,
+      se.filter(e=>e.status==='Partial').length,
+      se.filter(e=>e.status==='Not Audited').length,
+      se.filter(e=>!e.status).length,
+    ]);
+  }
+  const ws2 = XLSX.utils.aoa_to_sheet(summaryRows);
+  ws2['!cols'] = [{wch:10},{wch:8},{wch:8},{wch:8},{wch:8},{wch:10},{wch:12},{wch:8}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Summary');
+
+  const dateStr = new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'');
+  XLSX.writeFile(wb, `CR_이스타항공_${dateStr}.xlsx`);
 }
