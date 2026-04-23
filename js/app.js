@@ -255,6 +255,41 @@ function renderDashboard() {
 function renderCertification() {
   const c = APP_DATA.certification;
   const daysToExpiry = DateUtil.daysUntil(c.registrationExpiry);
+
+  // Safe fallback to defaults if certPhases is missing
+  const DEFAULT_PHASES = {
+    phase1: {
+      period: '2025년 7월 28일 ~ 8월 1일',
+      auditor: 'Perry Chou',
+      ism: 'ISM Ed.17 (17.1)',
+      findings: '21 Findings / 7 Observations',
+      cert: '2025.08.01 ~ 2027.08.01',
+      notes: 'CAP/FAT 전체 종결 완료'
+    },
+    phase2: {
+      item1title: '심사원 교육', item1desc: '내부심사원 역량강화 교육 실시',
+      item2title: '내부심사 실시', item2desc: 'ISM Ed.18 기준 내부심사 수행',
+      item3title: '사전 준비', item3desc: 'CR 작성 · IATA Connect 프로파일 업데이트',
+      item4title: 'ISM Ed.18 Gap 분석', item4desc: '개정 사항 분석 및 운영 문서 개정',
+      notes: ''
+    },
+    phase3: {
+      period: '2027년 3월 중순',
+      type: 'RBI (Risk-Based Inspection)',
+      ism: 'ISM Ed.18 Rev.1',
+      notes: ''
+    }
+  };
+  if (!APP_DATA.certPhases) APP_DATA.certPhases = JSON.parse(JSON.stringify(DEFAULT_PHASES));
+  const p1 = APP_DATA.certPhases.phase1 || DEFAULT_PHASES.phase1;
+  const p2 = APP_DATA.certPhases.phase2 || DEFAULT_PHASES.phase2;
+  const p3 = APP_DATA.certPhases.phase3 || DEFAULT_PHASES.phase3;
+
+  const showAdmin = typeof isAdmin !== 'undefined' && isAdmin;
+  const editBtn = (phase) => showAdmin
+    ? `<button onclick="editCertPhase('${phase}')" style="position:absolute;top:14px;right:14px;background:#fff;border:1px solid #e0e0e0;border-radius:4px;padding:3px 10px;font-size:0.68rem;font-weight:700;color:#555;cursor:pointer;"><i class="fas fa-pen me-1"></i>수정</button>`
+    : '';
+
   document.getElementById('section-certification').innerHTML = `
 <div class="sect-header">
   <div>
@@ -267,7 +302,7 @@ function renderCertification() {
 <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px;">
   <div style="flex:1;min-width:160px;background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:12px 16px;">
     <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#aaa;margin-bottom:4px;">인증 유효기간</div>
-    <div style="font-size:0.9rem;font-weight:700;">2025.08.01 ~ 2027.08.01</div>
+    <div style="font-size:0.9rem;font-weight:700;">${p1.cert || '2025.08.01 ~ 2027.08.01'}</div>
   </div>
   <div style="flex:1;min-width:160px;background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:12px 16px;">
     <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#aaa;margin-bottom:4px;">재인증 윈도우</div>
@@ -293,7 +328,8 @@ function renderCertification() {
     <div style="position:absolute;left:-32px;top:16px;width:22px;height:22px;border-radius:50%;background:var(--eastar-red);border:3px solid #fff;box-shadow:0 0 0 2px var(--eastar-red);display:flex;align-items:center;justify-content:center;">
       <i class="fas fa-check" style="color:#fff;font-size:0.6rem;"></i>
     </div>
-    <div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:20px 22px;">
+    <div style="position:relative;background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:20px 22px;">
+      ${editBtn('phase1')}
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
         <span style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--eastar-red);">Phase 1 — 2025년</span>
         <span style="background:#d1fae5;color:#065f46;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:3px;">완료 ✓</span>
@@ -302,19 +338,19 @@ function renderCertification() {
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;">
         <div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:12px;">
           <div style="font-size:0.7rem;font-weight:700;color:#888;margin-bottom:6px;text-transform:uppercase;">심사 기간</div>
-          <div style="font-size:0.85rem;font-weight:600;">2025년 7월 28일 ~ 8월 1일</div>
+          <div style="font-size:0.85rem;font-weight:600;">${p1.period}</div>
           <div style="font-size:0.75rem;color:#64748b;margin-top:3px;">IOSA 초도심사 (Initial Audit)</div>
-          <div style="font-size:0.75rem;color:#64748b;">Lead Auditor: Perry Chou</div>
+          <div style="font-size:0.75rem;color:#64748b;">Lead Auditor: ${p1.auditor}</div>
         </div>
         <div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:12px;">
           <div style="font-size:0.7rem;font-weight:700;color:#888;margin-bottom:6px;text-transform:uppercase;">심사 결과</div>
-          <div style="font-size:0.85rem;font-weight:600;">ISM Ed.17 적용</div>
-          <div style="font-size:0.75rem;color:#64748b;margin-top:3px;">21 Findings / 7 Observations</div>
+          <div style="font-size:0.85rem;font-weight:600;">${p1.ism} 적용</div>
+          <div style="font-size:0.75rem;color:#64748b;margin-top:3px;">${p1.findings}</div>
         </div>
         <div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:12px;">
           <div style="font-size:0.7rem;font-weight:700;color:#888;margin-bottom:6px;text-transform:uppercase;">인증서 취득</div>
-          <div style="font-size:0.85rem;font-weight:600;">유효 2025.08.01 ~ 2027.08.01</div>
-          <div style="font-size:0.75rem;color:#64748b;margin-top:3px;">CAP/FAT 전체 종결 완료</div>
+          <div style="font-size:0.85rem;font-weight:600;">유효 ${p1.cert}</div>
+          <div style="font-size:0.75rem;color:#64748b;margin-top:3px;">${p1.notes}</div>
         </div>
       </div>
     </div>
@@ -325,7 +361,8 @@ function renderCertification() {
     <div style="position:absolute;left:-32px;top:16px;width:22px;height:22px;border-radius:50%;background:#f59e0b;border:3px solid #fff;box-shadow:0 0 0 2px #f59e0b;display:flex;align-items:center;justify-content:center;">
       <i class="fas fa-spinner fa-spin" style="color:#fff;font-size:0.55rem;"></i>
     </div>
-    <div style="background:#fff;border:2px solid #fbbf24;border-radius:8px;padding:20px 22px;box-shadow:0 2px 12px rgba(251,191,36,0.15);">
+    <div style="position:relative;background:#fff;border:2px solid #fbbf24;border-radius:8px;padding:20px 22px;box-shadow:0 2px 12px rgba(251,191,36,0.15);">
+      ${editBtn('phase2')}
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
         <span style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#92400e;">Phase 2 — 2026년</span>
         <span style="background:#fef3c7;color:#92400e;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:3px;">진행중</span>
@@ -333,22 +370,23 @@ function renderCertification() {
       <div style="font-size:1.05rem;font-weight:800;color:#1a1a1a;margin-bottom:14px;">재인증 준비</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
         <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:12px;">
-          <div style="font-size:0.7rem;font-weight:700;color:#92400e;margin-bottom:5px;"><i class="fas fa-user-graduate me-1"></i>심사원 교육</div>
-          <div style="font-size:0.78rem;color:#78350f;">내부심사원 역량강화 교육 실시</div>
+          <div style="font-size:0.7rem;font-weight:700;color:#92400e;margin-bottom:5px;"><i class="fas fa-user-graduate me-1"></i>${p2.item1title}</div>
+          <div style="font-size:0.78rem;color:#78350f;">${p2.item1desc}</div>
         </div>
         <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:12px;">
-          <div style="font-size:0.7rem;font-weight:700;color:#92400e;margin-bottom:5px;"><i class="fas fa-clipboard-check me-1"></i>내부심사 실시</div>
-          <div style="font-size:0.78rem;color:#78350f;">ISM Ed.18 기준 내부심사 수행</div>
+          <div style="font-size:0.7rem;font-weight:700;color:#92400e;margin-bottom:5px;"><i class="fas fa-clipboard-check me-1"></i>${p2.item2title}</div>
+          <div style="font-size:0.78rem;color:#78350f;">${p2.item2desc}</div>
         </div>
         <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:12px;">
-          <div style="font-size:0.7rem;font-weight:700;color:#92400e;margin-bottom:5px;"><i class="fas fa-file-alt me-1"></i>사전 준비</div>
-          <div style="font-size:0.78rem;color:#78350f;">CR 작성 · IATA Connect 프로파일 업데이트</div>
+          <div style="font-size:0.7rem;font-weight:700;color:#92400e;margin-bottom:5px;"><i class="fas fa-file-alt me-1"></i>${p2.item3title}</div>
+          <div style="font-size:0.78rem;color:#78350f;">${p2.item3desc}</div>
         </div>
         <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:12px;">
-          <div style="font-size:0.7rem;font-weight:700;color:#92400e;margin-bottom:5px;"><i class="fas fa-search me-1"></i>ISM Ed.18 Gap 분석</div>
-          <div style="font-size:0.78rem;color:#78350f;">개정 사항 분석 및 운영 문서 개정</div>
+          <div style="font-size:0.7rem;font-weight:700;color:#92400e;margin-bottom:5px;"><i class="fas fa-search me-1"></i>${p2.item4title}</div>
+          <div style="font-size:0.78rem;color:#78350f;">${p2.item4desc}</div>
         </div>
       </div>
+      ${p2.notes ? `<div style="margin-top:10px;font-size:0.76rem;color:#78350f;padding:6px 10px;background:#fef3c7;border-radius:4px;">${p2.notes}</div>` : ''}
     </div>
   </div>
 
@@ -357,29 +395,229 @@ function renderCertification() {
     <div style="position:absolute;left:-32px;top:16px;width:22px;height:22px;border-radius:50%;background:#d0d0d0;border:3px solid #fff;box-shadow:0 0 0 2px #d0d0d0;display:flex;align-items:center;justify-content:center;">
       <i class="fas fa-flag" style="color:#fff;font-size:0.55rem;"></i>
     </div>
-    <div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:20px 22px;opacity:0.85;">
+    <div style="position:relative;background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:20px 22px;opacity:0.85;">
+      ${editBtn('phase3')}
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-        <span style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888;">Phase 3 — 2027년 3월</span>
+        <span style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888;">Phase 3 — ${p3.period}</span>
         <span style="background:#f3f4f6;color:#6b7280;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:3px;">예정</span>
       </div>
       <div style="font-size:1.05rem;font-weight:800;color:#1a1a1a;margin-bottom:14px;">Renewal IOSA 예정</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
         <div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:12px;">
           <div style="font-size:0.7rem;font-weight:700;color:#888;margin-bottom:5px;"><i class="fas fa-shield-alt me-1"></i>심사 방식</div>
-          <div style="font-size:0.78rem;color:#64748b;">RBI (Risk-Based Inspection)</div>
+          <div style="font-size:0.78rem;color:#64748b;">${p3.type}</div>
         </div>
         <div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:12px;">
           <div style="font-size:0.7rem;font-weight:700;color:#888;margin-bottom:5px;"><i class="fas fa-book me-1"></i>적용 기준</div>
-          <div style="font-size:0.78rem;color:#64748b;">ISM Ed.18 (Rev.1) 적용</div>
+          <div style="font-size:0.78rem;color:#64748b;">${p3.ism} 적용</div>
         </div>
         <div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:12px;">
           <div style="font-size:0.7rem;font-weight:700;color:#888;margin-bottom:5px;"><i class="fas fa-calendar me-1"></i>심사 예정 시기</div>
-          <div style="font-size:0.78rem;color:#64748b;">2027년 3월 중순</div>
+          <div style="font-size:0.78rem;color:#64748b;">${p3.period}</div>
         </div>
+        ${p3.notes ? `<div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:12px;">
+          <div style="font-size:0.7rem;font-weight:700;color:#888;margin-bottom:5px;"><i class="fas fa-sticky-note me-1"></i>비고</div>
+          <div style="font-size:0.78rem;color:#64748b;">${p3.notes}</div>
+        </div>` : ''}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Phase Edit Modals ── -->
+
+<!-- Modal Phase 1 -->
+<div class="modal fade" id="modal-cert-phase1" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Phase 1 — 2025 Initial IOSA 수정</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">심사기간</label>
+          <input type="text" class="form-control" id="cp1-period">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">Lead Auditor</label>
+          <input type="text" class="form-control" id="cp1-auditor">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">ISM 버전</label>
+          <input type="text" class="form-control" id="cp1-ism">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">Findings / OBS</label>
+          <input type="text" class="form-control" id="cp1-findings">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">인증 유효기간</label>
+          <input type="text" class="form-control" id="cp1-cert">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">비고</label>
+          <textarea class="form-control" id="cp1-notes" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-danger fw-bold" onclick="saveCertPhase('phase1')">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Phase 2 -->
+<div class="modal fade" id="modal-cert-phase2" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Phase 2 — 2026 재인증 준비 수정</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">항목 1 제목</label>
+          <input type="text" class="form-control" id="cp2-item1title">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">항목 1 설명</label>
+          <input type="text" class="form-control" id="cp2-item1desc">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">항목 2 제목</label>
+          <input type="text" class="form-control" id="cp2-item2title">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">항목 2 설명</label>
+          <input type="text" class="form-control" id="cp2-item2desc">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">항목 3 제목</label>
+          <input type="text" class="form-control" id="cp2-item3title">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">항목 3 설명</label>
+          <input type="text" class="form-control" id="cp2-item3desc">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">항목 4 제목</label>
+          <input type="text" class="form-control" id="cp2-item4title">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">항목 4 설명</label>
+          <input type="text" class="form-control" id="cp2-item4desc">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">비고</label>
+          <textarea class="form-control" id="cp2-notes" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-danger fw-bold" onclick="saveCertPhase('phase2')">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Phase 3 -->
+<div class="modal fade" id="modal-cert-phase3" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Phase 3 — 2027 Renewal IOSA 수정</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">심사 예정 시기</label>
+          <input type="text" class="form-control" id="cp3-period">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">심사 방식</label>
+          <input type="text" class="form-control" id="cp3-type">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">적용 ISM</label>
+          <input type="text" class="form-control" id="cp3-ism">
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:0.8rem;">비고</label>
+          <textarea class="form-control" id="cp3-notes" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-danger fw-bold" onclick="saveCertPhase('phase3')">저장</button>
       </div>
     </div>
   </div>
 </div>`;
+}
+
+function editCertPhase(phase) {
+  if (!APP_DATA.certPhases || !APP_DATA.certPhases[phase]) return;
+  const d = APP_DATA.certPhases[phase];
+  if (phase === 'phase1') {
+    document.getElementById('cp1-period').value   = d.period   || '';
+    document.getElementById('cp1-auditor').value  = d.auditor  || '';
+    document.getElementById('cp1-ism').value      = d.ism      || '';
+    document.getElementById('cp1-findings').value = d.findings || '';
+    document.getElementById('cp1-cert').value     = d.cert     || '';
+    document.getElementById('cp1-notes').value    = d.notes    || '';
+  } else if (phase === 'phase2') {
+    document.getElementById('cp2-item1title').value = d.item1title || '';
+    document.getElementById('cp2-item1desc').value  = d.item1desc  || '';
+    document.getElementById('cp2-item2title').value = d.item2title || '';
+    document.getElementById('cp2-item2desc').value  = d.item2desc  || '';
+    document.getElementById('cp2-item3title').value = d.item3title || '';
+    document.getElementById('cp2-item3desc').value  = d.item3desc  || '';
+    document.getElementById('cp2-item4title').value = d.item4title || '';
+    document.getElementById('cp2-item4desc').value  = d.item4desc  || '';
+    document.getElementById('cp2-notes').value      = d.notes      || '';
+  } else if (phase === 'phase3') {
+    document.getElementById('cp3-period').value = d.period || '';
+    document.getElementById('cp3-type').value   = d.type   || '';
+    document.getElementById('cp3-ism').value    = d.ism    || '';
+    document.getElementById('cp3-notes').value  = d.notes  || '';
+  }
+  new bootstrap.Modal(document.getElementById('modal-cert-' + phase)).show();
+}
+
+function saveCertPhase(phase) {
+  if (!APP_DATA.certPhases) APP_DATA.certPhases = {};
+  if (!APP_DATA.certPhases[phase]) APP_DATA.certPhases[phase] = {};
+  const d = APP_DATA.certPhases[phase];
+  if (phase === 'phase1') {
+    d.period   = document.getElementById('cp1-period').value;
+    d.auditor  = document.getElementById('cp1-auditor').value;
+    d.ism      = document.getElementById('cp1-ism').value;
+    d.findings = document.getElementById('cp1-findings').value;
+    d.cert     = document.getElementById('cp1-cert').value;
+    d.notes    = document.getElementById('cp1-notes').value;
+  } else if (phase === 'phase2') {
+    d.item1title = document.getElementById('cp2-item1title').value;
+    d.item1desc  = document.getElementById('cp2-item1desc').value;
+    d.item2title = document.getElementById('cp2-item2title').value;
+    d.item2desc  = document.getElementById('cp2-item2desc').value;
+    d.item3title = document.getElementById('cp2-item3title').value;
+    d.item3desc  = document.getElementById('cp2-item3desc').value;
+    d.item4title = document.getElementById('cp2-item4title').value;
+    d.item4desc  = document.getElementById('cp2-item4desc').value;
+    d.notes      = document.getElementById('cp2-notes').value;
+  } else if (phase === 'phase3') {
+    d.period = document.getElementById('cp3-period').value;
+    d.type   = document.getElementById('cp3-type').value;
+    d.ism    = document.getElementById('cp3-ism').value;
+    d.notes  = document.getElementById('cp3-notes').value;
+  }
+  DB.save(APP_DATA);
+  const modalEl = document.getElementById('modal-cert-' + phase);
+  const modalInstance = bootstrap.Modal.getInstance(modalEl);
+  if (modalInstance) modalInstance.hide();
+  renderCertification();
 }
 
 // ─── ISM REVISIONS ────────────────────────────────────────────
@@ -1717,89 +1955,126 @@ function renderPastYearContent(year) {
     </div>`;
   }
 
-  // 2025 full data
+  // 2025 full data — visual redesign
   return `
-  <!-- Summary bar -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+
+  <!-- ① 인증서 히어로 카드 -->
+  <div style="background:#fff;border:1px solid #e8e8e8;border-left:5px solid var(--eastar-red);border-radius:8px;padding:24px 28px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);display:flex;align-items:center;gap:28px;flex-wrap:wrap;">
+    <img src="assets/iosa_stamp.png" style="width:88px;height:88px;object-fit:contain;flex-shrink:0;" alt="IOSA stamp">
+    <div style="flex:1;min-width:200px;">
+      <div style="display:inline-flex;align-items:center;gap:7px;background:var(--eastar-red);color:#fff;padding:4px 12px;border-radius:3px;font-size:0.65rem;font-weight:900;letter-spacing:1.5px;margin-bottom:8px;">
+        <i class="fas fa-certificate"></i> IOSA REGISTERED
+      </div>
+      <div style="font-size:1.25rem;font-weight:900;color:#111;margin-bottom:2px;">EASTAR JET Co., Ltd.</div>
+      <div style="font-size:0.78rem;color:#888;margin-bottom:4px;">IAR No. ${a.iar} &nbsp;·&nbsp; ZE / ESR</div>
+      <div style="font-size:0.75rem;color:#555;">인증 유효: <strong>${a.dates.split('~')[0].replace('2025.07.28','2025.08.01').trim()} ~ ${a.expiry}</strong></div>
+    </div>
+    <div style="display:flex;gap:20px;flex-shrink:0;">
+      <div style="text-align:center;padding:16px 24px;background:#fff0f0;border:1px solid rgba(210,0,21,0.15);border-radius:8px;">
+        <div style="font-size:0.6rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--eastar-red);margin-bottom:4px;">FINDINGS</div>
+        <div style="font-size:2.6rem;font-weight:900;color:var(--eastar-red);line-height:1;">${a.totalF}</div>
+        <div style="font-size:0.68rem;color:#888;margin-top:2px;">건</div>
+      </div>
+      <div style="text-align:center;padding:16px 24px;background:#fdf8ee;border:1px solid rgba(152,123,55,0.2);border-radius:8px;">
+        <div style="font-size:0.6rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#7a5e1c;margin-bottom:4px;">OBSERVATIONS</div>
+        <div style="font-size:2.6rem;font-weight:900;color:#7a5e1c;line-height:1;">${a.totalO}</div>
+        <div style="font-size:0.68rem;color:#888;margin-top:2px;">건</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② 핵심 정보 바 -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
     ${[
-      {label:'심사 유형',   val:a.type,      sub:a.ism},
-      {label:'심사 기간',   val:a.dates.split(' ~ ')[0], sub:'~ '+a.dates.split(' ~ ')[1]},
-      {label:'지적사항',    val:a.totalF+'건', sub:'OBS '+a.totalO+'건', red:true},
-      {label:'인증 만료',   val:a.expiry,    sub:'24개월 유효'},
+      {icon:'fa-calendar-alt', label:'본점검 기간', val:a.dates},
+      {icon:'fa-book-open',    label:'ISM 버전',    val:a.ism},
+      {icon:'fa-clock',        label:'인증 만료',    val:a.expiry},
+      {icon:'fa-plane',        label:'보유 기종',    val:a.fleet},
     ].map(s=>`
-      <div style="background:#fff;border:1px solid #eee;border-radius:6px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
-        <div style="font-size:0.6rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#aaa;margin-bottom:4px;">${s.label}</div>
-        <div style="font-size:1rem;font-weight:900;color:${s.red?'var(--eastar-red)':'#111'};">${s.val}</div>
-        <div style="font-size:0.68rem;color:#888;margin-top:2px;">${s.sub}</div>
+      <div style="background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+          <i class="fas ${s.icon}" style="color:var(--eastar-red);font-size:0.75rem;width:14px;text-align:center;"></i>
+          <span style="font-size:0.6rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#aaa;">${s.label}</span>
+        </div>
+        <div style="font-size:0.82rem;font-weight:700;color:#111;">${s.val}</div>
       </div>
     `).join('')}
   </div>
 
-  <!-- Two column layout -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+  <!-- ③ 심사원 + 부문별 결과 (2열) -->
+  <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:16px;margin-bottom:16px;">
 
-    <!-- Section results -->
-    <div style="background:#fff;border:1px solid #eee;border-radius:6px;padding:20px 22px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
-      <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:14px;">부문별 지적사항 (FINDINGS / OBS)</div>
-      ${a.sections.map(s => `
-        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5;">
-          <div style="width:36px;font-size:0.65rem;font-weight:900;color:#888;letter-spacing:1px;">${s.code}</div>
-          <div style="flex:1;font-size:0.78rem;color:#333;">${s.name}</div>
-          <div style="display:flex;gap:6px;align-items:center;">
-            ${s.f > 0 ? `<span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:2px 8px;border-radius:3px;font-size:0.68rem;font-weight:800;">FINDING ${s.f}</span>` : ''}
-            ${s.o > 0 ? `<span style="background:#fdf8ee;color:#7a5e1c;border:1px solid rgba(152,123,55,0.3);padding:2px 8px;border-radius:3px;font-size:0.68rem;font-weight:800;">OBS ${s.o}</span>` : ''}
-            ${s.f === 0 && s.o === 0 ? `<span style="background:#f0faf4;color:#1a7a4a;border:1px solid rgba(26,122,74,0.2);padding:2px 8px;border-radius:3px;font-size:0.68rem;font-weight:700;">Clean</span>` : ''}
+    <!-- 심사원 리스트 -->
+    <div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:20px 22px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+      <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid #f0f0f0;">
+        <i class="fas fa-users me-1" style="color:var(--eastar-red);"></i> IATA Auditors
+      </div>
+      ${a.auditors.map(aud => `
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #f8f8f8;">
+          <div style="width:36px;height:36px;border-radius:50%;background:#f5f5f5;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fas fa-user-tie" style="color:#999;font-size:0.85rem;"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">
+              <span style="font-size:0.85rem;font-weight:700;color:${aud.name==='—'?'#aaa':'#111'};">${aud.name==='—'?'정보 없음':aud.name}</span>
+              <span style="padding:1px 7px;border-radius:3px;font-size:0.6rem;font-weight:800;${aud.role==='Lead Auditor'?'background:var(--eastar-red);color:#fff;':'background:#f0f0f0;color:#555;'}">${aud.role}</span>
+            </div>
+            <div style="font-size:0.72rem;color:#888;">${aud.sections}</div>
           </div>
         </div>
       `).join('')}
     </div>
 
-    <!-- Key CARs + Audit info -->
-    <div style="display:flex;flex-direction:column;gap:16px;">
-      <div style="background:#fff;border:1px solid #eee;border-radius:6px;padding:20px 22px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
-        <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:14px;">주요 FINDINGS (지적사항)</div>
-        ${a.keyCARs.map(c => `
-          <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5;">
-            <span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.15);padding:2px 7px;border-radius:3px;font-size:0.6rem;font-weight:900;flex-shrink:0;">${c.isarp}</span>
-            <div style="font-size:0.76rem;color:#444;line-height:1.5;">${c.desc}</div>
-          </div>
-        `).join('')}
-        <div style="margin-top:12px;padding:8px 12px;background:#f0faf4;border-radius:4px;font-size:0.72rem;color:#1a7a4a;font-weight:700;">
-          <i class="fas fa-check-circle me-1"></i> 전체 FINDINGS/OBS 종결 완료 — IOSA 인증서 취득
-        </div>
+    <!-- 부문별 심사 결과 -->
+    <div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:20px 22px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+      <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid #f0f0f0;">
+        <i class="fas fa-list-check me-1" style="color:var(--eastar-red);"></i> 부문별 심사 결과
       </div>
-
-      <div style="background:#fff;border:1px solid #eee;border-radius:6px;padding:20px 22px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
-        <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:14px;">심사 정보</div>
-        ${[
-          ['IAR 번호',     a.iar],
-          ['Lead Auditor', a.auditor],
-          ['심사 기간',     a.dates],
-          ['적용 ISM',     a.ism],
-          ['보유 기종',     a.fleet],
-          ['인증 만료',     a.expiry],
-        ].map(([k,v])=>`
-          <div style="display:flex;gap:12px;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:0.76rem;">
-            <div style="width:80px;color:#aaa;font-weight:700;flex-shrink:0;">${k}</div>
-            <div style="color:#333;">${v||'—'}</div>
+      <div style="display:grid;grid-template-columns:36px 1fr auto;gap:0;align-items:center;">
+        <div style="font-size:0.58rem;font-weight:800;color:#aaa;padding:4px 0;border-bottom:2px solid #f0f0f0;">CODE</div>
+        <div style="font-size:0.58rem;font-weight:800;color:#aaa;padding:4px 0;border-bottom:2px solid #f0f0f0;">부문</div>
+        <div style="font-size:0.58rem;font-weight:800;color:#aaa;padding:4px 0;border-bottom:2px solid #f0f0f0;text-align:right;">결과</div>
+        ${a.sections.map(s=>`
+          <div style="font-size:0.65rem;font-weight:900;color:#888;padding:7px 0;border-bottom:1px solid #f8f8f8;letter-spacing:0.5px;">${s.code}</div>
+          <div style="font-size:0.78rem;color:#333;padding:7px 8px;border-bottom:1px solid #f8f8f8;">${s.name}</div>
+          <div style="padding:7px 0;border-bottom:1px solid #f8f8f8;display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap;">
+            ${s.f>0?`<span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:1px 7px;border-radius:3px;font-size:0.62rem;font-weight:800;">F ${s.f}</span>`:''}
+            ${s.o>0?`<span style="background:#fdf8ee;color:#7a5e1c;border:1px solid rgba(152,123,55,0.25);padding:1px 7px;border-radius:3px;font-size:0.62rem;font-weight:800;">O ${s.o}</span>`:''}
+            ${s.f===0&&s.o===0?`<span style="background:#f0faf4;color:#1a7a4a;border:1px solid rgba(26,122,74,0.2);padding:1px 7px;border-radius:3px;font-size:0.62rem;font-weight:700;">✓</span>`:''}
           </div>
         `).join('')}
-        ${(typeof isAdminRole === 'function' && isAdminRole()) ? `
-        <div style="margin-top:12px;display:flex;gap:8px;">
-          <a href="../../IOSA (7.28~8.1)/EASTAR JET Co., Ltd. - IOSA Certificate.pdf" target="_blank"
-             style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:var(--eastar-red);color:#fff;border-radius:3px;font-size:0.72rem;font-weight:700;text-decoration:none;">
-            <i class="fas fa-file-pdf"></i> 인증서
-          </a>
-          <a href="../../IOSA (7.28~8.1)/RESULT/IOSA-ESR-IA-2025_Final.pdf" target="_blank"
-             style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#fff;color:#333;border:1.5px solid #ddd;border-radius:3px;font-size:0.72rem;font-weight:700;text-decoration:none;">
-            <i class="fas fa-file-alt"></i> IAR 보고서
-          </a>
-        </div>` : `
-        <div style="margin-top:12px;padding:8px 12px;background:#f8f8f8;border-radius:3px;border-left:3px solid #ddd;font-size:0.72rem;color:#aaa;">
-          <i class="fas fa-lock me-1"></i> 인증서 및 IAR은 안전보안실 담당자만 열람 가능합니다.
-        </div>`}
       </div>
     </div>
+  </div>
+
+  <!-- ④ 주요 Findings -->
+  <div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:20px 22px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+    <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid #f0f0f0;">
+      <i class="fas fa-exclamation-triangle me-1" style="color:var(--eastar-red);"></i> 주요 Findings
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      ${a.keyCARs.map(c=>`
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;">
+          <span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:2px 8px;border-radius:3px;font-size:0.6rem;font-weight:900;flex-shrink:0;white-space:nowrap;">${c.isarp}</span>
+          <div style="font-size:0.76rem;color:#444;line-height:1.5;">${c.desc}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="margin-top:12px;padding:8px 14px;background:#f0faf4;border-radius:4px;font-size:0.72rem;color:#1a7a4a;font-weight:700;">
+      <i class="fas fa-check-circle me-1"></i> 전체 Findings / OBS 종결 완료 — IOSA 인증서 취득
+    </div>
+  </div>
+
+  <!-- ⑤ 문서 버튼 -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <button onclick="openOrUploadFile('iosa_cert','IOSA 인증서')"
+      style="display:inline-flex;align-items:center;gap:7px;padding:10px 22px;background:var(--eastar-red);color:#fff;border:none;border-radius:4px;font-size:0.78rem;font-weight:800;cursor:pointer;">
+      <i class="fas fa-certificate"></i> 인증서 열기
+    </button>
+    <button onclick="openOrUploadFile('iosa_iar','IAR 보고서')"
+      style="display:inline-flex;align-items:center;gap:7px;padding:10px 22px;background:#fff;color:#333;border:1.5px solid #ddd;border-radius:4px;font-size:0.78rem;font-weight:700;cursor:pointer;">
+      <i class="fas fa-file-alt"></i> IAR 보고서
+    </button>
   </div>
   `;
 }
