@@ -115,10 +115,37 @@ const DEFAULT_DATA = {
     ]
   },
   tasks: [],
+  cr: {
+    entries: []
+    // each entry: { id, section, isarp, requirement, manualRef, evidence, verificationNote, status, verified, updatedAt }
+  },
   iataConnectProfile: {
     lastUpdated: '',
     nextUpdateDue: '',
     status: 'unknown',
+  },
+  certPhases: {
+    phase1: {
+      period: '2025년 7월 28일 ~ 8월 1일',
+      auditor: 'Perry Chou',
+      ism: 'ISM Ed.17 (17.1)',
+      findings: '21 Findings / 7 Observations',
+      cert: '2025.08.01 ~ 2027.08.01',
+      notes: 'CAP/FAT 전체 종결 완료'
+    },
+    phase2: {
+      item1title: '심사원 교육', item1desc: '내부심사원 역량강화 교육 실시',
+      item2title: '내부심사 실시', item2desc: 'ISM Ed.18 기준 내부심사 수행',
+      item3title: '사전 준비', item3desc: 'CR 작성 · IATA Connect 프로파일 업데이트',
+      item4title: 'ISM Ed.18 Gap 분석', item4desc: '개정 사항 분석 및 운영 문서 개정',
+      notes: ''
+    },
+    phase3: {
+      period: '2027년 3월 중순',
+      type: 'RBI (Risk-Based Inspection)',
+      ism: 'ISM Ed.18 Rev.1',
+      notes: ''
+    }
   }
 };
 

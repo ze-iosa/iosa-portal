@@ -7,6 +7,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <link href="css/styles.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -47,6 +48,11 @@
     <li class="nav-item">
       <span class="nav-link-top" id="navbtn-cap" onclick="navigate('cap')">
         CAP / FAT
+      </span>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link-top" id="navbtn-cr" onclick="navigate('cr')">
+        CR 작성
       </span>
     </li>
     <li class="nav-item">
@@ -314,6 +320,12 @@
   <div class="page-section" id="section-schedule"></div>
   <div class="page-section" id="section-manuals"></div>
   <div class="page-section" id="section-board"></div>
+  <div class="page-section" id="section-cr"></div>
+</div>
+
+<!-- ═══ SECTION DETAIL OVERLAY ═══ -->
+<div id="section-detail-overlay" onclick="closeSectionDetail()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1050;"></div>
+<div id="section-detail-panel" style="display:none;position:fixed;top:0;right:0;width:580px;max-width:98vw;height:100vh;background:#fff;z-index:1051;box-shadow:-4px 0 32px rgba(0,0,0,0.18);overflow-y:auto;flex-direction:column;">
 </div>
 
 <!-- ═══════════════════ MODALS ═══════════════════ -->
@@ -698,6 +710,7 @@ function renderSectionAll(s) {
     schedule: renderSchedule,
     manuals: renderManuals,
     board: renderBoard,
+    cr: renderCR,
   };
   if (map[s]) map[s]();
 }
@@ -881,7 +894,7 @@ function renderDashboardNew() {
     const badgeO = hasO ? '<span style="background:#f9f4e8;color:#7a5e1c;border:1px solid rgba(152,123,55,0.3);padding:2px 7px;border-radius:3px;font-size:0.6rem;font-weight:800;">'+s.o+' OBSERVATION'+(s.o>1?'S':'')+'</span>' : '';
     const badgeClean = clean ? '<span style="background:#f0faf4;color:#1a7a4a;border:1px solid rgba(26,122,74,0.2);padding:2px 7px;border-radius:3px;font-size:0.6rem;font-weight:700;">✓ Clean</span>' : '';
     return (
-      '<div onclick="navigate(\''+s.section+'\')" '+
+      '<div onclick="openSectionDetail(\''+s.code+'\')" '+
       'style="background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:20px 16px 16px;'+
       (!canView ? 'opacity:0.35;filter:grayscale(1);pointer-events:none;' : '') +
       'text-align:center;cursor:pointer;'+
@@ -1847,6 +1860,163 @@ function saveCapEdit() {
   // Login form enter key
   document.getElementById('login-pw')?.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 })();
+
+// ══════════════════════════════════════════════════════════
+//  SECTION DETAIL PANEL (from dashboard section cards)
+// ══════════════════════════════════════════════════════════
+const SECTION_NAMES = {ORG:'조직 및 안전',FLT:'운항',DSP:'종합통제',MNT:'정비',CAB:'객실',GRH:'운송',CGO:'화물',SEC:'항공보안'};
+const SECTION_ICONS = {ORG:'fa-sitemap',FLT:'fa-plane',DSP:'fa-display',MNT:'fa-tools',CAB:'fa-user-tie',GRH:'fa-dolly',CGO:'fa-boxes-stacked',SEC:'fa-shield-halved'};
+
+function openSectionDetail(code) {
+  const overlay = document.getElementById('section-detail-overlay');
+  const panel   = document.getElementById('section-detail-panel');
+  if (!overlay || !panel) return;
+
+  const findings = (APP_DATA.cap.findings || []).filter(f => f.dept === (
+    code==='ORG'?'안전보안실':code==='FLT'?'운항본부':code==='DSP'?'종합통제실':
+    code==='MNT'?'정비본부':code==='CAB'?'객실본부':
+    (code==='GRH'||code==='CGO')?'운송본부':'안전보안실'
+  ) && f.isarp && f.isarp.startsWith(code));
+
+  const hist = (AUDIT_HISTORY['2025'].sections||[]).find(s=>s.code===code) || {f:0,o:0,na:0};
+
+  const cars = findings.filter(f=>f.type==='CAR'||!f.type||f.type==='FINDING');
+  const obs  = findings.filter(f=>f.type==='OBS');
+
+  // Repeated ISARPs: marked as repeated or flag from past audits
+  const repeatedIsarps = findings.filter(f=>f.repeated).map(f=>f.isarp);
+
+  // Maturity assessments for this section
+  const maturity = (APP_DATA.rbiPrep.maturityAssessments||[]).filter(m=>m.isarp&&m.isarp.startsWith(code));
+  const maturityTotal = (APP_DATA.rbiMaturityCriteria.keyIsarps||[]).filter(i=>i.startsWith(code)).length;
+
+  const statusColor = {open:'#dc3545',in_progress:'#fd7e14',closed:'#198754'};
+  const statusLabel = {open:'미결',in_progress:'조치중',closed:'종결'};
+
+  panel.innerHTML = `
+  <div style="position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid #eee;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:40px;height:40px;background:rgba(210,0,21,0.08);border-radius:6px;display:flex;align-items:center;justify-content:center;">
+        <i class="fas ${SECTION_ICONS[code]||'fa-folder'}" style="color:var(--eastar-red);font-size:1.1rem;"></i>
+      </div>
+      <div>
+        <div style="font-size:0.6rem;font-weight:900;letter-spacing:2px;color:var(--eastar-red);">${code}</div>
+        <div style="font-size:1rem;font-weight:800;color:#111;">${SECTION_NAMES[code]||code}</div>
+      </div>
+    </div>
+    <button onclick="closeSectionDetail()" style="background:none;border:none;font-size:1.2rem;color:#999;cursor:pointer;padding:4px 8px;">✕</button>
+  </div>
+
+  <div style="padding:20px 22px;">
+    <!-- Stats row -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
+      <div style="background:#fff0f0;border:1px solid rgba(210,0,21,0.15);border-radius:6px;padding:12px;text-align:center;">
+        <div style="font-size:0.58rem;font-weight:800;color:var(--eastar-red);text-transform:uppercase;margin-bottom:4px;">FINDINGS</div>
+        <div style="font-size:2rem;font-weight:900;color:var(--eastar-red);line-height:1;">${hist.f}</div>
+      </div>
+      <div style="background:#fdf8ee;border:1px solid rgba(152,123,55,0.2);border-radius:6px;padding:12px;text-align:center;">
+        <div style="font-size:0.58rem;font-weight:800;color:#7a5e1c;text-transform:uppercase;margin-bottom:4px;">OBS</div>
+        <div style="font-size:2rem;font-weight:900;color:#7a5e1c;line-height:1;">${hist.o}</div>
+      </div>
+      <div style="background:#f5f5f5;border:1px solid #e8e8e8;border-radius:6px;padding:12px;text-align:center;">
+        <div style="font-size:0.58rem;font-weight:800;color:#888;text-transform:uppercase;margin-bottom:4px;">REPEATED</div>
+        <div style="font-size:2rem;font-weight:900;color:#555;line-height:1;">${repeatedIsarps.length}</div>
+      </div>
+      <div style="background:#f0faf4;border:1px solid rgba(26,122,74,0.15);border-radius:6px;padding:12px;text-align:center;">
+        <div style="font-size:0.58rem;font-weight:800;color:#1a7a4a;text-transform:uppercase;margin-bottom:4px;">MATURITY</div>
+        <div style="font-size:2rem;font-weight:900;color:#1a7a4a;line-height:1;">${maturity.length}<span style="font-size:0.7rem;color:#aaa;">/${maturityTotal}</span></div>
+      </div>
+    </div>
+
+    <!-- ISARP 항목 수 -->
+    <div style="background:#f8f8f8;border:1px solid #eee;border-radius:6px;padding:12px 16px;margin-bottom:18px;display:flex;gap:20px;font-size:0.78rem;">
+      <div><span style="color:#aaa;font-weight:700;">총 ISARP 항목</span> <strong style="color:#111;margin-left:6px;">${hist.na}개</strong></div>
+      <div><span style="color:#aaa;font-weight:700;">심사 결과</span> <strong style="color:#111;margin-left:6px;">${hist.f}F / ${hist.o}O / ${hist.na}NA</strong></div>
+    </div>
+
+    <!-- Findings 목록 -->
+    ${hist.f > 0 ? `
+    <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0f0;">
+      <i class="fas fa-exclamation-triangle me-1" style="color:var(--eastar-red);"></i> FINDINGS (${hist.f}건)
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
+      ${cars.map(f=>`
+        <div style="background:#fff;border:1px solid #f0f0f0;border-left:3px solid var(--eastar-red);border-radius:4px;padding:12px 14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:1px 8px;border-radius:3px;font-size:0.62rem;font-weight:900;">${f.isarp}</span>
+            <span style="background:${f.repeated?'#fef3c7':'#f5f5f5'};color:${f.repeated?'#92400e':'#888'};padding:1px 7px;border-radius:3px;font-size:0.6rem;font-weight:700;">${f.repeated?'REPEATED':'INITIAL'}</span>
+            <span style="margin-left:auto;background:${statusColor[f.status]||'#aaa'}22;color:${statusColor[f.status]||'#aaa'};padding:1px 7px;border-radius:3px;font-size:0.6rem;font-weight:800;">${statusLabel[f.status]||f.status}</span>
+          </div>
+          <div style="font-size:0.8rem;color:#222;font-weight:600;margin-bottom:4px;">${f.desc||'—'}</div>
+          ${f.action?`<div style="font-size:0.72rem;color:#555;margin-bottom:4px;"><span style="color:#aaa;font-weight:700;">CAP:</span> ${f.action}</div>`:''}
+          ${f.capDetail?`<div style="font-size:0.72rem;color:#444;margin-bottom:4px;background:#f9f9f9;padding:6px 10px;border-radius:3px;"><span style="color:#888;font-weight:700;">제출내용:</span> ${f.capDetail}</div>`:''}
+          ${f.evidence?`<div style="font-size:0.72rem;color:#444;margin-bottom:4px;"><span style="color:#aaa;font-weight:700;">증빙:</span> ${f.evidence}</div>`:''}
+          ${f.fatDetail?`<div style="font-size:0.72rem;color:#1a7a4a;"><span style="font-weight:700;">FAT:</span> ${f.fatDetail}</div>`:''}
+        </div>
+      `).join('')}
+    </div>` : ''}
+
+    <!-- OBS 목록 -->
+    ${hist.o > 0 ? `
+    <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0f0;">
+      <i class="fas fa-eye me-1" style="color:#7a5e1c;"></i> OBSERVATIONS (${hist.o}건)
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
+      ${obs.map(f=>`
+        <div style="background:#fff;border:1px solid #f0f0f0;border-left:3px solid #d4a94a;border-radius:4px;padding:12px 14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="background:#fdf8ee;color:#7a5e1c;border:1px solid rgba(152,123,55,0.2);padding:1px 8px;border-radius:3px;font-size:0.62rem;font-weight:900;">${f.isarp}</span>
+            <span style="margin-left:auto;background:${statusColor[f.status]||'#aaa'}22;color:${statusColor[f.status]||'#aaa'};padding:1px 7px;border-radius:3px;font-size:0.6rem;font-weight:800;">${statusLabel[f.status]||f.status}</span>
+          </div>
+          <div style="font-size:0.8rem;color:#222;font-weight:600;">${f.desc||'—'}</div>
+          ${f.action?`<div style="font-size:0.72rem;color:#555;margin-top:4px;"><span style="color:#aaa;font-weight:700;">조치:</span> ${f.action}</div>`:''}
+        </div>
+      `).join('')}
+    </div>` : ''}
+
+    ${hist.f===0&&hist.o===0?`
+    <div style="text-align:center;padding:40px 20px;background:#f0faf4;border-radius:8px;border:1px solid rgba(26,122,74,0.15);">
+      <i class="fas fa-check-circle" style="font-size:2.5rem;color:#1a7a4a;margin-bottom:12px;display:block;"></i>
+      <div style="font-size:1rem;font-weight:800;color:#1a7a4a;">지적사항 없음 (Clean)</div>
+      <div style="font-size:0.78rem;color:#555;margin-top:4px;">이 부문은 심사 결과 이상 없음</div>
+    </div>`:''}
+
+    <!-- Maturity -->
+    ${maturityTotal > 0 ? `
+    <div style="margin-top:18px;font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0f0;">
+      <i class="fas fa-chart-line me-1" style="color:#1a7a4a;"></i> Maturity Assessment (${maturity.length}/${maturityTotal})
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      ${(APP_DATA.rbiMaturityCriteria.keyIsarps||[]).filter(i=>i.startsWith(code)).map(isarp=>{
+        const ma = maturity.find(m=>m.isarp===isarp);
+        const lvlColor = {Established:'#1a7a4a',Mature:'#1d4ed8',Leading:'#7c3aed'};
+        return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f8f8f8;font-size:0.76rem;">
+          <span style="background:#f5f5f5;padding:1px 8px;border-radius:3px;font-size:0.62rem;font-weight:700;color:#555;min-width:70px;text-align:center;">${isarp}</span>
+          ${ma&&ma.level?`<span style="background:${lvlColor[ma.level]||'#aaa'}22;color:${lvlColor[ma.level]||'#aaa'};padding:1px 8px;border-radius:3px;font-size:0.62rem;font-weight:800;">${ma.level}</span>`:
+          `<span style="background:#f0f0f0;color:#bbb;padding:1px 8px;border-radius:3px;font-size:0.62rem;">미평가</span>`}
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0;display:flex;gap:8px;">
+      <button onclick="navigate('cap');closeSectionDetail();"
+        style="flex:1;padding:10px;background:var(--eastar-red);color:#fff;border:none;border-radius:4px;font-size:0.78rem;font-weight:800;cursor:pointer;">
+        <i class="fas fa-external-link-alt me-1"></i> 전체 CAP/FAT 보기
+      </button>
+    </div>
+  </div>`;
+
+  overlay.style.display = 'block';
+  panel.style.display   = 'flex';
+  panel.style.flexDirection = 'column';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSectionDetail() {
+  document.getElementById('section-detail-overlay').style.display = 'none';
+  document.getElementById('section-detail-panel').style.display   = 'none';
+  document.body.style.overflow = '';
+}
 </script>
 </body>
 </html>
