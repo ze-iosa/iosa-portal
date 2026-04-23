@@ -254,119 +254,127 @@ function renderDashboard() {
 // ─── CERTIFICATION INFO ────────────────────────────────────────
 function renderCertification() {
   const c = APP_DATA.certification;
+  const daysToExpiry = DateUtil.daysUntil(c.registrationExpiry);
   document.getElementById('section-certification').innerHTML = `
 <div class="sect-header">
   <div>
     <h2 class="sect-title">IOSA 인증 정보</h2>
-    <p class="sect-sub">초도 인증 현황 · 재인증 일정 · 인증서 관리</p>
+    <p class="sect-sub">IOSA 인증 라이프사이클 로드맵 · 이스타항공 ZE</p>
   </div>
 </div>
-<div class="row g-3">
-  <div class="col-md-6">
-    <div class="status-card">
-      <h6 class="fw-bold mb-3" style="color:var(--eastar-red);"><i class="fas fa-certificate me-2"></i>초도 인증 정보 (Initial Audit)</h6>
-      <table class="table table-sm" style="font-size:0.875rem;">
-        <tr><td style="color:#64748b;width:45%;">심사 기간</td><td><strong>${DateUtil.format(c.auditStartDate)} ~ ${DateUtil.format(c.auditCloseDate)}</strong></td></tr>
-        <tr><td style="color:#64748b;">Closing Meeting</td><td><strong>${DateUtil.format(c.auditCloseDate)}</strong></td></tr>
-        <tr><td style="color:#64748b;">적용 ISM</td><td><strong>Ed. ${c.ismEdition} (2024.10.01 발효)</strong></td></tr>
-        <tr><td style="color:#64748b;">인증 유효기간</td><td><strong>24개월</strong></td></tr>
-        <tr><td style="color:#64748b;">인증 만료일</td><td><strong class="text-danger">${DateUtil.format(c.registrationExpiry)}</strong> ${DateUtil.urgencyBadge(DateUtil.daysUntil(c.registrationExpiry))}</td></tr>
-      </table>
-      <div class="mt-3">
-        <div class="d-flex justify-content-between mb-1" style="font-size:0.75rem;">
-          <span>인증 기간 경과</span>
-          <span>${Math.round((24*30 - DateUtil.daysUntil(c.registrationExpiry))/(24*30)*100)}%</span>
+
+<!-- Compact info row -->
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px;">
+  <div style="flex:1;min-width:160px;background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:12px 16px;">
+    <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#aaa;margin-bottom:4px;">인증 유효기간</div>
+    <div style="font-size:0.9rem;font-weight:700;">2025.08.01 ~ 2027.08.01</div>
+  </div>
+  <div style="flex:1;min-width:160px;background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:12px 16px;">
+    <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#aaa;margin-bottom:4px;">재인증 윈도우</div>
+    <div style="font-size:0.9rem;font-weight:700;">${DateUtil.format(c.renewalWindowStart)} ~ ${DateUtil.format(c.renewalWindowEnd)}</div>
+  </div>
+  <div style="flex:1;min-width:160px;background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:12px 16px;">
+    <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#aaa;margin-bottom:4px;">인증 만료까지</div>
+    <div style="font-size:0.9rem;font-weight:700;color:${daysToExpiry < 180 ? '#fd7e14' : '#198754'};">${daysToExpiry}일 남음</div>
+  </div>
+  <div style="flex:1;min-width:160px;background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:12px 16px;">
+    <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#aaa;margin-bottom:4px;">적용 ISM (초도)</div>
+    <div style="font-size:0.9rem;font-weight:700;">Ed. ${c.ismEdition}</div>
+  </div>
+</div>
+
+<!-- Timeline -->
+<div style="position:relative;padding-left:32px;">
+  <!-- Vertical line -->
+  <div style="position:absolute;left:11px;top:16px;bottom:16px;width:2px;background:#e0e0e0;border-radius:1px;"></div>
+
+  <!-- Phase 1: 2025 완료 -->
+  <div style="position:relative;margin-bottom:24px;">
+    <div style="position:absolute;left:-32px;top:16px;width:22px;height:22px;border-radius:50%;background:var(--eastar-red);border:3px solid #fff;box-shadow:0 0 0 2px var(--eastar-red);display:flex;align-items:center;justify-content:center;">
+      <i class="fas fa-check" style="color:#fff;font-size:0.6rem;"></i>
+    </div>
+    <div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:20px 22px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <span style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--eastar-red);">Phase 1 — 2025년</span>
+        <span style="background:#d1fae5;color:#065f46;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:3px;">완료 ✓</span>
+      </div>
+      <div style="font-size:1.05rem;font-weight:800;color:#1a1a1a;margin-bottom:14px;">Initial IOSA 완료</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;">
+        <div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:12px;">
+          <div style="font-size:0.7rem;font-weight:700;color:#888;margin-bottom:6px;text-transform:uppercase;">심사 기간</div>
+          <div style="font-size:0.85rem;font-weight:600;">2025년 7월 28일 ~ 8월 1일</div>
+          <div style="font-size:0.75rem;color:#64748b;margin-top:3px;">IOSA 초도심사 (Initial Audit)</div>
+          <div style="font-size:0.75rem;color:#64748b;">Lead Auditor: Perry Chou</div>
         </div>
-        <div class="progress-custom">
-          <div class="progress-bar" style="width:${Math.min(100,Math.round((24*30-DateUtil.daysUntil(c.registrationExpiry))/(24*30)*100))}%;background:var(--iata-blue);"></div>
+        <div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:12px;">
+          <div style="font-size:0.7rem;font-weight:700;color:#888;margin-bottom:6px;text-transform:uppercase;">심사 결과</div>
+          <div style="font-size:0.85rem;font-weight:600;">ISM Ed.17 적용</div>
+          <div style="font-size:0.75rem;color:#64748b;margin-top:3px;">21 Findings / 7 Observations</div>
+        </div>
+        <div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:12px;">
+          <div style="font-size:0.7rem;font-weight:700;color:#888;margin-bottom:6px;text-transform:uppercase;">인증서 취득</div>
+          <div style="font-size:0.85rem;font-weight:600;">유효 2025.08.01 ~ 2027.08.01</div>
+          <div style="font-size:0.75rem;color:#64748b;margin-top:3px;">CAP/FAT 전체 종결 완료</div>
         </div>
       </div>
     </div>
   </div>
-  <div class="col-md-6">
-    <div class="status-card">
-      <h6 class="fw-bold mb-3" style="color:#065f46;"><i class="fas fa-calendar-check me-2"></i>주요 데드라인 일람</h6>
-      <div class="alert-info-custom mb-2">
-        <div style="font-size:0.8rem;font-weight:700;"><i class="fas fa-handshake me-1"></i>CAP 합의 마감</div>
-        <div style="font-size:0.85rem;">${DateUtil.format(c.capDeadline)}</div>
-        <div style="font-size:0.72rem;color:#64748b;">Closing Meeting + 45일</div>
+
+  <!-- Phase 2: 2026 진행중 -->
+  <div style="position:relative;margin-bottom:24px;">
+    <div style="position:absolute;left:-32px;top:16px;width:22px;height:22px;border-radius:50%;background:#f59e0b;border:3px solid #fff;box-shadow:0 0 0 2px #f59e0b;display:flex;align-items:center;justify-content:center;">
+      <i class="fas fa-spinner fa-spin" style="color:#fff;font-size:0.55rem;"></i>
+    </div>
+    <div style="background:#fff;border:2px solid #fbbf24;border-radius:8px;padding:20px 22px;box-shadow:0 2px 12px rgba(251,191,36,0.15);">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <span style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#92400e;">Phase 2 — 2026년</span>
+        <span style="background:#fef3c7;color:#92400e;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:3px;">진행중</span>
       </div>
-      <div class="${DateUtil.daysUntil(c.findingsCloseDeadline) < 60 ? 'alert-urgent' : 'alert-deadline'} mb-2">
-        <div style="font-size:0.8rem;font-weight:700;"><i class="fas fa-check-double me-1"></i>모든 지적사항 종결 마감</div>
-        <div style="font-size:0.85rem;">${DateUtil.format(c.findingsCloseDeadline)} ${DateUtil.urgencyBadge(DateUtil.daysUntil(c.findingsCloseDeadline))}</div>
-        <div style="font-size:0.72rem;color:#64748b;">IAR 발행까지 최소 15일 필요 → 만료 15일 전 종결</div>
-      </div>
-      <div class="alert-deadline mb-2">
-        <div style="font-size:0.8rem;font-weight:700;"><i class="fas fa-redo me-1"></i>재인증 심사 윈도우</div>
-        <div style="font-size:0.85rem;">${DateUtil.format(c.renewalWindowStart)} ~ ${DateUtil.format(c.renewalWindowEnd)}</div>
-        <div style="font-size:0.72rem;color:#64748b;">만료 180일 전부터 가능 (T-180 Window)</div>
-      </div>
-      <div class="alert-info-custom">
-        <div style="font-size:0.8rem;font-weight:700;"><i class="fas fa-sync me-1"></i>IATA Connect 프로파일 갱신</div>
-        <div style="font-size:0.85rem;">6개월마다, 심사 30일 전 의무</div>
-        <div style="font-size:0.72rem;color:#64748b;">미갱신 시 IOSA 등록 일시정지 가능 (IPM 4.8.2)</div>
+      <div style="font-size:1.05rem;font-weight:800;color:#1a1a1a;margin-bottom:14px;">재인증 준비</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:12px;">
+          <div style="font-size:0.7rem;font-weight:700;color:#92400e;margin-bottom:5px;"><i class="fas fa-user-graduate me-1"></i>심사원 교육</div>
+          <div style="font-size:0.78rem;color:#78350f;">내부심사원 역량강화 교육 실시</div>
+        </div>
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:12px;">
+          <div style="font-size:0.7rem;font-weight:700;color:#92400e;margin-bottom:5px;"><i class="fas fa-clipboard-check me-1"></i>내부심사 실시</div>
+          <div style="font-size:0.78rem;color:#78350f;">ISM Ed.18 기준 내부심사 수행</div>
+        </div>
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:12px;">
+          <div style="font-size:0.7rem;font-weight:700;color:#92400e;margin-bottom:5px;"><i class="fas fa-file-alt me-1"></i>사전 준비</div>
+          <div style="font-size:0.78rem;color:#78350f;">CR 작성 · IATA Connect 프로파일 업데이트</div>
+        </div>
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:12px;">
+          <div style="font-size:0.7rem;font-weight:700;color:#92400e;margin-bottom:5px;"><i class="fas fa-search me-1"></i>ISM Ed.18 Gap 분석</div>
+          <div style="font-size:0.78rem;color:#78350f;">개정 사항 분석 및 운영 문서 개정</div>
+        </div>
       </div>
     </div>
   </div>
-  <div class="col-12">
-    <div class="status-card">
-      <h6 class="fw-bold mb-3" style="color:var(--eastar-red);"><i class="fas fa-arrow-right me-2"></i>다음 재인증 (RBI) 정보</h6>
-      <div class="row g-3">
-        <div class="col-md-3">
-          <div class="p-3 rounded" style="background:#fff0f0;border:1px solid rgba(210,0,21,0.2);">
-            <div style="font-size:0.72rem;color:var(--eastar-red);font-weight:700;text-transform:uppercase;">심사 방식</div>
-            <div style="font-size:1.1rem;font-weight:800;color:var(--eastar-red);">RBI</div>
-            <div style="font-size:0.72rem;color:#64748b;">Risk-Based Inspection</div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="p-3 rounded" style="background:#f9f4e8;border:1px solid rgba(152,123,55,0.3);">
-            <div style="font-size:0.72rem;color:var(--eastar-gold);font-weight:700;text-transform:uppercase;">적용 ISM</div>
-            <div style="font-size:1.1rem;font-weight:800;color:var(--eastar-gold);">Ed. 18</div>
-            <div style="font-size:0.72rem;color:#64748b;">2026.01.01 발효</div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="p-3 rounded" style="background:#f5f5f5;border:1px solid rgba(140,140,140,0.3);">
-            <div style="font-size:0.72rem;color:var(--eastar-silver);font-weight:700;text-transform:uppercase;">Maturity Assessment</div>
-            <div style="font-size:1.1rem;font-weight:800;color:var(--eastar-silver);">필수</div>
-            <div style="font-size:0.72rem;color:#64748b;">Ed.3 (2025.06 발효)</div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="p-3 rounded" style="background:#2a2a2a;border:1px solid #111;">
-            <div style="font-size:0.72rem;color:#aaa;font-weight:700;text-transform:uppercase;">심사 추가 항목</div>
-            <div style="font-size:1rem;font-weight:800;color:#fff;">On-site 심사</div>
-            <div style="font-size:0.72rem;color:#888;">현장 방문 심사</div>
-          </div>
-        </div>
+
+  <!-- Phase 3: 2027 예정 -->
+  <div style="position:relative;">
+    <div style="position:absolute;left:-32px;top:16px;width:22px;height:22px;border-radius:50%;background:#d0d0d0;border:3px solid #fff;box-shadow:0 0 0 2px #d0d0d0;display:flex;align-items:center;justify-content:center;">
+      <i class="fas fa-flag" style="color:#fff;font-size:0.55rem;"></i>
+    </div>
+    <div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:20px 22px;opacity:0.85;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <span style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888;">Phase 3 — 2027년 3월</span>
+        <span style="background:#f3f4f6;color:#6b7280;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:3px;">예정</span>
       </div>
-      <div class="mt-3 p-3 rounded" style="background:#f8fafc;border:1px solid #e2e8f0;">
-        <div class="fw-bold mb-2" style="font-size:0.85rem;">RBI 재인증 vs 초도심사 주요 차이점</div>
-        <div class="row g-2">
-          <div class="col-md-6">
-            <table class="table table-sm mb-0" style="font-size:0.8rem;">
-              <thead><tr><th>구분</th><th>초도심사 (Initial)</th><th>재인증 (RBI)</th></tr></thead>
-              <tbody>
-                <tr><td>ISARPs 심사</td><td>전수 (100%)</td><td>우선순위 기반 (High/Med/Low)</td></tr>
-                <tr><td>Maturity Assessment</td><td>없음</td><td><strong>필수</strong> (25개 ISARP)</td></tr>
-                <tr><td>Offsite 단계</td><td>없음</td><td>문서·기록 원격 사전심사</td></tr>
-                <tr><td>IAR + MAR</td><td>IAR만</td><td>IAR + Maturity Assessment Report</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="col-md-6">
-            <div class="fw-bold mb-1" style="font-size:0.8rem;">성숙도 평가 3단계</div>
-            <div class="maturity-level maturity-established">
-              <strong>Established</strong> - 프로세스가 정립되어 일관되게 실행됨
-            </div>
-            <div class="maturity-level maturity-mature">
-              <strong>Mature</strong> - 데이터 기반 모니터링, 지속적 개선 실행
-            </div>
-            <div class="maturity-level maturity-leading">
-              <strong>Leading</strong> - 산업 선도 수준, 벤치마킹·예측적 접근
-            </div>
-          </div>
+      <div style="font-size:1.05rem;font-weight:800;color:#1a1a1a;margin-bottom:14px;">Renewal IOSA 예정</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
+        <div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:12px;">
+          <div style="font-size:0.7rem;font-weight:700;color:#888;margin-bottom:5px;"><i class="fas fa-shield-alt me-1"></i>심사 방식</div>
+          <div style="font-size:0.78rem;color:#64748b;">RBI (Risk-Based Inspection)</div>
+        </div>
+        <div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:12px;">
+          <div style="font-size:0.7rem;font-weight:700;color:#888;margin-bottom:5px;"><i class="fas fa-book me-1"></i>적용 기준</div>
+          <div style="font-size:0.78rem;color:#64748b;">ISM Ed.18 (Rev.1) 적용</div>
+        </div>
+        <div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:12px;">
+          <div style="font-size:0.7rem;font-weight:700;color:#888;margin-bottom:5px;"><i class="fas fa-calendar me-1"></i>심사 예정 시기</div>
+          <div style="font-size:0.78rem;color:#64748b;">2027년 3월 중순</div>
         </div>
       </div>
     </div>
@@ -1310,23 +1318,27 @@ function renderCAP() {
         <h6 class="fw-bold mb-0"><i class="fas fa-list me-2"></i>IATA 지적사항 (Findings) 목록</h6>
         <button class="btn btn-sm btn-iata" onclick="openModal('modal-capfinding')"><i class="fas fa-plus me-1"></i>추가</button>
       </div>
+      <div style="font-size:0.72rem;color:#888;margin-bottom:10px;"><i class="fas fa-hand-pointer me-1"></i>행을 클릭하면 상세 정보 및 편집 패널이 열립니다.</div>
       ${filteredFindings.length === 0
         ? '<div class="empty-state"><i class="fas fa-clipboard-check" style="color:#198754;"></i><p>IATA 심사 결과 지적사항을 추가하세요</p></div>'
         : `<div class="table-responsive"><table class="table data-table">
-          <thead><tr><th>번호</th><th>부문</th><th>ISARP</th><th>지적 내용</th><th>시정조치 계획</th><th>완료 목표</th><th>상태</th></tr></thead>
-          <tbody>${filteredFindings.map((f,i)=>{const realIdx=cap.findings.indexOf(f); return `<tr>
-            <td>CAR-${String(i+1).padStart(3,'0')}</td>
-            <td><span class="badge bg-secondary">${f.dept}</span></td>
-            <td style="font-weight:600;">${f.isarp}</td>
-            <td style="max-width:180px;">${f.desc}</td>
-            <td style="max-width:150px;">${f.action||'-'}</td>
-            <td>${DateUtil.format(f.dueDate)} ${DateUtil.urgencyBadge(DateUtil.daysUntil(f.dueDate))}</td>
-            <td><select class="form-select form-select-sm" style="width:auto;" onchange="updateCAPFinding(${realIdx},this.value)">
-              <option value="open" ${f.status==='open'?'selected':''}>미결</option>
-              <option value="in_progress" ${f.status==='in_progress'?'selected':''}>조치중</option>
-              <option value="closed" ${f.status==='closed'?'selected':''}>종결</option>
-            </select></td>
-          </tr>`; }).join('')}</tbody>
+          <thead><tr><th>번호</th><th>부문</th><th>ISARP</th><th>지적 내용</th><th>상태</th></tr></thead>
+          <tbody>${filteredFindings.map((f,i)=>{
+            const realIdx=cap.findings.indexOf(f);
+            const statusBadge = f.status==='closed'
+              ? '<span style="background:#d1fae5;color:#065f46;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:3px;">종결</span>'
+              : f.status==='in_progress'
+              ? '<span style="background:#fef3c7;color:#92400e;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:3px;">조치중</span>'
+              : '<span style="background:#fee2e2;color:#991b1b;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:3px;">미결</span>';
+            const descTrunc = (f.desc||'').length > 60 ? (f.desc||'').substring(0,60)+'…' : (f.desc||'-');
+            return `<tr style="cursor:pointer;" onclick="openCapDetail(${realIdx})" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+              <td style="font-weight:600;">CAR-${String(i+1).padStart(3,'0')}</td>
+              <td><span class="badge bg-secondary">${f.dept}</span></td>
+              <td style="font-weight:600;">${f.isarp}</td>
+              <td style="max-width:260px;font-size:0.82rem;color:#374151;">${descTrunc}</td>
+              <td>${statusBadge}</td>
+            </tr>`;
+          }).join('')}</tbody>
         </table></div>`
       }
     </div>
@@ -1347,6 +1359,11 @@ function renderCAP() {
     </div>
     <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">취소</button><button class="btn btn-iata" onclick="saveCAPFinding()">저장</button></div>
   </div></div>
+</div>
+<!-- CAP Detail Drawer Overlay -->
+<div id="capDetailOverlay" onclick="closeCapDetail()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1040;"></div>
+<div id="capDetailPanel" style="display:none;position:fixed;top:0;right:0;bottom:0;width:480px;background:#fff;z-index:1050;box-shadow:-4px 0 24px rgba(0,0,0,0.18);overflow-y:auto;flex-direction:column;">
+  <div id="capDetailContent"></div>
 </div>`;
 }
 function updateCAPStatus(val) { APP_DATA.cap.status = val; DB.save(APP_DATA); }
@@ -1355,6 +1372,95 @@ function saveCAPFinding() {
   DB.save(APP_DATA); bootstrap.Modal.getInstance(document.getElementById('modal-capfinding')).hide(); renderCAP();
 }
 function updateCAPFinding(i, val) { APP_DATA.cap.findings[i].status = val; DB.save(APP_DATA); }
+
+function openCapDetail(idx) {
+  const f = APP_DATA.cap.findings[idx];
+  if (!f) return;
+  const typeLabel = f.type === 'OBS' ? 'OBSERVATION' : 'FINDING';
+  document.getElementById('capDetailContent').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:1;">
+      <div>
+        <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#aaa;">지적사항 상세</div>
+        <div style="font-size:1rem;font-weight:800;color:#1a1a1a;">CAR-${String(idx+1).padStart(3,'0')} · ${f.dept}</div>
+      </div>
+      <button onclick="closeCapDetail()" style="background:none;border:none;font-size:1.2rem;color:#888;cursor:pointer;padding:4px 8px;line-height:1;">&times;</button>
+    </div>
+    <div style="padding:20px;">
+      <!-- 기본 정보 -->
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:14px;margin-bottom:16px;">
+        <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:10px;">Finding 기본 정보</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div><div style="font-size:0.65rem;color:#aaa;font-weight:700;">번호</div><div style="font-size:0.85rem;font-weight:700;">CAR-${String(idx+1).padStart(3,'0')}</div></div>
+          <div><div style="font-size:0.65rem;color:#aaa;font-weight:700;">부문</div><div style="font-size:0.85rem;font-weight:700;">${f.dept}</div></div>
+          <div><div style="font-size:0.65rem;color:#aaa;font-weight:700;">ISARP</div><div style="font-size:0.85rem;font-weight:700;">${f.isarp||'-'}</div></div>
+          <div><div style="font-size:0.65rem;color:#aaa;font-weight:700;">유형</div><div style="font-size:0.85rem;font-weight:700;">${typeLabel}</div></div>
+        </div>
+      </div>
+
+      <!-- 지적 내용 -->
+      <div style="margin-bottom:16px;">
+        <label style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:#374151;display:block;margin-bottom:6px;">지적 내용 (Finding Description)</label>
+        <div style="background:#fff8f8;border:1px solid rgba(210,0,21,0.15);border-radius:6px;padding:12px;font-size:0.83rem;line-height:1.6;color:#1a1a1a;">${f.desc||'-'}</div>
+      </div>
+
+      <!-- CAP 제출 내용 -->
+      <div style="margin-bottom:16px;">
+        <label style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:#374151;display:block;margin-bottom:6px;">CAP 제출 내용</label>
+        <div style="font-size:0.68rem;color:#888;margin-bottom:6px;">IATA에 제출한 시정조치계획</div>
+        <textarea id="cap-detail-capDetail" rows="4" style="width:100%;padding:10px 12px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:0.82rem;font-family:inherit;resize:vertical;outline:none;" onfocus="this.style.borderColor='#D20015'" onblur="this.style.borderColor='#e0e0e0'">${f.capDetail||''}</textarea>
+      </div>
+
+      <!-- 증빙자료 -->
+      <div style="margin-bottom:16px;">
+        <label style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:#374151;display:block;margin-bottom:6px;">증빙자료</label>
+        <div style="font-size:0.68rem;color:#888;margin-bottom:6px;">제출 증빙자료 목록</div>
+        <input type="text" id="cap-detail-evidence" value="${(f.evidence||'').replace(/"/g,'&quot;')}" style="width:100%;padding:9px 12px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:0.82rem;font-family:inherit;outline:none;" onfocus="this.style.borderColor='#D20015'" onblur="this.style.borderColor='#e0e0e0'" placeholder="예: 절차서 개정본, 교육 기록 등">
+      </div>
+
+      <!-- FAT 제출 내용 -->
+      <div style="margin-bottom:16px;">
+        <label style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:#374151;display:block;margin-bottom:6px;">FAT 제출 내용</label>
+        <div style="font-size:0.68rem;color:#888;margin-bottom:6px;">IATA에 제출한 최종조치결과</div>
+        <textarea id="cap-detail-fatDetail" rows="4" style="width:100%;padding:10px 12px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:0.82rem;font-family:inherit;resize:vertical;outline:none;" onfocus="this.style.borderColor='#D20015'" onblur="this.style.borderColor='#e0e0e0'">${f.fatDetail||''}</textarea>
+      </div>
+
+      <!-- 상태 -->
+      <div style="margin-bottom:24px;">
+        <label style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:#374151;display:block;margin-bottom:6px;">상태</label>
+        <select id="cap-detail-status" style="width:100%;padding:9px 12px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:0.82rem;font-family:inherit;outline:none;background:#fff;">
+          <option value="open" ${f.status==='open'?'selected':''}>미결</option>
+          <option value="in_progress" ${f.status==='in_progress'?'selected':''}>조치중</option>
+          <option value="closed" ${f.status==='closed'?'selected':''}>종결</option>
+        </select>
+      </div>
+
+      <!-- 저장 버튼 -->
+      <button onclick="saveCapDetail(${idx})" style="width:100%;padding:12px;background:var(--eastar-red);color:#fff;border:none;border-radius:6px;font-size:0.88rem;font-weight:800;cursor:pointer;font-family:inherit;transition:background 200ms;" onmouseover="this.style.background='#9e000f'" onmouseout="this.style.background='var(--eastar-red)'">
+        <i class="fas fa-save me-2"></i>저장
+      </button>
+    </div>`;
+  const overlay = document.getElementById('capDetailOverlay');
+  const panel = document.getElementById('capDetailPanel');
+  overlay.style.display = 'block';
+  panel.style.display = 'flex';
+}
+
+function closeCapDetail() {
+  document.getElementById('capDetailOverlay').style.display = 'none';
+  document.getElementById('capDetailPanel').style.display = 'none';
+}
+
+function saveCapDetail(idx) {
+  const f = APP_DATA.cap.findings[idx];
+  if (!f) return;
+  f.capDetail = document.getElementById('cap-detail-capDetail').value;
+  f.evidence  = document.getElementById('cap-detail-evidence').value;
+  f.fatDetail = document.getElementById('cap-detail-fatDetail').value;
+  f.status    = document.getElementById('cap-detail-status').value;
+  DB.save(APP_DATA);
+  closeCapDetail();
+  renderCAP();
+}
 
 // ─── RBI ──────────────────────────────────────────────────────
 function renderRBI() {

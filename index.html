@@ -41,32 +41,12 @@
     </li>
     <li class="nav-item">
       <span class="nav-link-top" id="navbtn-prep" onclick="navigate('preparation')">
-        심사준비 <i class="fas fa-chevron-down" style="font-size:0.55rem;opacity:0.6;"></i>
+        심사원 관리
       </span>
-      <div class="nav-dropdown">
-        <a data-section="preparation" onclick="navigate('preparation')">준비 단계 관리</a>
-        <a data-section="internal" onclick="navigate('internal')">내부심사 / CR</a>
-      </div>
-    </li>
-    <li class="nav-item">
-      <span class="nav-link-top" id="navbtn-audit" onclick="navigate('mainaudit')">
-        심사관리 <i class="fas fa-chevron-down" style="font-size:0.55rem;opacity:0.6;"></i>
-      </span>
-      <div class="nav-dropdown">
-        <a data-section="application" onclick="navigate('application')">IOSA 신청 관리</a>
-        <a data-section="coordination" onclick="navigate('coordination')">심사원 코디네이션</a>
-        <a data-section="mainaudit" onclick="navigate('mainaudit')">본점검 관리</a>
-      </div>
     </li>
     <li class="nav-item">
       <span class="nav-link-top" id="navbtn-cap" onclick="navigate('cap')">
         CAP / FAT
-      </span>
-    </li>
-    <li class="nav-item">
-      <span class="nav-link-top" id="navbtn-rbi" onclick="navigate('rbi')">
-        RBI 재인증
-        <span style="background:var(--eastar-red);color:white;font-size:0.58rem;font-weight:800;padding:1px 5px;border-radius:2px;letter-spacing:0.3px;">NEW</span>
       </span>
     </li>
     <li class="nav-item">
@@ -888,7 +868,7 @@ function renderDashboardNew() {
     { code:'FLT', name:'운항',           icon:'fa-plane',            f:7, o:0, dept:'운항본부',      section:'cap' },
     { code:'DSP', name:'종합통제',        icon:'fa-display',          f:1, o:0, dept:'종합통제실',    section:'cap' },
     { code:'MNT', name:'정비',           icon:'fa-tools',            f:5, o:1, dept:'정비본부',      section:'cap' },
-    { code:'CAB', name:'객실',           icon:'fa-mug-hot',          f:0, o:0, dept:'객실본부',      section:'cap' },
+    { code:'CAB', name:'객실',           icon:'fa-user-tie',         f:0, o:0, dept:'객실본부',      section:'cap' },
     { code:'GRH', name:'운송',           icon:'fa-dolly',            f:1, o:1, dept:'운송본부',      section:'cap' },
     { code:'CGO', name:'화물',           icon:'fa-boxes-stacked',    f:0, o:0, dept:'운송본부',      section:'cap' },
     { code:'SEC', name:'항공보안',        icon:'fa-shield-halved',    f:0, o:1, dept:'안전보안실',    section:'cap' },
@@ -1512,20 +1492,6 @@ async function removeUploadedManual(id) {
 }
 
 async function renderManuals() {
-  const manuals = [
-    {name:'ISM Ed.18 Rev.1', full:'IOSA Standards Manual Ed.18 Rev.1', desc:'현행 기준. 2026.01.01 발효. 재인증 적용', tag:'현행', tagClass:'pill-red', color:'red', icon:'fa-book', path:'../IATA Connect Manuals/IOSA Standards Manual (ISM) ED 18 Rev1.pdf'},
-    {name:'ISM Ed.17', full:'IOSA Standards Manual Ed.17', desc:'초도심사 적용 버전 (2025). 2024.10.01 발효', tag:'이전', tagClass:'pill-gray', color:'', icon:'fa-book', path:'../IATA Connect Manuals/(ISM) IOSA Standards Manual Ed. 17.pdf'},
-    {name:'IPM Ed.17', full:'IOSA Program Manual Ed.17', desc:'IOSA 프로그램 운영 절차 및 요건 안내', tag:'필수', tagClass:'pill-navy', color:'navy', icon:'fa-clipboard-list', path:'../IATA Connect Manuals/(IPM) IOSA program Manual Ed. 17.pdf'},
-    {name:'IRM Ed.15', full:'IATA Reference Manual Ed.15', desc:'용어 정의, 약어 등 기준서 (최신)', tag:'참조', tagClass:'pill-gold', color:'gold', icon:'fa-atlas', path:'../IATA Connect Manuals/IATA Reference Manual (IRM) Ed15 (1).pdf'},
-    {name:'IRM Ed.14', full:'IATA Reference Manual Ed.14', desc:'이전 버전 (초도심사 참조용)', tag:'이전', tagClass:'pill-gray', color:'', icon:'fa-atlas', path:'../IATA Connect Manuals/(IRM) IATA Reference Manual Ed. 14.pdf'},
-    {name:'IAH Ed.18', full:'IOSA Audit Handbook Ed.18 (Tables & Mandatory Obs.)', desc:'심사 테이블 + 필수 관찰사항 (최신)', tag:'심사', tagClass:'pill-green', color:'green', icon:'fa-search', path:'../IATA Connect Manuals/IOSA Audit Handbook - Tables and Mandatory Observations (IAH) Ed. 18.pdf'},
-    {name:'IAH Ed.13', full:'IOSA Audit Handbook Procedures Ed.13', desc:'심사 절차 안내서 이전 버전', tag:'이전', tagClass:'pill-gray', color:'', icon:'fa-search', path:'../IATA Connect Manuals/(IAH) IOSA Audit Handbook Procedures and Guidance Ed. 13.pdf'},
-    {name:'RBIISM Ed.3', full:'RBI ISM Maturity Criteria Ed.3', desc:'RBI 성숙도 평가 기준. 2025.06.01 발효', tag:'RBI필수', tagClass:'pill-red', color:'red', icon:'fa-chart-line', path:'../IATA Connect Manuals/RBIISM-ED03-2025.pdf'},
-    {name:'CR Template (ORG)', full:'Conformance Report Template — ORG (ISM Ed.17 v59)', desc:'ORG 부문 CR 양식', tag:'양식', tagClass:'pill-green', color:'green', icon:'fa-file-excel', path:'../IATA Connect Manuals/(ORG)-Conformance Report-Template-ISM-Ed-17(v59).xlsm'},
-    {name:'IAR — IOSA-ESR-IA-2025', full:'2025 초도심사 최종 보고서 (Final)', desc:'Lead Auditor: Perry Chou · FINDING 21건 / OBS 7건', tag:'내부', tagClass:'pill-red', color:'red', icon:'fa-file-pdf', path:'../../IOSA (7.28~8.1)/RESULT/IOSA-ESR-IA-2025_Final.pdf'},
-    {name:'IOSA 인증서', full:'EASTAR JET IOSA Certificate', desc:'이스타항공 초도 인증서 · 만료 2027.08.01', tag:'인증서', tagClass:'pill-gold', color:'gold', icon:'fa-certificate', path:'../../IOSA (7.28~8.1)/EASTAR JET Co., Ltd. - IOSA Certificate.pdf'},
-  ];
-
   // Load uploaded files from IndexedDB
   let uploaded = [];
   try { uploaded = await getManualFiles(); } catch(e) {}
@@ -1535,8 +1501,8 @@ async function renderManuals() {
   document.getElementById('section-manuals').innerHTML = `
 <div class="sect-header">
   <div>
-    <h2 class="sect-title">매뉴얼 다운로드</h2>
-    <p class="sect-sub">IOSA 관련 공식 매뉴얼 및 이스타항공 심사 자료</p>
+    <h2 class="sect-title">자료실</h2>
+    <p class="sect-sub">업로드된 파일 및 관련 자료</p>
   </div>
   ${adminMode ? `
   <div class="sect-actions">
@@ -1582,34 +1548,12 @@ ${uploaded.length > 0 ? `
       </div>`;
     }).join('')}
   </div>
-</div>` : ''}
-
-<div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #eee;">
-  <i class="fas fa-folder-open me-1"></i> 공식 매뉴얼 (${manuals.length}개)
-</div>
-<div class="manual-grid">
-  ${manuals.map(m=>`
-    <div class="manual-card ${m.color}">
-      <div class="manual-icon"><i class="fas ${m.icon}"></i></div>
-      <div style="flex:1;">
-        <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
-          <span class="pill ${m.tagClass}" style="font-size:0.6rem;">${m.tag}</span>
-        </div>
-        <div class="manual-name">${m.name}</div>
-        <div class="manual-desc">${m.full}</div>
-        <div class="manual-desc" style="color:var(--text-light);">${m.desc}</div>
-        <a href="${m.path}" target="_blank" class="manual-dl-btn mt-2">
-          <i class="fas fa-download"></i> 열기
-        </a>
-      </div>
-    </div>
-  `).join('')}
-</div>
-${adminMode ? `
-<div style="margin-top:20px;padding:14px 18px;background:#f0faf4;border:1px solid rgba(26,122,74,0.2);border-left:3px solid #1a7a4a;font-size:0.8rem;color:#1a7a4a;">
-  <i class="fas fa-info-circle me-1"></i>
-  <strong>파일 업로드 안내:</strong> 위 "파일 업로드" 버튼으로 업로드한 파일은 이 브라우저에 저장됩니다. 포털에 접속하는 모든 사용자가 파일에 접근하려면 파일을 <code style="background:rgba(0,0,0,0.05);padding:1px 5px;">IOSA_Portal/</code> 폴더에 직접 복사한 후 경로를 코드에 추가하세요.
-</div>` : ''}
+</div>` : `
+<div style="text-align:center;padding:48px 24px;color:#aaa;">
+  <i class="fas fa-folder-open" style="font-size:2.5rem;margin-bottom:12px;display:block;"></i>
+  <div style="font-size:0.9rem;font-weight:600;">업로드된 파일이 없습니다</div>
+  ${adminMode ? `<div style="font-size:0.78rem;margin-top:6px;">위 "파일 업로드" 버튼으로 파일을 추가하세요.</div>` : ''}
+</div>`}
 `;
 }
 
