@@ -788,105 +788,96 @@ function renderDashboardNew() {
 <!-- ══════════════════════════════════════════════════════
      HERO — Certificate + Current Status
 ════════════════════════════════════════════════════════ -->
-<div style="display:grid;grid-template-columns:1fr 340px;gap:0;margin-top:24px;margin-bottom:28px;border-radius:6px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.10);">
+<!-- Hero banner -->
+<div style="position:relative;margin-top:24px;margin-bottom:28px;border-radius:8px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.12);">
 
-  <!-- LEFT: Info panel -->
-  <div style="background:#fff;padding:40px 44px;">
+  <!-- Background: dark navy gradient with subtle pattern -->
+  <div style="background:linear-gradient(135deg,#00214f 0%,#003580 50%,#004aad 100%);padding:44px 52px;position:relative;overflow:hidden;">
 
-    <!-- IOSA badge -->
-    <div style="display:inline-flex;align-items:center;gap:10px;
-      background:var(--eastar-red);color:#fff;
-      padding:6px 16px 6px 10px;border-radius:4px;margin-bottom:24px;">
-      <div style="background:rgba(255,255,255,0.2);border-radius:2px;padding:3px 7px;font-size:0.55rem;font-weight:900;letter-spacing:2px;">IOSA</div>
-      <span style="font-size:0.72rem;font-weight:800;letter-spacing:1.5px;">REGISTERED</span>
-    </div>
+    <!-- Decorative circles (background) -->
+    <div style="position:absolute;right:-60px;top:-60px;width:320px;height:320px;border-radius:50%;border:40px solid rgba(255,255,255,0.04);pointer-events:none;"></div>
+    <div style="position:absolute;right:40px;top:40px;width:160px;height:160px;border-radius:50%;border:24px solid rgba(255,255,255,0.05);pointer-events:none;"></div>
+    <div style="position:absolute;left:-40px;bottom:-60px;width:220px;height:220px;border-radius:50%;border:30px solid rgba(255,255,255,0.03);pointer-events:none;"></div>
 
-    <!-- Airline name -->
-    <div style="font-size:2rem;font-weight:900;color:#111;letter-spacing:-0.5px;line-height:1.1;margin-bottom:6px;">
-      이스타항공 IOSA 포털
-    </div>
-    <div style="font-size:1rem;font-weight:500;color:#777;margin-bottom:28px;letter-spacing:0.3px;">
-      EASTARJET Co., Ltd. &nbsp;·&nbsp; ZE / ESR
-    </div>
+    <!-- IOSA stamp watermark top-right -->
+    <img src="assets/iosa_stamp.png" alt=""
+         style="position:absolute;right:44px;top:50%;transform:translateY(-50%);width:160px;height:160px;object-fit:contain;opacity:0.18;pointer-events:none;">
 
-    <!-- Divider line -->
-    <div style="width:40px;height:3px;background:var(--eastar-red);margin-bottom:24px;border-radius:2px;"></div>
+    <!-- Content -->
+    <div style="position:relative;z-index:1;display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center;">
 
-    <!-- Key details -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 32px;margin-bottom:32px;">
-      ${[
-        ['심사 완료','2025년 8월 1일'],
-        ['IAR 번호','IOSA-ESR-IA-2025'],
-        ['인증 만료','2027년 8월 1일'],
-        ['Lead Auditor','Perry Chou'],
-        ['적용 ISM','ISM Ed.17 (17.1)'],
-        ['Findings / FAT','21건 Findings · 전체 종결 ✓'],
-      ].map(([k,v])=>`
-        <div>
-          <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#aaa;margin-bottom:3px;">${k}</div>
-          <div style="font-size:0.88rem;font-weight:700;color:#111;">${v}</div>
-        </div>
-      `).join('')}
-    </div>
-
-    <!-- CTA buttons -->
-    <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <a href="../../IOSA (7.28~8.1)/EASTAR JET Co., Ltd. - IOSA Certificate.pdf"
-         target="_blank"
-         style="display:inline-flex;align-items:center;gap:7px;padding:10px 22px;background:var(--eastar-red);color:#fff;border-radius:4px;font-size:0.78rem;font-weight:800;text-decoration:none;letter-spacing:0.3px;"
-         onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-        <i class="fas fa-file-pdf"></i> 인증서 열기
-      </a>
-      <a href="https://www.iata.org/en/programs/safety/audit/iosa/registry/" target="_blank"
-         style="display:inline-flex;align-items:center;gap:7px;padding:10px 22px;background:#fff;color:#111;border:1.5px solid #ddd;border-radius:4px;font-size:0.78rem;font-weight:700;text-decoration:none;"
-         onmouseover="this.style.borderColor='#111'" onmouseout="this.style.borderColor='#ddd'">
-        <i class="fas fa-external-link-alt"></i> IOSA Registry
-      </a>
-    </div>
-  </div>
-
-  <!-- RIGHT: IOSA Registration Status Panel -->
-  <div style="background:linear-gradient(160deg,#003580 0%,#00214f 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 28px;gap:20px;position:relative;overflow:hidden;">
-    <!-- Background watermark text -->
-    <div style="position:absolute;bottom:-20px;right:-10px;font-size:7rem;font-weight:900;color:rgba(255,255,255,0.04);letter-spacing:-4px;line-height:1;pointer-events:none;">IOSA</div>
-    <!-- IOSA stamp image -->
-    <img src="assets/iosa_stamp.png" alt="IOSA Registered Operator"
-         style="width:130px;height:130px;object-fit:contain;filter:drop-shadow(0 4px 16px rgba(0,0,0,0.3));">
-    <!-- Status text -->
-    <div style="text-align:center;">
-      <div style="font-size:0.6rem;font-weight:800;letter-spacing:3px;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:6px;">Registration Status</div>
-      <div style="font-size:1.1rem;font-weight:900;color:#fff;letter-spacing:1px;margin-bottom:4px;">IOSA REGISTERED</div>
-      <div style="font-size:0.72rem;color:rgba(255,255,255,0.6);">EASTAR JET Co., Ltd.</div>
-    </div>
-    <!-- Valid until badge -->
-    <div style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:12px 20px;text-align:center;width:100%;">
-      <div style="font-size:0.58rem;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:4px;">Valid Until</div>
-      <div style="font-size:1rem;font-weight:900;color:#fff;">1 Aug 2027</div>
-      <div style="font-size:0.65rem;color:rgba(255,255,255,0.45);margin-top:2px;">D-${daysToExpiry} days remaining</div>
-    </div>
-  </div>
-</div>
-
-<!-- Status stats row below hero -->
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
-  ${[
-    {icon:'fa-clock',        label:'인증 만료까지',  val:'D-'+daysToExpiry,                   sub:DateUtil.format(c.registrationExpiry),     red:true},
-    {icon:'fa-redo',         label:'재인증 윈도우',  val:'D-'+Math.max(0,daysToRenewal),       sub:DateUtil.format(c.renewalWindowStart)+' 개시', red:false},
-    {icon:'fa-check-circle', label:'Findings / FAT', val:'전체 종결',                          sub:'21 Findings · 7 Observations 완료',    red:false},
-    {icon:'fa-tasks',        label:'RBI 준비',      val:Math.round(rbiDone/rbiTotal*100)+'%', sub:rbiDone+'/'+rbiTotal+' 태스크',           red:false},
-  ].map(s=>`
-    <div style="background:#fff;border:1px solid #eee;border-radius:6px;padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,0.05);">
-      <div style="width:36px;height:36px;background:${s.red?'rgba(210,0,21,0.08)':'#f5f5f5'};border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <i class="fas ${s.icon}" style="font-size:0.9rem;color:${s.red?'var(--eastar-red)':'#888'};"></i>
-      </div>
+      <!-- Left: text info -->
       <div>
-        <div style="font-size:0.58rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#aaa;">${s.label}</div>
-        <div style="font-size:0.95rem;font-weight:900;color:${s.red?'var(--eastar-red)':'#111'};">${s.val}</div>
-        <div style="font-size:0.62rem;color:#888;">${s.sub}</div>
+        <!-- Badge -->
+        <div style="display:inline-flex;align-items:center;gap:8px;background:var(--eastar-red);color:#fff;padding:5px 14px 5px 8px;border-radius:3px;margin-bottom:20px;">
+          <div style="background:rgba(255,255,255,0.25);border-radius:2px;padding:2px 6px;font-size:0.5rem;font-weight:900;letter-spacing:2px;">IOSA</div>
+          <span style="font-size:0.68rem;font-weight:800;letter-spacing:1.5px;">REGISTERED</span>
+        </div>
+        <div style="font-size:2.2rem;font-weight:900;color:#fff;letter-spacing:-0.5px;line-height:1.1;margin-bottom:6px;">이스타항공 IOSA 포털</div>
+        <div style="font-size:0.9rem;color:rgba(255,255,255,0.55);margin-bottom:28px;">EASTAR JET Co., Ltd. &nbsp;·&nbsp; ZE / ESR</div>
+
+        <!-- Stats row -->
+        <div style="display:flex;gap:32px;flex-wrap:wrap;margin-bottom:28px;">
+          ${[
+            ['심사 완료','2025년 8월 1일'],
+            ['인증 만료','2027년 8월 1일'],
+            ['적용 ISM','Ed.17 (17.1)'],
+            ['Lead Auditor','Perry Chou'],
+          ].map(([k,v])=>`
+            <div>
+              <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.4);margin-bottom:4px;">${k}</div>
+              <div style="font-size:0.88rem;font-weight:700;color:#fff;">${v}</div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Buttons -->
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <a href="../../IOSA (7.28~8.1)/EASTAR JET Co., Ltd. - IOSA Certificate.pdf" target="_blank"
+             style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;background:var(--eastar-red);color:#fff;border-radius:4px;font-size:0.78rem;font-weight:800;text-decoration:none;">
+            <i class="fas fa-file-pdf"></i> 인증서 열기
+          </a>
+          <a href="https://www.iata.org/en/programs/safety/audit/iosa/registry/" target="_blank"
+             style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.25);border-radius:4px;font-size:0.78rem;font-weight:700;text-decoration:none;">
+            <i class="fas fa-external-link-alt"></i> IOSA Registry
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: D-day counter -->
+      <div style="text-align:center;flex-shrink:0;">
+        <div style="width:140px;height:140px;border-radius:50%;border:3px solid rgba(255,255,255,0.2);display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,0.07);backdrop-filter:blur(4px);">
+          <div style="font-size:0.55rem;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:2px;">만료까지</div>
+          <div style="font-size:2.4rem;font-weight:900;color:#fff;line-height:1;">D-${daysToExpiry}</div>
+          <div style="font-size:0.6rem;color:rgba(255,255,255,0.4);margin-top:2px;">일 남음</div>
+        </div>
+        <div style="margin-top:12px;font-size:0.65rem;color:rgba(255,255,255,0.4);">Valid until 1 Aug 2027</div>
       </div>
     </div>
-  `).join('')}
+  </div>
+
+  <!-- Bottom strip: key stats -->
+  <div style="background:#fff;border-top:1px solid #eee;display:grid;grid-template-columns:repeat(4,1fr);divide-x:1px solid #eee;">
+    ${[
+      {icon:'fa-hashtag',   label:'IAR 번호',         val:'IOSA-ESR-IA-2025', sub:'2025 Initial Audit'},
+      {icon:'fa-flag-checkered',label:'재인증 윈도우', val:'D-'+Math.max(0,daysToRenewal),  sub:DateUtil.format(c.renewalWindowStart)+' 개시'},
+      {icon:'fa-check-circle',  label:'Findings / FAT',val:'전체 종결',         sub:'21 Findings · 7 OBS 완료'},
+      {icon:'fa-book-open',     label:'현행 ISM',       val:'Ed.18',            sub:'2026.01.01 발효 · 재인증 적용'},
+    ].map(s=>`
+      <div style="padding:16px 24px;border-right:1px solid #f0f0f0;display:flex;align-items:center;gap:14px;">
+        <div style="width:32px;height:32px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fas ${s.icon}" style="font-size:0.8rem;color:var(--eastar-red);"></i>
+        </div>
+        <div>
+          <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#aaa;">${s.label}</div>
+          <div style="font-size:0.9rem;font-weight:900;color:#111;">${s.val}</div>
+          <div style="font-size:0.62rem;color:#999;">${s.sub}</div>
+        </div>
+      </div>
+    `).join('')}
+  </div>
 </div>
+
 
 <!-- ══════════════════════════════════════════════════════
      8 IOSA SECTION CARDS — IATA.org style
@@ -896,10 +887,10 @@ function renderDashboardNew() {
   ${[
     { code:'ORG', name:'조직 및 안전',   icon:'fa-sitemap',          f:7, o:4, dept:'안전보안실',    section:'cap' },
     { code:'FLT', name:'운항',           icon:'fa-plane',            f:7, o:0, dept:'운항본부',      section:'cap' },
-    { code:'DSP', name:'종합통제',        icon:'fa-tower-broadcast',  f:1, o:0, dept:'종합통제실',    section:'cap' },
+    { code:'DSP', name:'종합통제',        icon:'fa-display',          f:1, o:0, dept:'종합통제실',    section:'cap' },
     { code:'MNT', name:'정비',           icon:'fa-tools',            f:5, o:1, dept:'정비본부',      section:'cap' },
-    { code:'CAB', name:'객실',           icon:'fa-users',            f:0, o:0, dept:'객실본부',      section:'cap' },
-    { code:'GRH', name:'운송',           icon:'fa-truck-ramp-box',   f:1, o:1, dept:'운송본부',      section:'cap' },
+    { code:'CAB', name:'객실',           icon:'fa-bell-concierge',   f:0, o:0, dept:'객실본부',      section:'cap' },
+    { code:'GRH', name:'운송',           icon:'fa-plane-arrival',    f:1, o:1, dept:'운송본부',      section:'cap' },
     { code:'CGO', name:'화물',           icon:'fa-boxes-stacked',    f:0, o:0, dept:'운송본부',      section:'cap' },
     { code:'SEC', name:'항공보안',        icon:'fa-shield-halved',    f:0, o:1, dept:'안전보안실',    section:'cap' },
   ].map(s => {
