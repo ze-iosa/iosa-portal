@@ -867,10 +867,21 @@ function renderDashboardNew() {
 
       <!-- Top logos row -->
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;position:relative;z-index:1;">
-        <!-- LEFT: Official IOSA Registered Operator stamp -->
-        <img src="/assets/iosa_stamp.png" alt="IOSA Registered Operator" style="width:72px;height:72px;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none'">
-        <!-- RIGHT: IATA blue logo -->
-        <img src="/assets/iata_logo_blue.png" alt="IATA" style="width:70px;object-fit:contain;flex-shrink:0;margin-top:4px;" onerror="this.style.display='none'">
+        <!-- LEFT: Official IOSA Registered Operator stamp (actual PNG) -->
+        <img src="assets/iosa_stamp.png" alt="IOSA Registered Operator" style="width:72px;height:72px;object-fit:contain;flex-shrink:0;">
+        <!-- RIGHT: IATA gold diamond mark (matches actual certificate) -->
+        <svg width="76" height="76" viewBox="0 0 76 76" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+          <!-- Main large diamond -->
+          <rect x="18" y="4" width="36" height="36" rx="1.5" transform="rotate(45 18 4)" fill="#F5A800"/>
+          <!-- White inner diamond cutout -->
+          <rect x="28" y="14" width="20" height="20" rx="1" transform="rotate(45 28 14)" fill="white"/>
+          <!-- Small inner gold diamond -->
+          <rect x="33" y="19" width="10" height="10" rx="0.5" transform="rotate(45 33 19)" fill="#F5A800"/>
+          <!-- Bottom-left satellite diamond -->
+          <rect x="4" y="52" width="18" height="18" rx="1" transform="rotate(45 4 52)" fill="#F5A800"/>
+          <!-- Top-right satellite diamond -->
+          <rect x="52" y="4" width="18" height="18" rx="1" transform="rotate(45 52 4)" fill="#F5A800"/>
+        </svg>
       </div>
 
       <!-- Certificate title — blue italic serif -->
@@ -951,14 +962,14 @@ function renderDashboardNew() {
 <div style="margin-bottom:8px;font-size:0.6rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#aaa;">IOSA 심사 부문 (2025 INITIAL AUDIT 결과)</div>
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px;">
   ${[
-    { code:'ORG', name:'조직 및 안전관리', icon:'fa-sitemap',      f:7, o:4, dept:'안전보안실',    section:'cap' },
-    { code:'FLT', name:'운항',            icon:'fa-plane',        f:7, o:0, dept:'운항본부',      section:'cap' },
-    { code:'DSP', name:'운항통제',         icon:'fa-headset',      f:1, o:0, dept:'종합통제실',    section:'cap' },
-    { code:'MNT', name:'항공기 정비',      icon:'fa-tools',        f:5, o:1, dept:'정비본부',      section:'cap' },
-    { code:'CAB', name:'객실 운항',        icon:'fa-chair',        f:0, o:0, dept:'객실본부',      section:'cap' },
-    { code:'GRH', name:'지상 조업',        icon:'fa-dolly',        f:1, o:1, dept:'운송본부',      section:'cap' },
-    { code:'CGO', name:'화물 운항',        icon:'fa-pallet',       f:0, o:0, dept:'운송본부',      section:'cap' },
-    { code:'SEC', name:'보안',             icon:'fa-user-shield',  f:0, o:1, dept:'안전보안실',    section:'cap' },
+    { code:'ORG', name:'조직 및 안전',   icon:'fa-sitemap',          f:7, o:4, dept:'안전보안실',    section:'cap' },
+    { code:'FLT', name:'운항',           icon:'fa-plane',            f:7, o:0, dept:'운항본부',      section:'cap' },
+    { code:'DSP', name:'종합통제',        icon:'fa-tower-broadcast',  f:1, o:0, dept:'종합통제실',    section:'cap' },
+    { code:'MNT', name:'정비',           icon:'fa-tools',            f:5, o:1, dept:'정비본부',      section:'cap' },
+    { code:'CAB', name:'객실',           icon:'fa-users',            f:0, o:0, dept:'객실본부',      section:'cap' },
+    { code:'GRH', name:'운송',           icon:'fa-truck-ramp-box',   f:1, o:1, dept:'운송본부',      section:'cap' },
+    { code:'CGO', name:'화물',           icon:'fa-boxes-stacked',    f:0, o:0, dept:'운송본부',      section:'cap' },
+    { code:'SEC', name:'항공보안',        icon:'fa-shield-halved',    f:0, o:1, dept:'안전보안실',    section:'cap' },
   ].map(s => {
     const canView = typeof canViewSection === 'function' ? canViewSection(s.code) : true;
     const hasF = s.f > 0;
