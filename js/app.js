@@ -2508,19 +2508,15 @@ function _renderCRContent(container, allEntries, crManuals) {
     <p class="sect-sub" id="cr-parse-status">총 ${totalAll}개 항목 저장됨 · 브라우저에 자동 저장</p>
   </div>
   <div class="sect-actions" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-    <button onclick="importCRFromFindings()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#1d4ed8;color:#fff;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;">
-      <i class="fas fa-bolt"></i> 심사결과 자동 불러오기
+    <button onclick="initFromISM18()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:var(--eastar-red);color:#fff;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;">
+      <i class="fas fa-list-check"></i> ISM 18 전체 ISARP 불러오기
     </button>
-    <button onclick="showCRAddModal()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#fff;color:#333;border:1.5px solid #ddd;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;">
-      <i class="fas fa-plus"></i> ISARP 직접 추가
+    <button onclick="showCRAddModal()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;background:#fff;color:#333;border:1.5px solid #ddd;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;">
+      <i class="fas fa-plus"></i> 직접 추가
     </button>
-    <button onclick="exportCRExcel()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#1a7a4a;color:#fff;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;">
+    <button onclick="exportCRExcel()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;background:#1a7a4a;color:#fff;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;">
       <i class="fas fa-file-excel"></i> Excel 내보내기
     </button>
-    <label style="display:inline-flex;align-items:center;gap:5px;padding:7px 12px;background:#f5f5f5;color:#555;border:1.5px solid #e0e0e0;border-radius:4px;font-size:0.72rem;font-weight:700;cursor:pointer;" title="IATA CR 양식 xlsx 업로드로 ISARP 전체 목록 가져오기">
-      <i class="fas fa-upload"></i> xlsx 가져오기
-      <input type="file" style="display:none;" accept=".xlsx" onchange="uploadCRTemplate(this)">
-    </label>
   </div>
 </div>
 
@@ -2577,12 +2573,12 @@ ${sectionEntries.length === 0 ? `
 <div style="background:#f9f9f9;border:1.5px dashed #e0e0e0;border-radius:8px;padding:52px 32px;text-align:center;">
   <i class="fas fa-clipboard-list" style="font-size:2.5rem;color:#ddd;margin-bottom:14px;display:block;"></i>
   <div style="font-size:0.92rem;font-weight:700;color:#bbb;margin-bottom:8px;">${crSection} 부문 ISARP 항목이 없습니다</div>
-  <div style="font-size:0.78rem;color:#ccc;margin-bottom:20px;">위에서 <strong>심사결과 자동 불러오기</strong>를 클릭하거나<br><strong>ISARP 직접 추가</strong>로 항목을 추가하세요</div>
+  <div style="font-size:0.78rem;color:#ccc;margin-bottom:20px;">상단의 <strong>ISM 18 전체 ISARP 불러오기</strong>를 클릭해서<br>전체 항목을 한 번에 추가하세요</div>
   <div style="display:flex;gap:10px;justify-content:center;">
-    <button onclick="importCRFromFindings()" style="padding:8px 20px;background:#1d4ed8;color:#fff;border:none;border-radius:5px;font-size:0.78rem;font-weight:700;cursor:pointer;">
-      <i class="fas fa-bolt me-1"></i> 심사결과 자동 불러오기</button>
-    <button onclick="showCRAddModal()" style="padding:8px 18px;background:#fff;color:#333;border:1.5px solid #ddd;border-radius:5px;font-size:0.78rem;font-weight:700;cursor:pointer;">
-      <i class="fas fa-plus me-1"></i> ISARP 직접 추가</button>
+    <button onclick="initFromISM18()" style="padding:8px 22px;background:var(--eastar-red);color:#fff;border:none;border-radius:5px;font-size:0.78rem;font-weight:700;cursor:pointer;">
+      <i class="fas fa-list-check me-1"></i> ISM 18 전체 ISARP 불러오기</button>
+    <button onclick="showCRAddModal()" style="padding:8px 16px;background:#fff;color:#333;border:1.5px solid #ddd;border-radius:5px;font-size:0.78rem;font-weight:700;cursor:pointer;">
+      <i class="fas fa-plus me-1"></i> 직접 추가</button>
   </div>
 </div>` : `
 <div class="cr-table-wrap">
@@ -2592,8 +2588,8 @@ ${sectionEntries.length === 0 ? `
     <div class="cr-header-cell">요건 / 내용</div>
     <div class="cr-header-cell">매뉴얼 근거</div>
     <div class="cr-header-cell">적합성</div>
-    <div class="cr-header-cell">부적합/N/A 사유</div>
-    <div class="cr-header-cell">시정조치</div>
+    <div class="cr-header-cell">지적사항 / N/A 사유</div>
+    <div class="cr-header-cell">개선 · 조치 계획</div>
     <div class="cr-header-cell"></div>
   </div>
   ${sectionEntries.map((e, idx) => {
@@ -2615,8 +2611,8 @@ ${sectionEntries.length === 0 ? `
   <div class="cr-cell">
     <select onchange="updateCRRowStyle(this)">${statusOptions}</select>
   </div>
-  <div class="cr-cell"><textarea placeholder="부적합 사유 또는 N/A 이유" onblur="debouncedCRSave('${_esc(e.id)}','ncDesc',this.value)">${_esc(e.ncDesc||'')}</textarea></div>
-  <div class="cr-cell"><textarea placeholder="시정조치 내용" onblur="debouncedCRSave('${_esc(e.id)}','correctiveAction',this.value)">${_esc(e.correctiveAction||'')}</textarea></div>
+  <div class="cr-cell"><textarea placeholder="NC·N/A인 경우 사유 기재" onblur="debouncedCRSave('${_esc(e.id)}','ncDesc',this.value)">${_esc(e.ncDesc||'')}</textarea></div>
+  <div class="cr-cell"><textarea placeholder="개선 또는 조치 계획" onblur="debouncedCRSave('${_esc(e.id)}','correctiveAction',this.value)">${_esc(e.correctiveAction||'')}</textarea></div>
   <div class="cr-cell cr-del-btn"><button onclick="deleteCREntry('${_esc(e.id)}')" title="삭제"><i class="fas fa-times"></i></button></div>
 </div>`;
   }).join('')}
@@ -2628,6 +2624,67 @@ ${sectionEntries.length === 0 ? `
     <span style="font-size:0.68rem;color:#bbb;">${sectionEntries.length}개 항목</span>
   </div>
 </div>`}`;
+}
+
+// ─── Initialize full ISM 18 ISARP list ───────────────────
+async function initFromISM18() {
+  if (typeof ISM18_ISARPS === 'undefined') {
+    alert('ISM 18 데이터 로딩 실패. 페이지를 새로고침 후 다시 시도하세요.');
+    return;
+  }
+
+  const existing    = await getCRDataEntries();
+  const existingIds = new Set(existing.map(e => e.id));
+  const sanitize    = s => s.replace(/[^A-Za-z0-9_.]/g, '_');
+
+  // Count total to add
+  const allCodes = Object.values(ISM18_ISARPS).flat();
+  const newCodes = allCodes.filter(code => !existingIds.has(sanitize(code)));
+
+  if (newCodes.length === 0) {
+    alert(`ISM 18 전체 ISARP가 이미 불러와져 있습니다. (${allCodes.length}개)`);
+    return;
+  }
+
+  const confirmMsg =
+    `ISM Edition 18 전체 ISARP ${newCodes.length}개를 추가합니다.\n` +
+    `(이미 있는 ${allCodes.length - newCodes.length}개는 건너뜁니다)\n\n` +
+    `모든 항목은 공란 상태로 추가되며,\n내부심사 진행 시 직접 입력하세요.\n\n계속하시겠습니까?`;
+  if (!confirm(confirmMsg)) return;
+
+  let added = 0;
+  for (const [section, codes] of Object.entries(ISM18_ISARPS)) {
+    for (const code of codes) {
+      const id = sanitize(code);
+      if (existingIds.has(id)) continue;
+      await saveCRDataEntry({
+        id,
+        section,
+        isarpCode:        code,
+        requirementText:  '',   // 내부심사용 — 요건 직접 확인
+        auditDate:        '',
+        auditorName:      '',
+        docRef:           '',
+        status:           '',   // 공란
+        ncDesc:           '',   // 공란
+        rootCause:        '',
+        correctiveAction: '',   // 공란
+        aa: {
+          AA1:'',AA2:'',AA3:'',AA4:'',AA5:'',
+          AA6:'',AA7:'',AA8:'',AA9:'',AA10:'',
+          AA11:'',AA12:'',AA13:'',AA14:'',AA15:'',
+          AAOther:'',
+        },
+        updatedAt: new Date().toISOString(),
+      });
+      existingIds.add(id);
+      added++;
+    }
+  }
+
+  alert(`ISM 18 ISARP ${added}개 추가 완료.\nORG 1.1.1부터 순서대로 내부심사를 진행하세요.`);
+  crSection = 'ORG';
+  renderCR();
 }
 
 // ─── Import from audit findings ──────────────────────────
