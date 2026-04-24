@@ -2350,13 +2350,47 @@ let _crSaveTimers = {};
 function debouncedCRSave(id, field, value) {
   clearTimeout(_crSaveTimers[id+'_'+field]);
   _crSaveTimers[id+'_'+field] = setTimeout(async () => {
-    const entries = await getCRDataEntries();
-    const entry = entries.find(e => e.id === id);
-    if (!entry) return;
-    entry[field] = value;
-    entry.updatedAt = new Date().toISOString();
-    await saveCRDataEntry(entry);
-  }, 600);
+    try {
+      const db = await openCRDataDB();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction('entries', 'readwrite');
+        const store = tx.objectStore('entries');
+        const getReq = store.get(id);
+        getReq.onsuccess = () => {
+          const entry = getReq.result;
+          if (!entry) { resolve(); return; }
+          entry[field] = value;
+          entry.updatedAt = new Date().toISOString();
+          store.put(entry);
+          tx.oncomplete = resolve;
+          tx.onerror = e => reject(e.target.error);
+        };
+        getReq.onerror = e => reject(e.target.error);
+      });
+      showCRSavedToast();
+      // Update status sub-text
+      const sub = document.getElementById('cr-parse-status');
+      if (sub) {
+        const now = new Date().toLocaleTimeString('ko-KR', {hour:'2-digit',minute:'2-digit'});
+        sub.textContent = `브라우저에 자동 저장 · 최근 저장: ${now}`;
+      }
+    } catch(e) { console.error('CR save error:', e); }
+  }, 500);
+}
+
+let _crToastTimer;
+function showCRSavedToast() {
+  let toast = document.getElementById('cr-saved-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'cr-saved-toast';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:99999;background:#1a7a4a;color:#fff;padding:8px 18px;border-radius:20px;font-size:0.75rem;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,0.18);display:flex;align-items:center;gap:7px;transition:opacity 0.3s;pointer-events:none;';
+    toast.innerHTML = '<i class="fas fa-check-circle"></i> 저장됨';
+    document.body.appendChild(toast);
+  }
+  toast.style.opacity = '1';
+  clearTimeout(_crToastTimer);
+  _crToastTimer = setTimeout(() => { toast.style.opacity = '0'; }, 1800);
 }
 
 // ─── Row style update ─────────────────────────────────────
@@ -2391,10 +2425,46 @@ async function renderCR() {
 </div>`;
 
   try {
-    const [allEntries, crManuals] = await Promise.all([
+    let [allEntries, crManuals] = await Promise.all([
       getCRDataEntries(),
       (typeof getCRManualFiles === 'function' ? getCRManualFiles() : Promise.resolve([])),
     ]);
+
+    // Auto-initialize ISM 18 ISARPs on first use (no entries yet)
+    if (allEntries.length === 0 && typeof ISM18_ISARPS !== 'undefined') {
+      container.innerHTML = `
+<div class="sect-header">
+  <div><h2 class="sect-title">Conformance Report (CR)</h2>
+    <p class="sect-sub">ISM Ed.18 Rev.1 ISARP 초기화 중... (924개)</p></div>
+</div>
+<div style="text-align:center;padding:60px 0;color:#bbb;">
+  <i class="fas fa-spinner fa-spin" style="font-size:2rem;margin-bottom:12px;display:block;"></i>
+  <div style="font-size:0.8rem;">ISM Edition 18 전체 ISARP 로딩 중...</div>
+</div>`;
+      const sanitize = s => s.replace(/[^A-Za-z0-9_.]/g, '_');
+      for (const [section, codes] of Object.entries(ISM18_ISARPS)) {
+        for (const code of codes) {
+          await saveCRDataEntry({
+            id: sanitize(code),
+            section,
+            isarpCode: code,
+            requirementText: '',
+            auditDate: '',
+            auditorName: '',
+            docRef: '',
+            status: '',
+            ncDesc: '',
+            rootCause: '',
+            correctiveAction: '',
+            aa: {},
+            createdAt: new Date().toISOString(),
+            updatedAt: '',
+          });
+        }
+      }
+      allEntries = await getCRDataEntries();
+    }
+
     _renderCRContent(container, allEntries, crManuals);
   } catch (err) {
     container.innerHTML += `<div style="color:red;padding:20px;">오류: ${err.message}</div>`;
@@ -2505,16 +2575,23 @@ function _renderCRContent(container, allEntries, crManuals) {
 <div class="sect-header">
   <div>
     <h2 class="sect-title">Conformance Report (CR)</h2>
-    <p class="sect-sub" id="cr-parse-status">총 ${totalAll}개 항목 저장됨 · 브라우저에 자동 저장</p>
+    <p class="sect-sub" id="cr-parse-status">
+      <span style="background:#f0faf4;color:#1a7a4a;border:1px solid rgba(26,122,74,0.2);padding:2px 8px;border-radius:3px;font-weight:800;font-size:0.65rem;margin-right:6px;">ISM Ed.18 Rev.1</span>
+      총 <strong>${totalAll}</strong>개 ISARP · 브라우저 자동 저장
+    </p>
   </div>
   <div class="sect-actions" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+    ${totalAll === 0 ? `
     <button onclick="initFromISM18()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:var(--eastar-red);color:#fff;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;">
       <i class="fas fa-list-check"></i> ISM 18 전체 ISARP 불러오기
-    </button>
+    </button>` : `
+    <button onclick="initFromISM18()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;background:#fff;color:#888;border:1.5px solid #e0e0e0;border-radius:4px;font-size:0.73rem;font-weight:700;cursor:pointer;" title="이미 로드됨 — 누락 항목만 추가">
+      <i class="fas fa-sync-alt"></i> ISARP 재동기화
+    </button>`}
     <button onclick="showCRAddModal()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;background:#fff;color:#333;border:1.5px solid #ddd;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;">
       <i class="fas fa-plus"></i> 직접 추가
     </button>
-    <button onclick="exportCRExcel()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;background:#1a7a4a;color:#fff;border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;">
+    <button onclick="exportCRExcel()" style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:#1a7a4a;color:#fff;border:none;border-radius:5px;font-size:0.78rem;font-weight:800;cursor:pointer;box-shadow:0 2px 8px rgba(26,122,74,0.25);">
       <i class="fas fa-file-excel"></i> Excel 내보내기
     </button>
   </div>
