@@ -843,6 +843,40 @@ function renderDashboardNew() {
 </div>
 
 
+<!-- 2026 재인증 준비 타임라인 -->
+<div class="w-card mb-3">
+  <div class="w-card-header">
+    <span class="w-card-title">2026 재인증 준비 일정</span>
+    <span style="font-size:0.72rem;color:var(--text-light);font-weight:600;">ISM Ed.18 · RBI 재인증 대비</span>
+  </div>
+  <div class="w-card-body" style="padding-top:4px;padding-bottom:8px;">
+    <div style="display:flex;gap:0;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;">
+      ${[
+        { month:'2026.07', color:'#1d4ed8', icon:'fa-chalkboard-teacher', label:'7월', items:['IOSA 내부심사원 교육 실시'] },
+        { month:'2026.08', color:'#7c3aed', icon:'fa-users-gear',         label:'8월', items:['IOSA TFT 발령','IOSA 내부심사 실시'] },
+        { month:'2026.10', color:'#d97706', icon:'fa-calendar-check',     label:'10월', items:['본점검 일정 조율','IATA 요구자료 제출'] },
+        { month:'2027.03', color:'var(--eastar-red)', icon:'fa-search',   label:'2027.03', items:['IOSA RBI 재인증 심사'] },
+      ].map((t, i, arr) => `
+        <div style="display:flex;align-items:flex-start;flex-shrink:0;">
+          <div style="display:flex;flex-direction:column;align-items:center;padding:0 4px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:${t.color}18;border:2px solid ${t.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1;">
+              <i class="fas ${t.icon}" style="color:${t.color};font-size:0.8rem;"></i>
+            </div>
+            ${i < arr.length-1 ? `<div style="flex:1;width:2px;background:linear-gradient(to bottom,${t.color}50,transparent);min-height:4px;"></div>` : ''}
+          </div>
+          <div style="padding:0 24px 20px 12px;min-width:180px;">
+            <div style="font-size:0.6rem;font-weight:900;letter-spacing:1.5px;color:${t.color};text-transform:uppercase;margin-bottom:4px;">${t.label}</div>
+            ${t.items.map(item => `
+              <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;">
+                <span style="width:5px;height:5px;border-radius:50%;background:${t.color};flex-shrink:0;margin-top:6px;"></span>
+                <span style="font-size:0.78rem;color:#333;font-weight:600;line-height:1.4;">${item}</span>
+              </div>`).join('')}
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════════════════════════════════════════════
      8 IOSA SECTION CARDS — IATA.org style
 ════════════════════════════════════════════════════════ -->
@@ -884,40 +918,6 @@ function renderDashboardNew() {
       '</div>'
     );
   }).join('')}
-</div>
-
-<!-- 2026 재인증 준비 타임라인 -->
-<div class="w-card mb-3">
-  <div class="w-card-header">
-    <span class="w-card-title">2026 재인증 준비 일정</span>
-    <span style="font-size:0.72rem;color:var(--text-light);font-weight:600;">ISM Ed.18 · RBI 재인증 대비</span>
-  </div>
-  <div class="w-card-body" style="padding-top:4px;padding-bottom:8px;">
-    <div style="display:flex;gap:0;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;">
-      ${[
-        { month:'2026.07', color:'#1d4ed8', icon:'fa-chalkboard-teacher', label:'7월', items:['IOSA 내부심사원 교육 실시'] },
-        { month:'2026.08', color:'#7c3aed', icon:'fa-users-gear',         label:'8월', items:['IOSA TFT 발령','IOSA 내부심사 실시'] },
-        { month:'2026.10', color:'#d97706', icon:'fa-calendar-check',     label:'10월', items:['본점검 일정 조율','IATA 요구자료 제출'] },
-        { month:'2027.03', color:'var(--eastar-red)', icon:'fa-search',   label:'2027.03', items:['IOSA RBI 재인증 심사'] },
-      ].map((t, i, arr) => `
-        <div style="display:flex;align-items:flex-start;flex-shrink:0;">
-          <div style="display:flex;flex-direction:column;align-items:center;padding:0 4px;">
-            <div style="width:36px;height:36px;border-radius:50%;background:${t.color}18;border:2px solid ${t.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1;">
-              <i class="fas ${t.icon}" style="color:${t.color};font-size:0.8rem;"></i>
-            </div>
-            ${i < arr.length-1 ? `<div style="flex:1;width:2px;background:linear-gradient(to bottom,${t.color}50,transparent);min-height:4px;"></div>` : ''}
-          </div>
-          <div style="padding:0 24px 20px 12px;min-width:180px;">
-            <div style="font-size:0.6rem;font-weight:900;letter-spacing:1.5px;color:${t.color};text-transform:uppercase;margin-bottom:4px;">${t.label}</div>
-            ${t.items.map(item => `
-              <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;">
-                <span style="width:5px;height:5px;border-radius:50%;background:${t.color};flex-shrink:0;margin-top:6px;"></span>
-                <span style="font-size:0.78rem;color:#333;font-weight:600;line-height:1.4;">${item}</span>
-              </div>`).join('')}
-          </div>
-        </div>`).join('')}
-    </div>
-  </div>
 </div>
 `;
 }
