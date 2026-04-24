@@ -1064,44 +1064,6 @@ ${a.placeholder ? `
   </div>
 </div>
 
-<!-- Section Breakdown -->
-<div class="w-card mb-3">
-  <div class="w-card-header">
-    <span class="w-card-title">부문별 심사 결과</span>
-    <span style="font-size:0.78rem;color:var(--text-light);">FINDINGS · OBSERVATIONS · N/A</span>
-  </div>
-  <div class="w-card-body">
-    <div class="result-grid">
-      ${a.sections.map(s => {
-        const cls = s.f>0?'has-findings':s.o>0?'has-obs':'clean';
-        const badgeBg    = s.f>0?'var(--eastar-red)':s.o>0?'var(--eastar-gold)':'#1a7a4a';
-        const badgeLabel = s.f>0?'FINDING':s.o>0?'OBS':'CLEAN';
-        return `<div class="result-card ${cls}" onclick="openSectionDetail('${s.code}')">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
-            <div>
-              <div class="result-card-code">${s.code}</div>
-              <div style="font-size:0.68rem;color:#777;font-weight:600;margin-top:2px;">${s.name}</div>
-            </div>
-            <span style="background:${badgeBg};color:#fff;padding:2px 7px;border-radius:3px;font-size:0.55rem;font-weight:800;white-space:nowrap;">${badgeLabel}</span>
-          </div>
-          <div style="display:flex;align-items:flex-end;gap:14px;">
-            <div style="text-align:center;">
-              <div class="result-card-f" style="color:${s.f>0?'var(--eastar-red)':'#e8e8e8'};">${s.f}</div>
-              <div style="font-size:0.55rem;font-weight:800;color:${s.f>0?'var(--eastar-red)':'#ccc'};text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">F</div>
-            </div>
-            <div style="text-align:center;">
-              <div class="result-card-o" style="color:${s.o>0?'var(--eastar-gold)':'#e8e8e8'};">${s.o}</div>
-              <div style="font-size:0.55rem;font-weight:800;color:${s.o>0?'var(--eastar-gold)':'#ccc'};text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">O</div>
-            </div>
-          </div>
-          <div class="result-card-na">${s.na} N/A</div>
-        </div>`;
-      }).join('')}
-    </div>
-
-  </div>
-</div>
-
 <!-- Key CARs -->
 <div class="row g-3">
   <div class="col-md-7">
