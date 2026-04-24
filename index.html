@@ -773,10 +773,6 @@ function renderDashboardNew() {
   <!-- Background: white with red left accent -->
   <div style="background:#fff;padding:36px 48px;position:relative;overflow:hidden;border-left:5px solid var(--eastar-red);">
 
-    <!-- Decorative circles (background) -->
-    <div style="position:absolute;right:-60px;top:-60px;width:320px;height:320px;border-radius:50%;border:40px solid rgba(210,0,21,0.04);pointer-events:none;"></div>
-    <div style="position:absolute;right:40px;top:40px;width:160px;height:160px;border-radius:50%;border:24px solid rgba(210,0,21,0.05);pointer-events:none;"></div>
-
     <!-- Content -->
     <div style="position:relative;z-index:1;display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center;">
 
@@ -1078,17 +1074,24 @@ ${a.placeholder ? `
     <div class="result-grid">
       ${a.sections.map(s => {
         const cls = s.f>0?'has-findings':s.o>0?'has-obs':'clean';
-        return `<div class="result-card ${cls}">
-          <div class="result-card-code">${s.code}</div>
-          <div style="font-size:0.72rem;color:var(--text-light);margin-bottom:8px;">${s.name}</div>
-          <div class="result-card-nums">
-            <span class="result-card-f">${s.f}</span>
+        const badgeBg    = s.f>0?'var(--eastar-red)':s.o>0?'var(--eastar-gold)':'#1a7a4a';
+        const badgeLabel = s.f>0?'FINDING':s.o>0?'OBS':'CLEAN';
+        return `<div class="result-card ${cls}" onclick="openSectionDetail('${s.code}')">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
             <div>
-              <div class="result-card-label" style="color:var(--eastar-red);">FINDINGS</div>
-              <div style="display:flex;gap:6px;align-items:baseline;margin-top:2px;">
-                <span class="result-card-o">${s.o}</span>
-                <span class="result-card-label" style="color:var(--eastar-gold);">OBS.</span>
-              </div>
+              <div class="result-card-code">${s.code}</div>
+              <div style="font-size:0.68rem;color:#777;font-weight:600;margin-top:2px;">${s.name}</div>
+            </div>
+            <span style="background:${badgeBg};color:#fff;padding:2px 7px;border-radius:3px;font-size:0.55rem;font-weight:800;white-space:nowrap;">${badgeLabel}</span>
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:14px;">
+            <div style="text-align:center;">
+              <div class="result-card-f" style="color:${s.f>0?'var(--eastar-red)':'#e8e8e8'};">${s.f}</div>
+              <div style="font-size:0.55rem;font-weight:800;color:${s.f>0?'var(--eastar-red)':'#ccc'};text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">F</div>
+            </div>
+            <div style="text-align:center;">
+              <div class="result-card-o" style="color:${s.o>0?'var(--eastar-gold)':'#e8e8e8'};">${s.o}</div>
+              <div style="font-size:0.55rem;font-weight:800;color:${s.o>0?'var(--eastar-gold)':'#ccc'};text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">O</div>
             </div>
           </div>
           <div class="result-card-na">${s.na} N/A</div>
@@ -1983,113 +1986,144 @@ function openSectionDetail(code) {
   const maturity = (APP_DATA.rbiPrep.maturityAssessments||[]).filter(m=>m.isarp&&m.isarp.startsWith(code));
   const maturityTotal = (APP_DATA.rbiMaturityCriteria.keyIsarps||[]).filter(i=>i.startsWith(code)).length;
 
-  const statusColor = {open:'#dc3545',in_progress:'#fd7e14',closed:'#198754'};
-  const statusLabel = {open:'미결',in_progress:'조치중',closed:'종결'};
+  const statusColor = {open:'#dc3545',in_progress:'#fd7e14',submitted:'#1d4ed8',closed:'#198754'};
+  const statusLabel = {open:'미결',in_progress:'조치중',submitted:'제출',closed:'종결'};
+
+  // Default tab: findings > obs > maturity > clean
+  const defaultTab = hist.f > 0 ? 'findings' : hist.o > 0 ? 'obs' : maturityTotal > 0 ? 'maturity' : 'clean';
+
+  const repeatedFindings = findings.filter(f => f.repeated);
+
+  function statBtn(tabId, bg, border, numColor, label, num, extra='') {
+    return `<div id="dtabBtn-${tabId}" onclick="showDetailTab('${tabId}')"
+      style="background:${bg};border:2px solid ${border};border-radius:8px;padding:14px 10px;text-align:center;cursor:pointer;
+      transition:all 140ms;user-select:none;${tabId===defaultTab?'box-shadow:0 3px 10px rgba(0,0,0,0.12);transform:translateY(-2px);border-width:2px;':'opacity:0.75;'}">
+      <div style="font-size:0.56rem;font-weight:800;color:${numColor};text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">${label}</div>
+      <div style="font-size:2.2rem;font-weight:900;color:${numColor};line-height:1;">${num}${extra}</div>
+    </div>`;
+  }
 
   panel.innerHTML = `
-  <div style="position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid #eee;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;">
+  <!-- Sticky header -->
+  <div style="position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid #eee;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;">
     <div style="display:flex;align-items:center;gap:12px;">
-      <div style="width:40px;height:40px;background:rgba(210,0,21,0.08);border-radius:6px;display:flex;align-items:center;justify-content:center;">
-        <i class="fas ${SECTION_ICONS[code]||'fa-folder'}" style="color:var(--eastar-red);font-size:1.1rem;"></i>
+      <div style="width:38px;height:38px;background:rgba(210,0,21,0.08);border-radius:6px;display:flex;align-items:center;justify-content:center;">
+        <i class="fas ${SECTION_ICONS[code]||'fa-folder'}" style="color:var(--eastar-red);font-size:1rem;"></i>
       </div>
       <div>
-        <div style="font-size:0.6rem;font-weight:900;letter-spacing:2px;color:var(--eastar-red);">${code}</div>
+        <div style="font-size:0.58rem;font-weight:900;letter-spacing:2px;color:var(--eastar-red);">${code}</div>
         <div style="font-size:1rem;font-weight:800;color:#111;">${SECTION_NAMES[code]||code}</div>
       </div>
     </div>
-    <button onclick="closeSectionDetail()" style="background:none;border:none;font-size:1.2rem;color:#999;cursor:pointer;padding:4px 8px;">✕</button>
+    <button onclick="closeSectionDetail()" style="background:none;border:none;font-size:1.2rem;color:#ccc;cursor:pointer;padding:4px 8px;line-height:1;" onmouseover="this.style.color='#333'" onmouseout="this.style.color='#ccc'">✕</button>
   </div>
 
-  <div style="padding:20px 22px;">
-    <!-- Stats row -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
-      <div style="background:#fff0f0;border:1px solid rgba(210,0,21,0.15);border-radius:6px;padding:12px;text-align:center;">
-        <div style="font-size:0.58rem;font-weight:800;color:var(--eastar-red);text-transform:uppercase;margin-bottom:4px;">FINDINGS</div>
-        <div style="font-size:2rem;font-weight:900;color:var(--eastar-red);line-height:1;">${hist.f}</div>
-      </div>
-      <div style="background:#fdf8ee;border:1px solid rgba(152,123,55,0.2);border-radius:6px;padding:12px;text-align:center;">
-        <div style="font-size:0.58rem;font-weight:800;color:#7a5e1c;text-transform:uppercase;margin-bottom:4px;">OBS</div>
-        <div style="font-size:2rem;font-weight:900;color:#7a5e1c;line-height:1;">${hist.o}</div>
-      </div>
-      <div style="background:#f5f5f5;border:1px solid #e8e8e8;border-radius:6px;padding:12px;text-align:center;">
-        <div style="font-size:0.58rem;font-weight:800;color:#888;text-transform:uppercase;margin-bottom:4px;">REPEATED</div>
-        <div style="font-size:2rem;font-weight:900;color:#555;line-height:1;">${repeatedIsarps.length}</div>
-      </div>
-      <div style="background:#f0faf4;border:1px solid rgba(26,122,74,0.15);border-radius:6px;padding:12px;text-align:center;">
-        <div style="font-size:0.58rem;font-weight:800;color:#1a7a4a;text-transform:uppercase;margin-bottom:4px;">MATURITY</div>
-        <div style="font-size:2rem;font-weight:900;color:#1a7a4a;line-height:1;">${maturity.length}<span style="font-size:0.7rem;color:#aaa;">/${maturityTotal}</span></div>
-      </div>
+  <div style="padding:18px 20px;">
+    <!-- ISARP info bar -->
+    <div style="background:#f9f9f9;border:1px solid #f0f0f0;border-radius:6px;padding:10px 14px;margin-bottom:14px;display:flex;gap:18px;font-size:0.75rem;color:#888;">
+      <div>총 ISARP <strong style="color:#333;margin-left:4px;">${hist.na}개</strong></div>
+      <div style="color:#e0e0e0;">|</div>
+      <div>심사 결과 <strong style="color:var(--eastar-red);margin-left:4px;">${hist.f}F</strong> / <strong style="color:#7a5e1c;margin-left:2px;">${hist.o}O</strong> / <strong style="color:#aaa;margin-left:2px;">${hist.na}NA</strong></div>
     </div>
 
-    <!-- ISARP 항목 수 -->
-    <div style="background:#f8f8f8;border:1px solid #eee;border-radius:6px;padding:12px 16px;margin-bottom:18px;display:flex;gap:20px;font-size:0.78rem;">
-      <div><span style="color:#aaa;font-weight:700;">총 ISARP 항목</span> <strong style="color:#111;margin-left:6px;">${hist.na}개</strong></div>
-      <div><span style="color:#aaa;font-weight:700;">심사 결과</span> <strong style="color:#111;margin-left:6px;">${hist.f}F / ${hist.o}O / ${hist.na}NA</strong></div>
+    <!-- Clickable stat tabs -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px;">
+      ${statBtn('findings','#fff0f0','rgba(210,0,21,0.25)','var(--eastar-red)','FINDINGS',hist.f)}
+      ${statBtn('obs','#fdf8ee','rgba(152,123,55,0.25)','#7a5e1c','OBS',hist.o)}
+      ${statBtn('repeated','#f8f5ff','rgba(124,58,237,0.2)','#7c3aed','REPEATED',repeatedFindings.length)}
+      ${statBtn('maturity','#f0faf4','rgba(26,122,74,0.2)','#1a7a4a','MATURITY',maturity.length,`<span style="font-size:0.65rem;color:#aaa;">/${maturityTotal}</span>`)}
     </div>
 
-    <!-- Findings 목록 -->
-    ${hist.f > 0 ? `
-    <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0f0;">
-      <i class="fas fa-exclamation-triangle me-1" style="color:var(--eastar-red);"></i> FINDINGS (${hist.f}건)
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
-      ${cars.map(f=>`
-        <div style="background:#fff;border:1px solid #f0f0f0;border-left:3px solid var(--eastar-red);border-radius:4px;padding:12px 14px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-            <span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:1px 8px;border-radius:3px;font-size:0.62rem;font-weight:900;">${f.isarp}</span>
-            <span style="background:${f.repeated?'#fef3c7':'#f5f5f5'};color:${f.repeated?'#92400e':'#888'};padding:1px 7px;border-radius:3px;font-size:0.6rem;font-weight:700;">${f.repeated?'REPEATED':'INITIAL'}</span>
-            <span style="margin-left:auto;background:${statusColor[f.status]||'#aaa'}22;color:${statusColor[f.status]||'#aaa'};padding:1px 7px;border-radius:3px;font-size:0.6rem;font-weight:800;">${statusLabel[f.status]||f.status}</span>
+    <!-- ── Tab: FINDINGS ── -->
+    <div id="dtab-findings" style="display:${defaultTab==='findings'?'block':'none'}">
+      ${hist.f > 0 ? `
+      <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--eastar-red);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+        <i class="fas fa-exclamation-triangle"></i> FINDINGS (${hist.f}건)
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${cars.map(f=>`
+          <div style="background:#fff;border:1px solid #f0f0f0;border-left:3px solid var(--eastar-red);border-radius:4px;padding:12px 14px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+              <span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:2px 8px;border-radius:3px;font-size:0.62rem;font-weight:900;">${f.isarp||'—'}</span>
+              ${f.repeated?`<span style="background:#fef3c7;color:#92400e;padding:2px 7px;border-radius:3px;font-size:0.58rem;font-weight:700;">REPEATED</span>`:''}
+              <span style="margin-left:auto;background:${(statusColor[f.status]||'#aaa')}18;color:${statusColor[f.status]||'#aaa'};border:1px solid ${(statusColor[f.status]||'#aaa')}40;padding:2px 8px;border-radius:3px;font-size:0.6rem;font-weight:800;">${statusLabel[f.status]||f.status||'—'}</span>
+            </div>
+            <div style="font-size:0.8rem;color:#222;font-weight:600;margin-bottom:4px;line-height:1.5;">${f.desc||'—'}</div>
+            ${f.action?`<div style="font-size:0.72rem;color:#555;margin-top:4px;padding-top:4px;border-top:1px solid #f5f5f5;"><span style="color:#bbb;font-weight:700;">CAP</span>  ${f.action}</div>`:''}
+            ${f.fatDetail?`<div style="font-size:0.72rem;color:#1a7a4a;margin-top:3px;"><span style="font-weight:700;">FAT</span>  ${f.fatDetail}</div>`:''}
           </div>
-          <div style="font-size:0.8rem;color:#222;font-weight:600;margin-bottom:4px;">${f.desc||'—'}</div>
-          ${f.action?`<div style="font-size:0.72rem;color:#555;margin-bottom:4px;"><span style="color:#aaa;font-weight:700;">CAP:</span> ${f.action}</div>`:''}
-          ${f.capDetail?`<div style="font-size:0.72rem;color:#444;margin-bottom:4px;background:#f9f9f9;padding:6px 10px;border-radius:3px;"><span style="color:#888;font-weight:700;">제출내용:</span> ${f.capDetail}</div>`:''}
-          ${f.evidence?`<div style="font-size:0.72rem;color:#444;margin-bottom:4px;"><span style="color:#aaa;font-weight:700;">증빙:</span> ${f.evidence}</div>`:''}
-          ${f.fatDetail?`<div style="font-size:0.72rem;color:#1a7a4a;"><span style="font-weight:700;">FAT:</span> ${f.fatDetail}</div>`:''}
-        </div>
-      `).join('')}
-    </div>` : ''}
-
-    <!-- OBS 목록 -->
-    ${hist.o > 0 ? `
-    <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0f0;">
-      <i class="fas fa-eye me-1" style="color:#7a5e1c;"></i> OBSERVATIONS (${hist.o}건)
+        `).join('')}
+      </div>` : `<div style="text-align:center;padding:32px;background:#f0faf4;border-radius:8px;color:#1a7a4a;font-weight:700;"><i class="fas fa-check-circle" style="font-size:2rem;display:block;margin-bottom:8px;"></i>이 부문 지적사항 없음</div>`}
     </div>
-    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
-      ${obs.map(f=>`
-        <div style="background:#fff;border:1px solid #f0f0f0;border-left:3px solid #d4a94a;border-radius:4px;padding:12px 14px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-            <span style="background:#fdf8ee;color:#7a5e1c;border:1px solid rgba(152,123,55,0.2);padding:1px 8px;border-radius:3px;font-size:0.62rem;font-weight:900;">${f.isarp}</span>
-            <span style="margin-left:auto;background:${statusColor[f.status]||'#aaa'}22;color:${statusColor[f.status]||'#aaa'};padding:1px 7px;border-radius:3px;font-size:0.6rem;font-weight:800;">${statusLabel[f.status]||f.status}</span>
+
+    <!-- ── Tab: OBS ── -->
+    <div id="dtab-obs" style="display:${defaultTab==='obs'?'block':'none'}">
+      ${hist.o > 0 ? `
+      <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#7a5e1c;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+        <i class="fas fa-eye"></i> OBSERVATIONS (${hist.o}건)
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${obs.map(f=>`
+          <div style="background:#fff;border:1px solid #f0f0f0;border-left:3px solid #d4a94a;border-radius:4px;padding:12px 14px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+              <span style="background:#fdf8ee;color:#7a5e1c;border:1px solid rgba(152,123,55,0.2);padding:2px 8px;border-radius:3px;font-size:0.62rem;font-weight:900;">${f.isarp||'—'}</span>
+              <span style="margin-left:auto;background:${(statusColor[f.status]||'#aaa')}18;color:${statusColor[f.status]||'#aaa'};border:1px solid ${(statusColor[f.status]||'#aaa')}40;padding:2px 8px;border-radius:3px;font-size:0.6rem;font-weight:800;">${statusLabel[f.status]||f.status||'—'}</span>
+            </div>
+            <div style="font-size:0.8rem;color:#222;font-weight:600;line-height:1.5;">${f.desc||'—'}</div>
+            ${f.action?`<div style="font-size:0.72rem;color:#555;margin-top:4px;padding-top:4px;border-top:1px solid #f5f5f5;"><span style="color:#bbb;font-weight:700;">조치</span>  ${f.action}</div>`:''}
           </div>
-          <div style="font-size:0.8rem;color:#222;font-weight:600;">${f.desc||'—'}</div>
-          ${f.action?`<div style="font-size:0.72rem;color:#555;margin-top:4px;"><span style="color:#aaa;font-weight:700;">조치:</span> ${f.action}</div>`:''}
-        </div>
-      `).join('')}
-    </div>` : ''}
-
-    ${hist.f===0&&hist.o===0?`
-    <div style="text-align:center;padding:40px 20px;background:#f0faf4;border-radius:8px;border:1px solid rgba(26,122,74,0.15);">
-      <i class="fas fa-check-circle" style="font-size:2.5rem;color:#1a7a4a;margin-bottom:12px;display:block;"></i>
-      <div style="font-size:1rem;font-weight:800;color:#1a7a4a;">지적사항 없음 (Clean)</div>
-      <div style="font-size:0.78rem;color:#555;margin-top:4px;">이 부문은 심사 결과 이상 없음</div>
-    </div>`:''}
-
-    <!-- Maturity -->
-    ${maturityTotal > 0 ? `
-    <div style="margin-top:18px;font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0f0;">
-      <i class="fas fa-chart-line me-1" style="color:#1a7a4a;"></i> Maturity Assessment (${maturity.length}/${maturityTotal})
+        `).join('')}
+      </div>` : `<div style="text-align:center;padding:32px;background:#f0faf4;border-radius:8px;color:#1a7a4a;font-weight:700;"><i class="fas fa-check-circle" style="font-size:2rem;display:block;margin-bottom:8px;"></i>이 부문 OBS 없음</div>`}
     </div>
-    <div style="display:flex;flex-direction:column;gap:6px;">
-      ${(APP_DATA.rbiMaturityCriteria.keyIsarps||[]).filter(i=>i.startsWith(code)).map(isarp=>{
-        const ma = maturity.find(m=>m.isarp===isarp);
-        const lvlColor = {Established:'#1a7a4a',Mature:'#1d4ed8',Leading:'#7c3aed'};
-        return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f8f8f8;font-size:0.76rem;">
-          <span style="background:#f5f5f5;padding:1px 8px;border-radius:3px;font-size:0.62rem;font-weight:700;color:#555;min-width:70px;text-align:center;">${isarp}</span>
-          ${ma&&ma.level?`<span style="background:${lvlColor[ma.level]||'#aaa'}22;color:${lvlColor[ma.level]||'#aaa'};padding:1px 8px;border-radius:3px;font-size:0.62rem;font-weight:800;">${ma.level}</span>`:
-          `<span style="background:#f0f0f0;color:#bbb;padding:1px 8px;border-radius:3px;font-size:0.62rem;">미평가</span>`}
-        </div>`;
-      }).join('')}
-    </div>` : ''}
+
+    <!-- ── Tab: REPEATED ── -->
+    <div id="dtab-repeated" style="display:${defaultTab==='repeated'?'block':'none'}">
+      <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#7c3aed;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+        <i class="fas fa-redo"></i> REPEATED FINDINGS (${repeatedFindings.length}건)
+      </div>
+      ${repeatedFindings.length > 0 ? `
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${repeatedFindings.map(f=>`
+          <div style="background:#fdf8ff;border:1px solid rgba(124,58,237,0.15);border-left:3px solid #7c3aed;border-radius:4px;padding:12px 14px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <span style="background:#f3eeff;color:#7c3aed;border:1px solid rgba(124,58,237,0.2);padding:2px 8px;border-radius:3px;font-size:0.62rem;font-weight:900;">${f.isarp||'—'}</span>
+              <span style="background:#fef3c7;color:#92400e;padding:2px 7px;border-radius:3px;font-size:0.58rem;font-weight:700;">REPEATED</span>
+              <span style="margin-left:auto;background:${(statusColor[f.status]||'#aaa')}18;color:${statusColor[f.status]||'#aaa'};padding:2px 8px;border-radius:3px;font-size:0.6rem;font-weight:800;">${statusLabel[f.status]||f.status||'—'}</span>
+            </div>
+            <div style="font-size:0.8rem;color:#222;font-weight:600;line-height:1.5;">${f.desc||'—'}</div>
+          </div>
+        `).join('')}
+      </div>` : `<div style="text-align:center;padding:32px;background:#f5f0ff;border-radius:8px;color:#7c3aed;font-weight:700;font-size:0.85rem;">반복 지적사항 없음</div>`}
+    </div>
+
+    <!-- ── Tab: MATURITY ── -->
+    <div id="dtab-maturity" style="display:${defaultTab==='maturity'?'block':'none'}">
+      <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#1a7a4a;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+        <i class="fas fa-chart-line"></i> MATURITY ASSESSMENT (${maturity.length}/${maturityTotal})
+      </div>
+      ${maturityTotal > 0 ? `
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        ${(APP_DATA.rbiMaturityCriteria.keyIsarps||[]).filter(i=>i.startsWith(code)).map(isarp=>{
+          const ma = maturity.find(m=>m.isarp===isarp);
+          const lvlColor = {Established:'#1a7a4a',Mature:'#1d4ed8',Leading:'#7c3aed'};
+          return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f5f5f5;font-size:0.76rem;">
+            <span style="background:#f5f5f5;padding:2px 10px;border-radius:3px;font-size:0.62rem;font-weight:700;color:#555;min-width:76px;text-align:center;">${isarp}</span>
+            ${ma&&ma.level
+              ? `<span style="background:${lvlColor[ma.level]||'#aaa'}22;color:${lvlColor[ma.level]||'#aaa'};padding:2px 10px;border-radius:3px;font-size:0.62rem;font-weight:800;">${ma.level}</span>`
+              : `<span style="background:#f0f0f0;color:#ccc;padding:2px 10px;border-radius:3px;font-size:0.62rem;">미평가</span>`}
+          </div>`;
+        }).join('')}
+      </div>` : `<div style="text-align:center;padding:32px;color:#bbb;font-size:0.8rem;">Maturity 평가 항목 없음</div>`}
+    </div>
+
+    <!-- ── Clean state ── -->
+    <div id="dtab-clean" style="display:${defaultTab==='clean'?'block':'none'}">
+      <div style="text-align:center;padding:40px 20px;background:#f0faf4;border-radius:8px;border:1px solid rgba(26,122,74,0.15);">
+        <i class="fas fa-check-circle" style="font-size:2.5rem;color:#1a7a4a;margin-bottom:12px;display:block;"></i>
+        <div style="font-size:1rem;font-weight:800;color:#1a7a4a;">지적사항 없음 (Clean)</div>
+        <div style="font-size:0.78rem;color:#555;margin-top:4px;">이 부문은 심사 결과 이상 없음</div>
+      </div>
+    </div>
 
     <div style="margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0;display:flex;gap:8px;">
       <button onclick="navigateToHistoryCAP('${code}');closeSectionDetail();"
@@ -2109,6 +2143,27 @@ function closeSectionDetail() {
   document.getElementById('section-detail-overlay').style.display = 'none';
   document.getElementById('section-detail-panel').style.display   = 'none';
   document.body.style.overflow = '';
+}
+
+function showDetailTab(tab) {
+  ['findings','obs','repeated','maturity','clean'].forEach(t => {
+    const el  = document.getElementById('dtab-' + t);
+    const btn = document.getElementById('dtabBtn-' + t);
+    if (el)  el.style.display = (t === tab) ? 'block' : 'none';
+    if (btn) {
+      if (t === tab) {
+        btn.style.opacity     = '1';
+        btn.style.transform   = 'translateY(-2px)';
+        btn.style.boxShadow   = '0 3px 10px rgba(0,0,0,0.12)';
+        btn.style.borderWidth = '2px';
+      } else {
+        btn.style.opacity     = '0.65';
+        btn.style.transform   = '';
+        btn.style.boxShadow   = '';
+        btn.style.borderWidth = '2px';
+      }
+    }
+  });
 }
 
 // ── CAP/FAT in History: filtered navigation ───────────────

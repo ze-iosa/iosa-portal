@@ -454,19 +454,24 @@ button { font-family: var(--font); cursor: pointer; }
 .prog-bar-fill { height: 100%; background: var(--iata-blue); border-radius: var(--radius-md); transition: width var(--motion-fast); }
 
 /* ── Result cards (audit section results) ───────────────── */
-.result-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: var(--sp-5); margin-bottom: var(--sp-7); }
+.result-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: var(--sp-7); }
 .result-card {
-  background: #fff; border-radius: var(--radius-xs);
-  border: 1px solid var(--border); border-top: 3px solid var(--border);
-  padding: var(--sp-7); box-shadow: var(--shadow-0);
+  background: #fff; border-radius: 6px;
+  border: 1px solid #ebebeb;
+  border-left: 4px solid #ddd;
+  padding: 14px 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  cursor: pointer;
+  transition: transform 120ms, box-shadow 120ms;
 }
-.result-card.has-findings { border-top-color: var(--eastar-red); }
-.result-card.has-obs      { border-top-color: var(--eastar-gold); }
-.result-card.clean        { border-top-color: #1a7a4a; }
-.result-card-code { font-size: var(--size-xs); font-weight: 900; letter-spacing: 2px; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: var(--sp-3); }
-.result-card-f  { font-size: 36px; font-weight: 900; line-height: 1; color: var(--eastar-red); }
-.result-card-o  { font-size: 20px; font-weight: 800; color: var(--eastar-gold); }
-.result-card-na { font-size: var(--size-xs); color: #ccc; margin-top: var(--sp-3); font-weight: 500; }
+.result-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.09); }
+.result-card.has-findings { border-left-color: var(--eastar-red); background: #fff8f8; }
+.result-card.has-obs      { border-left-color: var(--eastar-gold); background: #fffcf4; }
+.result-card.clean        { border-left-color: #1a7a4a; }
+.result-card-code { font-size: 0.58rem; font-weight: 900; letter-spacing: 2.5px; color: #aaa; text-transform: uppercase; }
+.result-card-f  { font-size: 2.4rem; font-weight: 900; line-height: 1; color: var(--eastar-red); }
+.result-card-o  { font-size: 1.5rem; font-weight: 800; line-height: 1; color: var(--eastar-gold); }
+.result-card-na { font-size: 0.62rem; color: #ccc; margin-top: 6px; font-weight: 500; }
 
 /* ── Maturity ───────────────────────────────────────────── */
 .maturity-chip { display:inline-flex; padding: 3px 12px; border-radius: var(--radius-md); font-size: var(--size-xs); font-weight: 700; border:1px solid; }
