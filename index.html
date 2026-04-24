@@ -844,34 +844,55 @@ function renderDashboardNew() {
 
 
 <!-- 2026 재인증 준비 타임라인 -->
-<div class="w-card mb-3">
-  <div class="w-card-header">
-    <span class="w-card-title">2026 재인증 준비 일정</span>
-    <span style="font-size:0.72rem;color:var(--text-light);font-weight:600;">ISM Ed.18 · RBI 재인증 대비</span>
+<div style="background:#fff;border:1px solid #e8e8e8;border-radius:10px;margin-bottom:20px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+  <!-- 헤더 -->
+  <div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <i class="fas fa-route" style="color:#60a5fa;font-size:1rem;"></i>
+      <span style="color:#fff;font-size:0.88rem;font-weight:800;letter-spacing:0.3px;">재인증 준비 로드맵</span>
+    </div>
+    <span style="background:rgba(96,165,250,0.2);color:#93c5fd;border:1px solid rgba(96,165,250,0.3);padding:3px 10px;border-radius:20px;font-size:0.62rem;font-weight:800;letter-spacing:1px;">ISM Ed.18 · RBI 재인증</span>
   </div>
-  <div class="w-card-body" style="padding-top:4px;padding-bottom:8px;">
-    <div style="display:flex;gap:0;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;">
+  <!-- 타임라인 트랙 -->
+  <div style="padding:20px 20px 16px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:#e0e0e0 transparent;">
+    <div style="display:flex;align-items:stretch;min-width:max-content;gap:0;position:relative;">
       ${[
-        { month:'2026.07', color:'#1d4ed8', icon:'fa-chalkboard-teacher', label:'7월', items:['IOSA 내부심사원 교육 실시'] },
-        { month:'2026.08', color:'#7c3aed', icon:'fa-users-gear',         label:'8월', items:['IOSA TFT 발령','IOSA 내부심사 실시'] },
-        { month:'2026.10', color:'#d97706', icon:'fa-calendar-check',     label:'10월', items:['본점검 일정 조율','IATA 요구자료 제출'] },
-        { month:'2027.03', color:'var(--eastar-red)', icon:'fa-search',   label:'2027.03', items:['IOSA RBI 재인증 심사'] },
+        { ym:'2026.06', color:'#059669', bg:'#ecfdf5', border:'#6ee7b7', icon:'fa-graduation-cap', label:'6월',  items:['IATA RBI 교육 이수'],                                      tag:'D-'+(Math.max(0,Math.round((new Date('2026-06-01')-new Date())/(86400000))))  },
+        { ym:'2026.07', color:'#1d4ed8', bg:'#eff6ff', border:'#93c5fd', icon:'fa-chalkboard-teacher', label:'7월',  items:['IOSA 내부심사원 교육 실시'],                          tag:'D-'+(Math.max(0,Math.round((new Date('2026-07-01')-new Date())/(86400000))))  },
+        { ym:'2026.08', color:'#7c3aed', bg:'#f5f3ff', border:'#c4b5fd', icon:'fa-users-gear',         label:'8월',  items:['IOSA TFT 발령','IOSA 내부심사 실시'],                tag:'D-'+(Math.max(0,Math.round((new Date('2026-08-01')-new Date())/(86400000))))  },
+        { ym:'2026.10', color:'#b45309', bg:'#fffbeb', border:'#fcd34d', icon:'fa-calendar-check',     label:'10월', items:['본점검 일정 조율','IATA 요구자료 제출'],             tag:'D-'+(Math.max(0,Math.round((new Date('2026-10-01')-new Date())/(86400000))))  },
+        { ym:'2027.03', color:'#d20015', bg:'#fff0f0', border:'#fca5a5', icon:'fa-shield-check',        label:'2027.03', items:['IOSA RBI 재인증 심사'],                          tag:'D-'+(Math.max(0,Math.round((new Date('2027-03-01')-new Date())/(86400000)))), final:true },
       ].map((t, i, arr) => `
-        <div style="display:flex;align-items:flex-start;flex-shrink:0;">
-          <div style="display:flex;flex-direction:column;align-items:center;padding:0 4px;">
-            <div style="width:36px;height:36px;border-radius:50%;background:${t.color}18;border:2px solid ${t.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1;">
-              <i class="fas ${t.icon}" style="color:${t.color};font-size:0.8rem;"></i>
-            </div>
-            ${i < arr.length-1 ? `<div style="flex:1;width:2px;background:linear-gradient(to bottom,${t.color}50,transparent);min-height:4px;"></div>` : ''}
-          </div>
-          <div style="padding:0 24px 20px 12px;min-width:180px;">
-            <div style="font-size:0.6rem;font-weight:900;letter-spacing:1.5px;color:${t.color};text-transform:uppercase;margin-bottom:4px;">${t.label}</div>
-            ${t.items.map(item => `
-              <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;">
-                <span style="width:5px;height:5px;border-radius:50%;background:${t.color};flex-shrink:0;margin-top:6px;"></span>
-                <span style="font-size:0.78rem;color:#333;font-weight:600;line-height:1.4;">${item}</span>
+        <div style="display:flex;align-items:center;flex-shrink:0;">
+          <!-- 마일스톤 카드 -->
+          <div style="width:160px;background:${t.bg};border:2px solid ${t.border};border-radius:10px;overflow:hidden;position:relative;${t.final?'box-shadow:0 4px 20px rgba(210,0,21,0.15);':''}" >
+            <!-- 컬러 탑바 -->
+            <div style="height:4px;background:${t.color};"></div>
+            <div style="padding:12px 14px 14px;">
+              <!-- 월 + D-day -->
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <span style="font-size:0.65rem;font-weight:900;color:${t.color};letter-spacing:1.5px;text-transform:uppercase;">${t.ym}</span>
+                <span style="background:${t.color};color:#fff;font-size:0.55rem;font-weight:800;padding:2px 6px;border-radius:10px;">${t.tag}</span>
+              </div>
+              <!-- 아이콘 -->
+              <div style="width:44px;height:44px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                <i class="fas ${t.icon}" style="font-size:1.1rem;color:${t.color};"></i>
+              </div>
+              <!-- 업무 목록 -->
+              ${t.items.map(item => `
+              <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:5px;">
+                <span style="width:5px;height:5px;border-radius:50%;background:${t.color};flex-shrink:0;margin-top:5px;"></span>
+                <span style="font-size:0.73rem;color:#222;font-weight:700;line-height:1.4;">${item}</span>
               </div>`).join('')}
+            </div>
           </div>
+          <!-- 연결선 (마지막 제외) -->
+          ${i < arr.length-1 ? `
+          <div style="display:flex;align-items:center;width:32px;flex-shrink:0;">
+            <div style="width:100%;height:2px;background:linear-gradient(to right,${t.color}60,${arr[i+1].color}60);position:relative;">
+              <i class="fas fa-chevron-right" style="position:absolute;right:-4px;top:50%;transform:translateY(-50%);font-size:0.6rem;color:${arr[i+1].color};"></i>
+            </div>
+          </div>` : ''}
         </div>`).join('')}
     </div>
   </div>
