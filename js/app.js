@@ -2218,18 +2218,21 @@ async function parseCRTemplate(file) {
     reader.onload = async e => {
       try {
         const data = new Uint8Array(e.target.result);
-        const wb   = XLSX.read(data, { type: 'array' });
+        const wb   = XLSX.read(data, { type: 'array', cellText: true, cellNF: false });
 
-        // ① Try to find a "Conformance Report"-like sheet first, else use all sheets
+        // ① Try named sheets first, then fall back to scanning all
         const preferredSheet = wb.SheetNames.find(n =>
           /conformance|cr|report|심사|점검/i.test(n)
         );
-        const sheetsToScan = preferredSheet
-          ? [preferredSheet]
-          : wb.SheetNames;
+        const sheetsToScan = preferredSheet ? [preferredSheet] : wb.SheetNames;
 
-        // ② ISARP code pattern: e.g. "FLT 1.1.2" / "CAB 1.5.1A" / "ORG 3.6"
-        const ISARP_RE = /\b([A-Z]{2,3})\s+(\d+(?:\.\d+)*[A-Z]?)\b/;
+        // ② Broad ISARP regex — handles "FLT 1.1.2", "FLT-1.1.2", "FLT1.1.2"
+        //    Section prefix must be one of our 8 known sections.
+        //    Captured as group(1)=prefix, group(2)=number
+        const ISARP_RE = new RegExp(
+          '(?:^|[\\s,;(])(' + CR_SECTIONS.join('|') + ')[\\s\\-_]*(\\d+(?:[.\\-]\\d+)*[A-Za-z]?)(?=[\\s,;)\\n]|$)',
+          'i'
+        );
         const sanitize = s => s.replace(/[^A-Za-z0-9_.]/g, '_');
 
         const seenCodes = new Set();
@@ -2237,23 +2240,26 @@ async function parseCRTemplate(file) {
 
         for (const sheetName of sheetsToScan) {
           const ws   = wb.Sheets[sheetName];
-          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
 
           for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
             if (!row || row.length === 0) continue;
 
-            // ③ Scan every cell in the row for an ISARP code
+            // ③ Check every cell in this row for an ISARP code
             let isarpCode = '';
             let section   = '';
-            for (const cell of row) {
-              const cellStr = (cell || '').toString().trim();
+            let isarpCellIdx = -1;
+
+            for (let ci = 0; ci < row.length; ci++) {
+              const cellStr = ' ' + (row[ci] || '').toString().trim() + ' ';
               const m = cellStr.match(ISARP_RE);
               if (m) {
                 const prefix = m[1].toUpperCase();
                 if (CR_SECTIONS.includes(prefix)) {
-                  isarpCode = `${prefix} ${m[2]}`;
-                  section   = prefix;
+                  isarpCode    = `${prefix} ${m[2].toUpperCase()}`;
+                  section      = prefix;
+                  isarpCellIdx = ci;
                   break;
                 }
               }
@@ -2261,13 +2267,18 @@ async function parseCRTemplate(file) {
             if (!isarpCode || seenCodes.has(isarpCode)) continue;
             seenCodes.add(isarpCode);
 
-            // ④ Find the longest text cell as the requirement text
-            //    (skip cells that are just the ISARP code itself)
-            const requirementText = row
-              .map(c => (c || '').toString().trim())
-              .filter(c => c && !ISARP_RE.test(c) && c !== section && c.length > 5)
-              .sort((a, b) => b.length - a.length)[0] || '';
+            // ④ Requirement text = longest non-ISARP cell (prefer cells after ISARP cell)
+            const textCells = row
+              .map((c, ci) => ({ val: (c || '').toString().trim(), ci }))
+              .filter(({ val, ci }) =>
+                val &&
+                val.length > 2 &&
+                ci !== isarpCellIdx &&
+                !ISARP_RE.test(' ' + val + ' ')
+              )
+              .sort((a, b) => b.val.length - a.val.length);
 
+            const requirementText = textCells.length > 0 ? textCells[0].val : '';
             const id = sanitize(isarpCode);
 
             entries.push({
@@ -2294,18 +2305,21 @@ async function parseCRTemplate(file) {
         }
 
         if (entries.length === 0) {
-          // ⑤ Fallback: could not find any ISARP codes — show debug info
-          const ws   = wb.Sheets[wb.SheetNames[0]];
-          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-          const preview = rows.slice(0, 5).map(r => r.join(' | ')).join('\n');
+          // ⑤ Nothing found — build a debug preview to show the user
+          const ws      = wb.Sheets[wb.SheetNames[0]];
+          const rows    = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
+          const preview = rows.slice(0, 8)
+            .map((r, i) => `[${i}] ` + r.map(c => (c||'').toString().substring(0,30)).join(' | '))
+            .join('\n');
           return reject(new Error(
-            `ISARP 코드를 찾을 수 없습니다.\n시트: ${wb.SheetNames.join(', ')}\n` +
-            `첫 5행 미리보기:\n${preview}\n\n` +
-            `엑셀에 "FLT 1.1.2" 형식의 ISARP 코드가 있는지 확인하세요.`
+            `ISARP 코드를 찾을 수 없습니다.\n` +
+            `시트 목록: ${wb.SheetNames.join(', ')}\n\n` +
+            `첫 8행:\n${preview}\n\n` +
+            `ORG/FLT/DSP/MNT/CAB/GRH/CGO/SEC 중 하나로 시작하는 코드(예: FLT 1.1.2)가 있는지 확인하세요.`
           ));
         }
 
-        // ⑥ Save to IndexedDB
+        // ⑥ Parse succeeded — NOW clear old data and save new entries
         await clearCRData();
         for (const entry of entries) {
           await saveCRDataEntry(entry);
