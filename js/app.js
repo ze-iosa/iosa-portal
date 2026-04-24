@@ -2453,9 +2453,9 @@ function _renderCRContent(container, allEntries, crManuals) {
   const tableStyles = `
 <style>
 .cr-table-wrap { overflow-x:auto; border:1px solid #e8e8e8; border-radius:6px; }
-.cr-header { display:grid; grid-template-columns:36px 120px 1fr 160px 100px 180px 180px 36px; background:#f5f5f5; border-bottom:2px solid #e0e0e0; position:sticky; top:0; z-index:5; }
-.cr-header-cell { padding:8px 10px; font-size:0.6rem; font-weight:800; text-transform:uppercase; letter-spacing:0.8px; color:#777; border-right:1px solid #e8e8e8; }
-.cr-row { display:grid; grid-template-columns:36px 120px 1fr 160px 100px 180px 180px 36px; border-bottom:1px solid #f0f0f0; border-left:3px solid transparent; transition:border-left-color 180ms,background 180ms; }
+.cr-header { display:grid; grid-template-columns:32px 105px 100px 120px 155px 95px 175px 145px 165px 32px; background:#f5f5f5; border-bottom:2px solid #e0e0e0; position:sticky; top:0; z-index:5; }
+.cr-header-cell { padding:7px 8px; font-size:0.57rem; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; color:#777; border-right:1px solid #e8e8e8; line-height:1.3; }
+.cr-row { display:grid; grid-template-columns:32px 105px 100px 120px 155px 95px 175px 145px 165px 32px; border-bottom:1px solid #f0f0f0; border-left:3px solid transparent; transition:border-left-color 180ms,background 180ms; }
 .cr-row:hover { background:#fafafa !important; }
 .cr-cell { padding:6px 8px; border-right:1px solid #f0f0f0; font-size:0.76rem; display:flex; align-items:flex-start; }
 .cr-num { color:#bbb; font-size:0.63rem; align-items:center; justify-content:center; }
@@ -2585,11 +2585,13 @@ ${sectionEntries.length === 0 ? `
   <div class="cr-header">
     <div class="cr-header-cell">#</div>
     <div class="cr-header-cell">ISARP</div>
-    <div class="cr-header-cell">요건 / 내용</div>
-    <div class="cr-header-cell">매뉴얼 근거</div>
-    <div class="cr-header-cell">적합성</div>
-    <div class="cr-header-cell">지적사항 / N/A 사유</div>
-    <div class="cr-header-cell">개선 · 조치 계획</div>
+    <div class="cr-header-cell">심사 일자<br><span style="font-weight:500;opacity:0.7;">Date of Last Audit</span></div>
+    <div class="cr-header-cell">심사원<br><span style="font-weight:500;opacity:0.7;">Name of Auditor</span></div>
+    <div class="cr-header-cell">매뉴얼 근거<br><span style="font-weight:500;opacity:0.7;">Documentation Ref.</span></div>
+    <div class="cr-header-cell">적합성<br><span style="font-weight:500;opacity:0.7;">Assessment</span></div>
+    <div class="cr-header-cell">지적사항 / N/A 사유<br><span style="font-weight:500;opacity:0.7;">Description / Reason</span></div>
+    <div class="cr-header-cell">근본 원인<br><span style="font-weight:500;opacity:0.7;">Root Cause</span></div>
+    <div class="cr-header-cell">시정조치<br><span style="font-weight:500;opacity:0.7;">Corrective Action</span></div>
     <div class="cr-header-cell"></div>
   </div>
   ${sectionEntries.map((e, idx) => {
@@ -2606,13 +2608,25 @@ ${sectionEntries.length === 0 ? `
     return `<div class="cr-row" data-id="${_esc(e.id)}" style="border-left-color:${st.color};background:${rowBg};${rowOp}">
   <div class="cr-cell cr-num">${idx+1}</div>
   <div class="cr-cell cr-isarp">${_esc(e.isarpCode)}${findingBadge?'<br>'+findingBadge:''}</div>
-  <div class="cr-cell cr-req" onclick="toggleCRReq(this)" title="클릭해서 전체보기">${shortReq||'<span style="color:#ddd;font-size:0.7rem;">내용 없음</span>'}</div>
-  <div class="cr-cell"><textarea placeholder="사내 매뉴얼명, 조항 등" onblur="debouncedCRSave('${_esc(e.id)}','docRef',this.value)">${_esc(e.docRef||'')}</textarea></div>
+  <div class="cr-cell" style="padding:4px 6px;">
+    <input type="date" value="${_esc(e.auditDate||'')}"
+      style="width:100%;border:1px solid #eee;border-radius:3px;padding:4px 5px;font-size:0.7rem;font-family:inherit;background:transparent;color:#333;outline:none;"
+      onchange="debouncedCRSave('${_esc(e.id)}','auditDate',this.value)"
+      onfocus="this.style.borderColor='var(--eastar-red)'" onblur="this.style.borderColor='#eee'">
+  </div>
+  <div class="cr-cell" style="padding:4px 6px;">
+    <input type="text" value="${_esc(e.auditorName||'')}" placeholder="심사원 이름"
+      style="width:100%;border:1px solid #eee;border-radius:3px;padding:4px 5px;font-size:0.72rem;font-family:inherit;background:transparent;color:#333;outline:none;"
+      onchange="debouncedCRSave('${_esc(e.id)}','auditorName',this.value)"
+      onfocus="this.style.borderColor='var(--eastar-red)'" onblur="this.style.borderColor='#eee'">
+  </div>
+  <div class="cr-cell"><textarea placeholder="사내 매뉴얼, 조항번호 등" onblur="debouncedCRSave('${_esc(e.id)}','docRef',this.value)">${_esc(e.docRef||'')}</textarea></div>
   <div class="cr-cell">
     <select onchange="updateCRRowStyle(this)">${statusOptions}</select>
   </div>
-  <div class="cr-cell"><textarea placeholder="NC·N/A인 경우 사유 기재" onblur="debouncedCRSave('${_esc(e.id)}','ncDesc',this.value)">${_esc(e.ncDesc||'')}</textarea></div>
-  <div class="cr-cell"><textarea placeholder="개선 또는 조치 계획" onblur="debouncedCRSave('${_esc(e.id)}','correctiveAction',this.value)">${_esc(e.correctiveAction||'')}</textarea></div>
+  <div class="cr-cell"><textarea placeholder="NC·N/A인 경우 기재" onblur="debouncedCRSave('${_esc(e.id)}','ncDesc',this.value)">${_esc(e.ncDesc||'')}</textarea></div>
+  <div class="cr-cell"><textarea placeholder="근본 원인 분석" onblur="debouncedCRSave('${_esc(e.id)}','rootCause',this.value)">${_esc(e.rootCause||'')}</textarea></div>
+  <div class="cr-cell"><textarea placeholder="시정조치 계획 및 내용" onblur="debouncedCRSave('${_esc(e.id)}','correctiveAction',this.value)">${_esc(e.correctiveAction||'')}</textarea></div>
   <div class="cr-cell cr-del-btn"><button onclick="deleteCREntry('${_esc(e.id)}')" title="삭제"><i class="fas fa-times"></i></button></div>
 </div>`;
   }).join('')}
