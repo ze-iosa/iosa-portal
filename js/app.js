@@ -2410,6 +2410,191 @@ function toggleCRReq(el) {
   el.classList.toggle('cr-req-expanded');
 }
 
+// ════════════════════════════════════════════════════════════
+//  사내 매뉴얼 근거 자동 매핑 테이블
+//  출처: 품질규정 Rev.17 / SMS 매뉴얼 Rev.14 / ERP Rev.12 / FDAP 운영지침 Rev.12
+// ════════════════════════════════════════════════════════════
+const ISARP_DOC_REF_MAP = {
+  // ── ORG 1.1  최고경영관리자(AE) 및 통합관리시스템 ──────────────
+  'ORG 1.1.1': '안전관리시스템 매뉴얼 Rev.14, 2.3절 (안전 조직); 품질규정 Rev.17, 2.4절 (품질시스템 조직)',
+  'ORG 1.1.2': '안전관리시스템 매뉴얼 Rev.14, 2.3절; 품질규정 Rev.17, 2.5.1절 (최고경영관리자)',
+  'ORG 1.1.3': '안전관리시스템 매뉴얼 Rev.14, 2.1절 (안전정책), 2.3절 (안전조직)',
+  'ORG 1.1.4': '안전관리시스템 매뉴얼 Rev.14, 2.4절 (안전 회의체)',
+
+  // ── ORG 1.2  선임관리자 / Nominated Persons ───────────────────
+  'ORG 1.2.1': '안전관리시스템 매뉴얼 Rev.14, 2.3절; 품질규정 Rev.17, 2.5절 (책임과 권한)',
+  'ORG 1.2.2': '안전관리시스템 매뉴얼 Rev.14, 2.3절; 품질규정 Rev.17, 2.5.3절 (부문별 품질책임자)',
+  'ORG 1.2.3': '안전관리시스템 매뉴얼 Rev.14, 2.3절; 품질규정 Rev.17, 2.5절',
+
+  // ── ORG 1.3  안전관리자(Safety Manager) ──────────────────────
+  'ORG 1.3.1': '안전관리시스템 매뉴얼 Rev.14, 2.3절 (안전조직)',
+  'ORG 1.3.2': '안전관리시스템 매뉴얼 Rev.14, 2.3절',
+  'ORG 1.3.3': '안전관리시스템 매뉴얼 Rev.14, 2.3절',
+
+  // ── ORG 1.4  안전위원회 / Safety Review Board ─────────────────
+  'ORG 1.4.1': '안전관리시스템 매뉴얼 Rev.14, 2.4절 (안전 회의체)',
+  'ORG 1.4.2': '안전관리시스템 매뉴얼 Rev.14, 2.4절',
+
+  // ── ORG 1.5  문서관리(Documentation System) ──────────────────
+  'ORG 1.5.1': '안전관리시스템 매뉴얼 Rev.14, 1.5절 (구성 및 배포), 1.6절 (문서 및 기록물 관리); 품질규정 Rev.17, 1.3절 (제정 및 개정)',
+  'ORG 1.5.2': '안전관리시스템 매뉴얼 Rev.14, 1.6절; 품질규정 Rev.17, 1.3절',
+  'ORG 1.5.3': '안전관리시스템 매뉴얼 Rev.14, 1.6절',
+  'ORG 1.5.4': '안전관리시스템 매뉴얼 Rev.14, 1.5절 (배포); 품질규정 Rev.17, 1.3절',
+  'ORG 1.5.5': '안전관리시스템 매뉴얼 Rev.14, 1.6절; 품질규정 Rev.17, 2.11절 (품질심사 자료관리)',
+  'ORG 1.5.6': '안전관리시스템 매뉴얼 Rev.14, 1.6절; 품질규정 Rev.17, 2.11절',
+  'ORG 1.5.7': '안전관리시스템 매뉴얼 Rev.14, 1.6절',
+
+  // ── ORG 1.6  외주협력업체 위탁활동 관리 ──────────────────────
+  'ORG 1.6.1': '품질규정 Rev.17, 2.12절 (공급업체 및 외주협력업체 관리)',
+  'ORG 1.6.2': '품질규정 Rev.17, 2.12절, 2.12.1절 (외주협력업체 선정 절차)',
+
+  // ── ORG 1.7  변화관리(Management of Change) ──────────────────
+  'ORG 1.7.1':  '안전관리시스템 매뉴얼 Rev.14, 4.5절 (변화관리)',
+  'ORG 1.7.2':  '안전관리시스템 매뉴얼 Rev.14, 4.5절',
+  'ORG 1.7.3':  '안전관리시스템 매뉴얼 Rev.14, 4.5절',
+  'ORG 1.7.4':  '안전관리시스템 매뉴얼 Rev.14, 4.5절',
+  'ORG 1.7.5':  '안전관리시스템 매뉴얼 Rev.14, 4.5절',
+  'ORG 1.7.6':  '안전관리시스템 매뉴얼 Rev.14, 4.5절',
+  'ORG 1.7.7':  '안전관리시스템 매뉴얼 Rev.14, 4.5절',
+  'ORG 1.7.8':  '안전관리시스템 매뉴얼 Rev.14, 4.5절',
+  'ORG 1.7.9':  '안전관리시스템 매뉴얼 Rev.14, 4.5절',
+  'ORG 1.7.10': '안전관리시스템 매뉴얼 Rev.14, 4.5절',
+  'ORG 1.7.11': '안전관리시스템 매뉴얼 Rev.14, 4.5절',
+  'ORG 1.7.12': '안전관리시스템 매뉴얼 Rev.14, 4.5절',
+
+  // ── ORG 2.1  품질관리시스템(QMS) ─────────────────────────────
+  'ORG 2.1.1': '품질규정 Rev.17, 2.1절 (품질시스템 개요), 2.2절 (경영자 방침)',
+  'ORG 2.1.2': '품질규정 Rev.17, 2.4절 (품질시스템 조직), 2.5절 (책임과 권한)',
+  'ORG 2.1.4': '품질규정 Rev.17, 2.5.2절 (총괄품질관리자)',
+  'ORG 2.1.5': '품질규정 Rev.17, 2.5.2절',
+  'ORG 2.1.6': '품질규정 Rev.17, 2.5.2절, 2.5.3절 (부문별 품질책임자)',
+  'ORG 2.1.7': '품질규정 Rev.17, 2.6절 (품질보증 프로그램), 2.10절 (품질 성과 측정)',
+  'ORG 2.1.8': '품질규정 Rev.17, 2.7절 (의사소통), 2.8절 (품질회의)',
+  'ORG 2.1.9': '품질규정 Rev.17, 2.9.4절 (품질심사원 교육훈련)',
+
+  // ── ORG 2.2  내부품질심사 ─────────────────────────────────────
+  'ORG 2.2.1': '품질규정 Rev.17, 2.9절 (품질심사 프로그램), 3.1절~3.10절 (심사 절차)',
+  'ORG 2.2.2': '품질규정 Rev.17, 2.9.3절 (ISARPs 심사 프로그램)',
+  'ORG 2.2.3': '품질규정 Rev.17, 2.9.2절, 2.9.2.1절 (심사 분야), 2.9.2.2절 (심사 종류)',
+  'ORG 2.2.4': '품질규정 Rev.17, 2.9.4절, 2.9.5절 (품질심사팀 구성)',
+
+  // ── ORG 2.3  시정조치 프로세스 ───────────────────────────────
+  'ORG 2.3.1': '품질규정 Rev.17, 3.9절 (심사 결과 후속조치)',
+
+  // ── ORG 2.4  외주협력업체 평가(QMS 관점) ─────────────────────
+  'ORG 2.4.1': '품질규정 Rev.17, 2.12절 (외주협력업체 관리)',
+  'ORG 2.4.2': '품질규정 Rev.17, 2.12.1절 (외주협력업체 선정 절차)',
+  'ORG 2.4.3': '품질규정 Rev.17, 2.12절',
+  'ORG 2.4.4': '품질규정 Rev.17, 2.12절',
+
+  // ── ORG 2.5  안전보증 / Safety Assurance (QMS 연계) ──────────
+  'ORG 2.5.1': '품질규정 Rev.17, 2.6절 (품질보증 프로그램); 안전관리시스템 매뉴얼 Rev.14, 4.2절 (안전 감사)',
+  'ORG 2.5.3': '품질규정 Rev.17, 2.6절; 안전관리시스템 매뉴얼 Rev.14, 4.3절 (안전성과지표)',
+  'ORG 2.5.4': '품질규정 Rev.17, 2.6절; 안전관리시스템 매뉴얼 Rev.14, 4.1절 (안전성과 모니터링)',
+
+  // ── ORG 2.6  경영자 검토(Management Review) ──────────────────
+  'ORG 2.6.1': '품질규정 Rev.17, 2.13절 (최고경영관리자의 검토)',
+  'ORG 2.6.2': '품질규정 Rev.17, 2.13절',
+
+  // ── ORG 3.1  안전관리시스템(SMS) 구성 ────────────────────────
+  'ORG 3.1.1': '안전관리시스템 매뉴얼 Rev.14, 2.1절 (안전정책), 2.2절 (안전목표)',
+  'ORG 3.1.2': '안전관리시스템 매뉴얼 Rev.14, 2.3절 (안전조직)',
+  'ORG 3.1.3': '안전관리시스템 매뉴얼 Rev.14, 1.2절 (적용범위), 1.3절 (책임 및 의무)',
+  'ORG 3.1.4': '안전관리시스템 매뉴얼 Rev.14, 1.5절 (구성 및 배포), 1.6절 (문서 및 기록물 관리)',
+  'ORG 3.1.5': '안전관리시스템 매뉴얼 Rev.14, 2.3절; 품질규정 Rev.17, 2.1.1절 (통합안전관리시스템)',
+
+  // ── ORG 3.2  위해요인 식별 및 위험관리 ──────────────────────
+  'ORG 3.2.1': '안전관리시스템 매뉴얼 Rev.14, 3.2절 (위해요인 식별)',
+  'ORG 3.2.2': '안전관리시스템 매뉴얼 Rev.14, 3.3절 (위험분석), 3.4절 (위험평가), 3.5절 (위험경감)',
+
+  // ── ORG 3.3  안전성과 모니터링 및 SMS 지속 개선 ─────────────
+  'ORG 3.3.1': '안전관리시스템 매뉴얼 Rev.14, 4.3절 (안전성과지표 설정 및 운영)',
+  'ORG 3.3.2': '안전관리시스템 매뉴얼 Rev.14, 4.3절',
+  'ORG 3.3.3': '안전관리시스템 매뉴얼 Rev.14, 6.1절 (안전데이터 수집·처리 및 활용)',
+  'ORG 3.3.4': '안전관리시스템 매뉴얼 Rev.14, 4.2절 (안전 감사)',
+  'ORG 3.3.5': '안전관리시스템 매뉴얼 Rev.14, 4.1절 (안전성과 모니터링 및 지속적 개선)',
+
+  // ── ORG 3.4  안전보고 시스템 ─────────────────────────────────
+  'ORG 3.4.1': '안전관리시스템 매뉴얼 Rev.14, 3.6절 (안전보고), 3.7절 (안전조사)',
+
+  // ── ORG 3.5  변화관리(SMS) ────────────────────────────────────
+  'ORG 3.5.1': '안전관리시스템 매뉴얼 Rev.14, 4.5절 (변화관리)',
+  'ORG 3.5.2': '안전관리시스템 매뉴얼 Rev.14, 4.5절',
+
+  // ── ORG 3.6  비상대응계획(ERP) ───────────────────────────────
+  'ORG 3.6.1': '사고처리절차교범 Rev.12, 제1장~제8장; 안전관리시스템 매뉴얼 Rev.14, 2.5절 (위기대응계획)',
+
+  // ── ORG 4.1  교육훈련 프로그램 ───────────────────────────────
+  'ORG 4.1.1': '안전관리시스템 매뉴얼 Rev.14, 5.1절 (SMS 교육); 품질규정 Rev.17, 2.9.4절 (심사원 교육훈련)',
+  'ORG 4.1.2': '안전관리시스템 매뉴얼 Rev.14, 5.1절',
+  'ORG 4.1.3': '안전관리시스템 매뉴얼 Rev.14, 5.1절',
+
+  // ── ORG 4.2  안전의사소통 / Safety Promotion ─────────────────
+  'ORG 4.2.1': '안전관리시스템 매뉴얼 Rev.14, 5.2절 (안전 의사소통), 5.4절 (안전문화)',
+
+  // ── ORG 4.3  비행자료분석 프로그램(FDAP/FOQA) ────────────────
+  'ORG 4.3.1': '비행자료분석 프로그램 운영지침 Rev.12, 제1장 (총칙); 안전관리시스템 매뉴얼 Rev.14, 4.6절 (FDAP)',
+  'ORG 4.3.2': '비행자료분석 프로그램 운영지침 Rev.12, 제2장~제6장 (자료분석·처리·위원회)',
+};
+
+// ── 매뉴얼 근거 자동 적용 함수 ────────────────────────────
+async function applyDocRefsForSection(section) {
+  const entries = await getCRDataEntries();
+  const targets = entries.filter(e => e.section === section);
+
+  const hasMappings = targets.some(e => ISARP_DOC_REF_MAP[e.isarpCode]);
+  if (!hasMappings) {
+    alert(`${section} 부문에 대한 매뉴얼 근거 매핑이 준비되지 않았습니다.\n현재 ORG 부문만 지원합니다.`);
+    return;
+  }
+
+  const emptyCount = targets.filter(e => !e.docRef && ISARP_DOC_REF_MAP[e.isarpCode]).length;
+  const allCount   = targets.filter(e => ISARP_DOC_REF_MAP[e.isarpCode]).length;
+
+  if (emptyCount === 0) {
+    if (!confirm(`${section} 부문 전체 ${allCount}개 항목에 매뉴얼 근거가 이미 입력되어 있습니다.\n덮어쓰시겠습니까?`)) return;
+    // Overwrite all
+    for (const e of targets) {
+      const ref = ISARP_DOC_REF_MAP[e.isarpCode];
+      if (!ref) continue;
+      await debouncedCRSaveImmediate(e.id, 'docRef', ref);
+    }
+  } else {
+    if (!confirm(`${section} 부문 ${emptyCount}개 빈 항목에 사내 매뉴얼 근거를 자동으로 입력합니다.\n(이미 입력된 항목은 유지됩니다)\n\n• 품질규정 Rev.17\n• 안전관리시스템 매뉴얼 Rev.14\n• 사고처리절차교범 Rev.12\n• 비행자료분석 운영지침 Rev.12\n\n계속하시겠습니까?`)) return;
+    for (const e of targets) {
+      if (e.docRef) continue; // 기존 내용 보존
+      const ref = ISARP_DOC_REF_MAP[e.isarpCode];
+      if (!ref) continue;
+      await debouncedCRSaveImmediate(e.id, 'docRef', ref);
+    }
+  }
+
+  showCRSavedToast();
+  await renderCR();
+}
+
+// 즉시 저장 (디바운스 없음) — applyDocRefs 전용
+async function debouncedCRSaveImmediate(id, field, value) {
+  try {
+    const db = await openCRDataDB();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction('entries', 'readwrite');
+      const store = tx.objectStore('entries');
+      const req = store.get(id);
+      req.onsuccess = () => {
+        const entry = req.result;
+        if (!entry) { resolve(); return; }
+        entry[field] = value;
+        entry.updatedAt = new Date().toISOString();
+        store.put(entry);
+        tx.oncomplete = resolve;
+        tx.onerror = e => reject(e.target.error);
+      };
+      req.onerror = e => reject(e.target.error);
+    });
+  } catch(e) { console.error('CR immediate save error:', e); }
+}
+
 // ─── renderCR ────────────────────────────────────────────
 async function renderCR() {
   const container = document.getElementById('section-cr');
@@ -2637,11 +2822,20 @@ ${manualsHtml}
       <div style="height:100%;width:${secPct}%;background:${secPct===100?'#1a7a4a':'var(--eastar-red)'};border-radius:3px;transition:width 0.4s;"></div>
     </div>
   </div>
-  <div style="display:flex;gap:10px;font-size:0.67rem;flex-shrink:0;">
+  <div style="display:flex;gap:10px;font-size:0.67rem;flex-shrink:0;align-items:center;">
     <span style="color:#1a7a4a;font-weight:800;">C:${curStat.c}</span>
     <span style="color:#dc3545;font-weight:800;">NC:${curStat.nc}</span>
     <span style="color:#888;font-weight:700;">N/A:${curStat.na}</span>
     <span style="color:#ccc;font-weight:700;">미:${curStat.empty}</span>
+    ${ISARP_DOC_REF_MAP[crSection + ' 1.1.1'] ? `
+    <button onclick="applyDocRefsForSection('${crSection}')"
+      style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border:none;border-radius:4px;font-size:0.68rem;font-weight:800;cursor:pointer;box-shadow:0 2px 6px rgba(29,78,216,0.3);white-space:nowrap;"
+      title="사내 매뉴얼에서 각 ISARP의 매뉴얼 근거를 자동으로 입력합니다">
+      <i class="fas fa-book-open"></i> 매뉴얼 근거 자동 입력
+    </button>` : `
+    <span style="font-size:0.62rem;color:#ccc;font-weight:600;white-space:nowrap;padding:5px 8px;border:1px dashed #eee;border-radius:4px;">
+      <i class="fas fa-book-open" style="margin-right:3px;"></i>근거 매핑 준비 중
+    </span>`}
   </div>
 </div>
 
