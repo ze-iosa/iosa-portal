@@ -361,12 +361,12 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">CAR/OBS 상태 편집</h5>
+        <h5 class="modal-title">Finding/OBS 상태 편집</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label class="form-label">CAR/OBS ID</label>
+          <label class="form-label">Finding/OBS ID</label>
           <input type="text" class="iata-input" id="cap-edit-id" readonly style="background:#f5f5f5;">
         </div>
         <div class="mb-3">
@@ -857,11 +857,11 @@ function renderDashboardNew() {
   <div style="padding:20px 20px 16px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:#e0e0e0 transparent;">
     <div style="display:flex;align-items:stretch;min-width:max-content;gap:0;position:relative;">
       ${[
-        { ym:'2026.06', color:'#2563eb', bg:'#eff6ff', border:'#bfdbfe', icon:'fa-graduation-cap',      label:'6월',     items:['IATA RBI 교육 이수'],                    tag:'D-'+(Math.max(0,Math.round((new Date('2026-06-01')-new Date())/(86400000))))  },
-        { ym:'2026.07', color:'#2563eb', bg:'#eff6ff', border:'#bfdbfe', icon:'fa-chalkboard-teacher', label:'7월',     items:['IOSA 내부심사원 교육 실시'],              tag:'D-'+(Math.max(0,Math.round((new Date('2026-07-01')-new Date())/(86400000))))  },
-        { ym:'2026.08', color:'#1d4ed8', bg:'#eff6ff', border:'#93c5fd', icon:'fa-users-gear',         label:'8월',     items:['IOSA TFT 발령','IOSA 내부심사 실시'],     tag:'D-'+(Math.max(0,Math.round((new Date('2026-08-01')-new Date())/(86400000))))  },
-        { ym:'2026.10', color:'#1e40af', bg:'#eef2ff', border:'#a5b4fc', icon:'fa-calendar-check',    label:'10월',    items:['본점검 일정 조율','IATA 요구자료 제출'],   tag:'D-'+(Math.max(0,Math.round((new Date('2026-10-01')-new Date())/(86400000))))  },
-        { ym:'2027.03', color:'#d20015', bg:'#fff0f0', border:'#fca5a5', icon:'fa-shield-check',       label:'2027.03', items:['IOSA RBI 재인증 심사'],                    tag:'D-'+(Math.max(0,Math.round((new Date('2027-03-01')-new Date())/(86400000)))), final:true },
+        { ym:'2026.06', color:'#6b7280', bg:'#fff', border:'#e5e7eb', icon:'fa-graduation-cap',      label:'6월',     items:['IATA RBI 교육 이수'],                    tag:'D-'+(Math.max(0,Math.round((new Date('2026-06-01')-new Date())/(86400000))))  },
+        { ym:'2026.07', color:'#6b7280', bg:'#fff', border:'#e5e7eb', icon:'fa-chalkboard-teacher', label:'7월',     items:['IOSA 내부심사원 교육 실시'],              tag:'D-'+(Math.max(0,Math.round((new Date('2026-07-01')-new Date())/(86400000))))  },
+        { ym:'2026.08', color:'#6b7280', bg:'#fff', border:'#e5e7eb', icon:'fa-users-gear',         label:'8월',     items:['IOSA TFT 발령','IOSA 내부심사 실시'],     tag:'D-'+(Math.max(0,Math.round((new Date('2026-08-01')-new Date())/(86400000))))  },
+        { ym:'2026.10', color:'#6b7280', bg:'#fff', border:'#e5e7eb', icon:'fa-calendar-check',    label:'10월',    items:['본점검 일정 조율','IATA 요구자료 제출'],   tag:'D-'+(Math.max(0,Math.round((new Date('2026-10-01')-new Date())/(86400000))))  },
+        { ym:'2027.03', color:'#d20015', bg:'#fff', border:'#fecaca', icon:'fa-shield-check',       label:'2027.03', items:['IOSA RBI 재인증 심사'],                    tag:'D-'+(Math.max(0,Math.round((new Date('2027-03-01')-new Date())/(86400000)))), final:true },
       ].map((t, i, arr) => `
         <div style="display:flex;align-items:center;flex-shrink:0;">
           <!-- 마일스톤 카드 -->
@@ -1017,7 +1017,46 @@ const AUDIT_HISTORY = {
 };
 
 let historyTab = '2025';
+
+function saveHistoryEntry(year) {
+  const g = id => document.getElementById(id)?.value?.trim() ?? '';
+  const entry = {
+    dates:   g(`hist-dates-${year}`),
+    auditor: g(`hist-auditor-${year}`) || '—',
+    ism:     g(`hist-ism-${year}`) || '—',
+    totalF:  g(`hist-findings-${year}`) !== '' ? parseInt(g(`hist-findings-${year}`)) : null,
+    totalO:  g(`hist-obs-${year}`) !== '' ? parseInt(g(`hist-obs-${year}`)) : null,
+    totalNA: null,
+    iar:     g(`hist-iar-${year}`) || '—',
+    type:    g(`hist-type-${year}`) || 'RENEWAL',
+    savedAt: new Date().toISOString(),
+  };
+  if (!entry.dates) { alert('심사 기간을 입력하세요.'); return; }
+  const stored = JSON.parse(localStorage.getItem('iosa_history_entries') || '{}');
+  stored[year] = entry;
+  localStorage.setItem('iosa_history_entries', JSON.stringify(stored));
+  if (typeof showCRSavedToast === 'function') showCRSavedToast();
+  else alert('저장 완료!');
+  renderHistory();
+}
+
+function deleteHistoryEntry(year) {
+  if (!confirm(`${year}년 수동 입력 기록을 초기화하시겠습니까?`)) return;
+  const stored = JSON.parse(localStorage.getItem('iosa_history_entries') || '{}');
+  delete stored[year];
+  localStorage.setItem('iosa_history_entries', JSON.stringify(stored));
+  renderHistory();
+}
+
 function renderHistory() {
+  // localStorage 저장 기록을 AUDIT_HISTORY 플레이스홀더에 머지
+  const customEntries = JSON.parse(localStorage.getItem('iosa_history_entries') || '{}');
+  Object.entries(customEntries).forEach(([yr, custom]) => {
+    if (AUDIT_HISTORY[yr] && custom.dates) {
+      AUDIT_HISTORY[yr] = { ...AUDIT_HISTORY[yr], ...custom };
+    }
+  });
+
   const years = ['2025','2018','2016','2015','2010'];
   const a = AUDIT_HISTORY[historyTab];
 
@@ -1060,16 +1099,29 @@ ${a.placeholder ? `
     </a>
     ${isAdmin ? `
     <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
-      <div style="font-size:0.78rem;color:var(--text-light);margin-bottom:12px;"><i class="fas fa-lock-open me-1"></i>관리자 모드 — 데이터 직접 입력 가능</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:left;max-width:600px;margin:0 auto;">
-        <div><label class="form-label">심사 기간</label><input class="iata-input" placeholder="예: 2018.06.10~14"></div>
-        <div><label class="form-label">Lead Auditor</label><input class="iata-input" placeholder="심사원 이름"></div>
-        <div><label class="form-label">적용 ISM</label><input class="iata-input" placeholder="예: Ed.10"></div>
-        <div><label class="form-label">총 CAR</label><input class="iata-input" type="number" placeholder="0"></div>
-        <div><label class="form-label">총 OBS</label><input class="iata-input" type="number" placeholder="0"></div>
-        <div><label class="form-label">IAR ID</label><input class="iata-input" placeholder="IOSA-ESR-..."></div>
+      <div style="font-size:0.78rem;color:var(--text-light);margin-bottom:12px;"><i class="fas fa-lock-open me-1"></i>관리자 모드 — 과거 심사 기록 직접 입력</div>
+      ${(() => {
+        const saved = JSON.parse(localStorage.getItem('iosa_history_entries') || '{}')[a.year] || {};
+        return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:left;max-width:620px;margin:0 auto;">
+          <div><label class="form-label">심사 기간</label><input class="iata-input" id="hist-dates-${a.year}" placeholder="예: 2018.06.10~14" value="${saved.dates||''}"></div>
+          <div><label class="form-label">Lead Auditor</label><input class="iata-input" id="hist-auditor-${a.year}" placeholder="심사원 이름" value="${saved.auditor||''}"></div>
+          <div><label class="form-label">적용 ISM</label><input class="iata-input" id="hist-ism-${a.year}" placeholder="예: Ed.10" value="${saved.ism||''}"></div>
+          <div><label class="form-label">총 Finding</label><input class="iata-input" type="number" id="hist-findings-${a.year}" placeholder="0" value="${saved.totalF!=null?saved.totalF:''}"></div>
+          <div><label class="form-label">총 OBS</label><input class="iata-input" type="number" id="hist-obs-${a.year}" placeholder="0" value="${saved.totalO!=null?saved.totalO:''}"></div>
+          <div><label class="form-label">IAR ID</label><input class="iata-input" id="hist-iar-${a.year}" placeholder="IOSA-ESR-..." value="${saved.iar||''}"></div>
+          <div style="grid-column:1/-1;"><label class="form-label">심사 종류</label>
+            <select class="iata-input" id="hist-type-${a.year}">
+              <option value="INITIAL" ${(saved.type||a.type)==='INITIAL'?'selected':''}>INITIAL — 초도심사</option>
+              <option value="RENEWAL" ${(saved.type||a.type)==='RENEWAL'?'selected':''}>RENEWAL — 갱신심사</option>
+            </select>
+          </div>
+        </div>
+        ${saved.dates ? `<div style="font-size:0.72rem;color:#1a7a4a;margin-top:8px;"><i class="fas fa-check-circle me-1"></i>마지막 저장: ${new Date(saved.savedAt).toLocaleString('ko-KR')}</div>` : ''}`;
+      })()}
+      <div style="display:flex;gap:8px;margin-top:12px;justify-content:center;">
+        <button class="btn-primary btn-primary-sm" onclick="saveHistoryEntry(${a.year})"><i class="fas fa-save me-1"></i>저장</button>
+        <button class="btn-outline btn-outline-sm" onclick="deleteHistoryEntry(${a.year})" style="color:#dc3545;border-color:#dc3545;"><i class="fas fa-trash me-1"></i>초기화</button>
       </div>
-      <button class="btn-primary btn-primary-sm" style="margin-top:12px;">저장 (준비중)</button>
     </div>` : ''}
   </div>
 </div>
@@ -1111,7 +1163,7 @@ ${a.placeholder ? `
   </div>
 </div>
 
-<!-- Key CARs -->
+<!-- Key Findings -->
 <div class="row g-3">
   <div class="col-md-7">
     <div class="w-card h-100">
@@ -1247,7 +1299,7 @@ function renderSchedule() {
         {period:'2025.07', done:true,  title:'심사원 코디네이션', desc:'Perry Chou 외 심사팀\n항공권·호텔·비자 준비', chips:['코디']},
         {period:'2025.07.28', done:true, title:'본점검 — Documentation / Implementation', desc:'문서·구현 단계 심사 시작', chips:['본점검']},
         {period:'2025.07.29~31', done:true, title:'본점검 — 현장 (On-site)', desc:'공항·격납고·훈련센터 현장 심사', chips:['On-site']},
-        {period:'2025.08.01', done:true, title:'Closing Meeting', desc:'CAR 21건 / OBS 7건 확인\n심사 공식 종결', chips:['종결']},
+        {period:'2025.08.01', done:true, title:'Closing Meeting', desc:'Finding 21건 / OBS 7건 확인\n심사 공식 종결', chips:['종결']},
         {period:'2025.09.15', done:true, title:'CAP 합의 마감', desc:'Closing Meeting + 45일\n부문별 시정조치계획 합의', chips:['CAP','D+45']},
         {period:'2025.10~12', done:false, active:true, title:'FAT 이행 & 증빙 제출', desc:'부문별 FAT 작성 및 증빙자료 제출\n→ IATA QC 검토', chips:['FAT','증빙']},
       ]
@@ -1258,7 +1310,7 @@ function renderSchedule() {
         {period:'2026.01.01', done:true,  title:'ISM Ed.18 발효', desc:'ISM Ed.18 Rev.1 공식 발효\n재인증 심사 시 Ed.18 적용', chips:['ISM Ed.18']},
         {period:'2026.01~03', done:true,  title:'ISM Ed.17→18 Gap 분석', desc:'전 부문 Gap 분석\n변경사항 문서 개정 우선순위 도출', chips:['Gap분석']},
         {period:'2026.04~06', done:false, active:true, title:'부문별 문서 개정', desc:'[현재] 운항규정/정비규정 등\nEd.18 기준으로 개정 진행', chips:['문서개정','진행중']},
-        {period:'2026.07.17', done:false, warn:true, title:'모든 CAR 종결 마감 ⚠️', desc:'초도심사 지적사항 전체 종결 필수\n(IAR 발행 최소 15일 전)', chips:['CAR종결','마감']},
+        {period:'2026.07.17', done:false, warn:true, title:'모든 Finding 종결 마감 ⚠️', desc:'초도심사 지적사항 전체 종결 필수\n(IAR 발행 최소 15일 전)', chips:['Finding종결','마감']},
         {period:'2026.08.01', done:false, title:'IATA Connect 프로파일 갱신', desc:'6개월 주기 의무 갱신\n(미이행 시 등록 일시정지)', chips:['IATA Connect','의무']},
         {period:'2026.09', done:false, title:'ISM Ed.18 기반 CR 작성', desc:'Conformance Report Ed.18 버전\n전 부문 CR 갱신', chips:['CR','Ed.18']},
         {period:'2026.10', done:false, title:'내부심사원 역량강화 교육', desc:'5일 기본 + 5일 IOSA 과정\n(ORG 2.1.9 요건)', chips:['교육','심사원']},
@@ -1778,7 +1830,7 @@ function renderBoard() {
       <div class="sidebar-widget-header">주요 데드라인</div>
       <div class="sidebar-widget-body">
         ${[
-          {label:'CAR 종결', date:'2026.07.17', warn:true},
+          {label:'Finding 종결', date:'2026.07.17', warn:true},
           {label:'IATA Connect 갱신', date:'2026.08.01', warn:false},
           {label:'RBI 내부심사', date:'2026.11.01', warn:false},
           {label:'인증 만료', date:'2027.08.01', warn:false},
@@ -1904,32 +1956,32 @@ function saveCapEdit() {
                       APP_DATA.cap.findings[0].status !== 'closed';
   if (needsReseed) {
     APP_DATA.cap.findings = [
-      // ORG (7 CAR / 4 OBS)
-      {id:'93285',type:'CAR',isarp:'ORG 1.5.3',dept:'안전보안실',desc:'안전관리 목표 및 성과지표 문서화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
-      {id:'93286',type:'CAR',isarp:'ORG 2.1.2',dept:'안전보안실',desc:'품질보증 프로그램 운영 절차 부적합',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
-      {id:'93287',type:'CAR',isarp:'ORG 2.1.6',dept:'안전보안실',desc:'불안전 상황 보고 프로세스 문서화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
-      {id:'93288',type:'CAR',isarp:'ORG 2.4.3',dept:'안전보안실',desc:'내부심사 계획 수립 및 실시 방법 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
-      {id:'93289',type:'CAR',isarp:'ORG 2.4.4',dept:'안전보안실',desc:'내부심사 Follow-up 절차 및 기록 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
-      {id:'93290',type:'CAR',isarp:'ORG 3.1.1',dept:'안전보안실',desc:'위험 관리 프로세스 문서화 및 실행 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
-      {id:'93295',type:'CAR',isarp:'ORG 4.1.2',dept:'안전보안실',desc:'비상대응 훈련 기록 관리 절차 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      // ORG (7 Finding / 4 OBS)
+      {id:'93285',type:'FINDING',isarp:'ORG 1.5.3',dept:'안전보안실',desc:'안전관리 목표 및 성과지표 문서화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93286',type:'FINDING',isarp:'ORG 2.1.2',dept:'안전보안실',desc:'품질보증 프로그램 운영 절차 부적합',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93287',type:'FINDING',isarp:'ORG 2.1.6',dept:'안전보안실',desc:'불안전 상황 보고 프로세스 문서화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93288',type:'FINDING',isarp:'ORG 2.4.3',dept:'안전보안실',desc:'내부심사 계획 수립 및 실시 방법 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93289',type:'FINDING',isarp:'ORG 2.4.4',dept:'안전보안실',desc:'내부심사 Follow-up 절차 및 기록 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93290',type:'FINDING',isarp:'ORG 3.1.1',dept:'안전보안실',desc:'위험 관리 프로세스 문서화 및 실행 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93295',type:'FINDING',isarp:'ORG 4.1.2',dept:'안전보안실',desc:'비상대응 훈련 기록 관리 절차 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
       {id:'93296',type:'OBS',isarp:'ORG 1.2.1',dept:'안전보안실',desc:'안전문화 증진 프로그램 개선 권고',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
       {id:'93297',type:'OBS',isarp:'ORG 2.3.1',dept:'안전보안실',desc:'안전정보 공유 체계 강화 권고',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
       {id:'93298',type:'OBS',isarp:'ORG 3.2.1',dept:'안전보안실',desc:'위험식별 방법론 다양화 권고',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
       {id:'93299',type:'OBS',isarp:'ORG 4.2.1',dept:'안전보안실',desc:'비상절차 검토 주기 단축 권고',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
-      // FLT (7 CAR)
-      {id:'93291',type:'CAR',isarp:'MNT 3.1.1',dept:'정비본부',desc:'정비프로그램 문서 개정 관리 절차 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
-      {id:'93292',type:'CAR',isarp:'FLT 2.1.1A',dept:'운항본부',desc:'비행승무원 자격 관리 절차 적합성 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
-      {id:'93300',type:'CAR',isarp:'FLT 2.1.2',dept:'운항본부',desc:'운항승무원 자격심사 절차 문서화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
-      {id:'93301',type:'CAR',isarp:'FLT 3.1.1',dept:'운항본부',desc:'운항 절차서 개정 관리 체계 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
-      {id:'93302',type:'CAR',isarp:'FLT 4.1.2',dept:'운항본부',desc:'비행 전 브리핑 절차 일관성 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
-      {id:'93303',type:'CAR',isarp:'FLT 5.2.1',dept:'운항본부',desc:'항공기 중량 및 평형 관리 절차 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
-      {id:'93304',type:'CAR',isarp:'FLT 8.1.3',dept:'운항본부',desc:'악기상 운항 절차 문서화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
-      // DSP (1 CAR), MNT (5 CAR / 1 OBS), GRH (1 CAR / 1 OBS), SEC (1 OBS)
-      {id:'93305',type:'CAR',isarp:'DSP 2.1.1',dept:'종합통제실',desc:'운항통제 절차서 현행화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
-      {id:'93306',type:'CAR',isarp:'MNT 1.1.2',dept:'정비본부',desc:'정비 조직 구조 및 책임 문서화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
-      {id:'93307',type:'CAR',isarp:'MNT 2.1.1',dept:'정비본부',desc:'정비 훈련 프로그램 요건 미충족',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      // FLT (7 Finding)
+      {id:'93291',type:'FINDING',isarp:'MNT 3.1.1',dept:'정비본부',desc:'정비프로그램 문서 개정 관리 절차 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93292',type:'FINDING',isarp:'FLT 2.1.1A',dept:'운항본부',desc:'비행승무원 자격 관리 절차 적합성 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93300',type:'FINDING',isarp:'FLT 2.1.2',dept:'운항본부',desc:'운항승무원 자격심사 절차 문서화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93301',type:'FINDING',isarp:'FLT 3.1.1',dept:'운항본부',desc:'운항 절차서 개정 관리 체계 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93302',type:'FINDING',isarp:'FLT 4.1.2',dept:'운항본부',desc:'비행 전 브리핑 절차 일관성 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93303',type:'FINDING',isarp:'FLT 5.2.1',dept:'운항본부',desc:'항공기 중량 및 평형 관리 절차 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93304',type:'FINDING',isarp:'FLT 8.1.3',dept:'운항본부',desc:'악기상 운항 절차 문서화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      // DSP (1 Finding), MNT (5 Finding / 1 OBS), GRH (1 Finding / 1 OBS), SEC (1 OBS)
+      {id:'93305',type:'FINDING',isarp:'DSP 2.1.1',dept:'종합통제실',desc:'운항통제 절차서 현행화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93306',type:'FINDING',isarp:'MNT 1.1.2',dept:'정비본부',desc:'정비 조직 구조 및 책임 문서화 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93307',type:'FINDING',isarp:'MNT 2.1.1',dept:'정비본부',desc:'정비 훈련 프로그램 요건 미충족',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
       {id:'93308',type:'OBS',isarp:'MNT 2.3.1',dept:'정비본부',desc:'정비 기술 자료 접근 절차 개선 권고',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
-      {id:'93309',type:'CAR',isarp:'GRH 3.2.1',dept:'운송본부',desc:'지상조업 감독 절차 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
+      {id:'93309',type:'FINDING',isarp:'GRH 3.2.1',dept:'운송본부',desc:'지상조업 감독 절차 미흡',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
       {id:'93310',type:'OBS',isarp:'GRH 2.1.1',dept:'운송본부',desc:'지상조업 위험 평가 절차 개선 권고',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
       {id:'93311',type:'OBS',isarp:'SEC 2.3.1',dept:'안전보안실',desc:'보안 위협 대응 훈련 주기 강화 권고',status:'closed',action:'FAT 제출 완료 및 IATA QC 승인',fatDate:'2025-12-31',dueDate:'2026-07-17'},
     ];
@@ -1970,7 +2022,7 @@ function openSectionDetail(code) {
 
   const hist = (AUDIT_HISTORY['2025'].sections||[]).find(s=>s.code===code) || {f:0,o:0,na:0};
 
-  const cars = findings.filter(f=>f.type==='CAR'||!f.type||f.type==='FINDING');
+  const cars = findings.filter(f=>f.type==='FINDING'||f.type==='CAR'||!f.type);
   const obs  = findings.filter(f=>f.type==='OBS');
 
   // Repeated ISARPs: marked as repeated or flag from past audits
@@ -2249,7 +2301,7 @@ function renderHistoryCAPContent(filterCode) {
           ${findings.map((f, i) => {
             const sColor = statusColor[f.status] || '#aaa';
             const sLabel = statusLabel[f.status] || f.status;
-            const t = f.type || 'CAR';
+            const t = f.type || 'FINDING';
             const tBg  = typeBg[t]    || '#f5f5f5';
             const tCol = typeColor[t] || '#888';
             return `<tr style="border-bottom:1px solid #f8f8f8;${i%2===1?'background:#fafafa':''}">

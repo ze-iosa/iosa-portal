@@ -1571,7 +1571,7 @@ function renderCAP() {
               : '<span style="background:#fee2e2;color:#991b1b;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:3px;">미결</span>';
             const descTrunc = (f.desc||'').length > 60 ? (f.desc||'').substring(0,60)+'…' : (f.desc||'-');
             return `<tr style="cursor:pointer;" onclick="openCapDetail(${realIdx})" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
-              <td style="font-weight:600;">CAR-${String(i+1).padStart(3,'0')}</td>
+              <td style="font-weight:600;">F-${String(i+1).padStart(3,'0')}</td>
               <td><span class="badge bg-secondary">${f.dept}</span></td>
               <td style="font-weight:600;">${f.isarp}</td>
               <td style="max-width:260px;font-size:0.82rem;color:#374151;">${descTrunc}</td>
@@ -1586,7 +1586,7 @@ function renderCAP() {
 <!-- CAP Finding Modal -->
 <div class="modal fade" id="modal-capfinding" tabindex="-1">
   <div class="modal-dialog modal-lg"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title">IATA 지적사항(CAR) 추가</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+    <div class="modal-header"><h5 class="modal-title">IATA 지적사항(Finding) 추가</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
     <div class="modal-body">
       <div class="row">
         <div class="col-md-4 mb-3"><label class="form-label">부문</label><select class="form-select" id="cf-dept"><option>ORG</option><option>FLT</option><option>DSP</option><option>MNT</option><option>CAB</option><option>GRH</option><option>CGO</option><option>SEC</option></select></div>
@@ -1620,7 +1620,7 @@ function openCapDetail(idx) {
     <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:1;">
       <div>
         <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#aaa;">지적사항 상세</div>
-        <div style="font-size:1rem;font-weight:800;color:#1a1a1a;">CAR-${String(idx+1).padStart(3,'0')} · ${f.dept}</div>
+        <div style="font-size:1rem;font-weight:800;color:#1a1a1a;">F-${String(idx+1).padStart(3,'0')} · ${f.dept}</div>
       </div>
       <button onclick="closeCapDetail()" style="background:none;border:none;font-size:1.2rem;color:#888;cursor:pointer;padding:4px 8px;line-height:1;">&times;</button>
     </div>
@@ -1629,7 +1629,7 @@ function openCapDetail(idx) {
       <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:14px;margin-bottom:16px;">
         <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:10px;">Finding 기본 정보</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <div><div style="font-size:0.65rem;color:#aaa;font-weight:700;">번호</div><div style="font-size:0.85rem;font-weight:700;">CAR-${String(idx+1).padStart(3,'0')}</div></div>
+          <div><div style="font-size:0.65rem;color:#aaa;font-weight:700;">번호</div><div style="font-size:0.85rem;font-weight:700;">F-${String(idx+1).padStart(3,'0')}</div></div>
           <div><div style="font-size:0.65rem;color:#aaa;font-weight:700;">부문</div><div style="font-size:0.85rem;font-weight:700;">${f.dept}</div></div>
           <div><div style="font-size:0.65rem;color:#aaa;font-weight:700;">ISARP</div><div style="font-size:0.85rem;font-weight:700;">${f.isarp||'-'}</div></div>
           <div><div style="font-size:0.65rem;color:#aaa;font-weight:700;">유형</div><div style="font-size:0.85rem;font-weight:700;">${typeLabel}</div></div>
@@ -2420,6 +2420,20 @@ function toggleCREvidence(id) {
   if (btn) btn.style.background = isHidden ? '#dbeafe' : '';
 }
 
+// ─── 증빙자료 조회 (개별 ISARP → 서브섹션 순으로 폴백) ───
+function getEvidenceItems(isarpCode) {
+  if (!isarpCode) return [];
+  // 1) 정확한 코드 일치 (ORG 개별 항목)
+  if (ISARP_EVIDENCE_MAP[isarpCode]) return ISARP_EVIDENCE_MAP[isarpCode];
+  // 2) 서브섹션 접두어 일치 (예: 'FLT 3.7' ← 'FLT 3.7.1')
+  const m = isarpCode.match(/^([A-Z]+)\s+(\d+\.\d+)/);
+  if (m) {
+    const subKey = m[1] + ' ' + m[2];
+    if (ISARP_EVIDENCE_MAP[subKey]) return ISARP_EVIDENCE_MAP[subKey];
+  }
+  return [];
+}
+
 // ════════════════════════════════════════════════════════════
 //  사내 매뉴얼 근거 자동 매핑 테이블
 //  출처: 2025 Initial Audit (IOSA-ESR-IA-2025) 실제 심사 결과 기반 검증
@@ -2618,7 +2632,7 @@ const ISARP_EVIDENCE_MAP = {
   'ORG 2.2.4': ['심사팀 구성 기록', '심사원 자격 증명 서류', '심사원 임명 공문'],
 
   // ── ORG 2.3  시정조치 프로세스
-  'ORG 2.3.1': ['시정조치 추적 대장(CAR Log)', '시정조치 완료 기록', '효과성 검증 기록'],
+  'ORG 2.3.1': ['시정조치 추적 대장(Finding/CAP Log)', '시정조치 완료 기록', '효과성 검증 기록'],
 
   // ── ORG 2.4  외주협력업체 평가(QMS 관점)
   'ORG 2.4.1': ['공급업체 목록(AVL)', '외주업체 평가 기록', '품질규정 외주 관련 조항'],
@@ -2674,6 +2688,217 @@ const ISARP_EVIDENCE_MAP = {
   // ── ORG 4.3  비행자료분석 프로그램(FDAP/FOQA)
   'ORG 4.3.1': ['비행자료분석 프로그램 운영지침 현행본', 'FDAP 운영 조직도', 'FADEC/QAR 장착 현황'],
   'ORG 4.3.2': ['FDAP 분석 보고서(최근 분기)', 'FDAP 위원회 회의록', '초과 이벤트 처리 기록', '자료 보안 및 접근 통제 절차'],
+
+  // ════════════════════════════════════════════════════════════
+  //  FLT — 운항 부문 (서브섹션 레벨 매핑)
+  // ════════════════════════════════════════════════════════════
+  'FLT 1.1': ['운항교범(OM) Part A·B·C·D 현행본', '교범 개정 이력 및 배포 기록'],
+  'FLT 1.2': ['FDAP/FOQA 운영지침', 'QAR/ACMS 장착 현황 기록', 'FDAP 분석 보고서'],
+  'FLT 1.3': ['비행교범(AFM) 현행본', '운항한계 관련 OM 조항', '성능표(Performance Charts)', '비행계획서(OFP) 샘플'],
+  'FLT 1.4': ['기상브리핑 절차서', '기상브리핑 수령 기록(METAR/TAF)', '대체공항 기상기준 조항'],
+  'FLT 1.5': ['공항운영최저치(Aerodrome Operating Minima) 목록', '공항분석 기록(Airport Analysis)', '비계기 운항절차'],
+  'FLT 1.6': ['비정상/비상 체크리스트(QRH) 현행본', '비상훈련 기록', '비상절차 브리핑 기록'],
+  'FLT 1.7': ['항로교범(Route Manual) 현행본', '항법차트 현행성 기록', 'NOTAM 검토 절차'],
+  'FLT 1.8': ['통신절차서', '주파수 목록', 'SELCAL 등록 기록'],
+  'FLT 1.10': ['위험물 운송 통지서(NOTOC)', '기장 위험물 수령확인서', 'DG 거절 기록'],
+  'FLT 1.11': ['보안위협 대응절차(OM 내 보안 관련 조항)', '운항승무원 보안 교육 기록'],
+  'FLT 1.12': ['피로위험관리시스템(FRMS) 매뉴얼', '승무원 근무시간 기록(FDP/RP)', '피로보고 기록'],
+  'FLT 2.1': ['표준운항절차서(SOP/Normal Checklist) 현행본', '비행기록(FDR/CVR 점검 기록)', '정상절차 준수 확인 기록'],
+  'FLT 2.2': ['접근절차(Approach Plate) 현행본', '안정화접근 기준 조항', 'CFIT 예방 절차', 'Go-around 절차'],
+  'FLT 2.3': ['이륙절차(SOP)', '감소추력 이륙 기록', '이륙성능 계산서'],
+  'FLT 2.4': ['연료정책 조항(OM)', '연료계획 기록(Fuel Planning Sheet)', '최소연료 기준 조항'],
+  'FLT 2.5': ['중량중심(W&B) 시스템 관련 절차', '적재표(Load Sheet) 샘플', '중량중심 포락선 차트'],
+  'FLT 3.1': ['운항훈련 프로그램(OM Part D)', '훈련 교과목 목록', '훈련계획서'],
+  'FLT 3.2': ['초기 운항훈련 기록', '입사 전 이력서 및 자격 검토 기록'],
+  'FLT 3.3': ['형식 훈련(Type Rating) 기록', '시뮬레이터 훈련 세션 기록', '형식 자격증명서'],
+  'FLT 3.4': ['정기 훈련(Recurrent) 기록', '운항 자격심사(OPC/LPC/PC) 기록', '정기 지상교육 기록'],
+  'FLT 3.5': ['전환 훈련(Conversion Training) 기록', '차이훈련(Difference Training) 기록'],
+  'FLT 3.6': ['기장 승격 과정 기록', '노선 심사(Line Check) 기록', '기장 자격 부여 기록'],
+  'FLT 3.7': ['승무원 협조(CRM) 교육 기록', 'CRM 교관 자격 기록', 'CRM 교과목 및 교재'],
+  'FLT 3.8': ['노선지향훈련(LOFT)/라인 운영 평가(LOE) 기록', '평가관 자격 기록', '시나리오 문서'],
+  'FLT 3.9': ['노선심사(Line Check) 기록', '심사관(Examiner) 승인 기록', '심사 노선(Check Route) 기록'],
+  'FLT 3.10': ['비상장비·승객안전(SEP) 교육 기록', '비상문 조작 훈련 기록', '소화 및 연기 훈련 기록'],
+  'FLT 3.11': ['위험물 취급 교육 기록(DGR 수료증)', 'IATA DGR 교육 기록(CAT 6/7 또는 동등)', '위험물 재교육 이력'],
+  'FLT 3.12': ['보안 교육 기록(초기·정기)', '보안 인식 교육 수료증'],
+  'FLT 3.13': ['피로관리 교육 기록', 'FRMS 인식 교육 수료증'],
+  'FLT 3.14': ['역량기반훈련(CBTA) 교과목(해당 시)', '역량 평가 기록', 'EBT 세션 기록'],
+  'FLT 3.15': ['시뮬레이터(FSTD) 자격 증명서', '시뮬레이터 일정 및 사용 기록', '비행훈련장치(FTD) 승인 기록'],
+  'FLT 4.1': ['운항승무원 자격증명(ATPL/CPL) 사본', '형식 자격(Type Rating) 유효성 확인 기록', '면허 유효기간 관리 대장'],
+  'FLT 4.2': ['항공신체검사 증명 사본', '신체검사 유효기간 관리 대장'],
+  'FLT 4.3': ['노선 운항경험(OE) 기록', '노선 훈련 완료 서명 기록'],
+
+  // ════════════════════════════════════════════════════════════
+  //  DSP — 종합통제 부문 (서브섹션 레벨 매핑)
+  // ════════════════════════════════════════════════════════════
+  'DSP 1.1': ['운항관리 절차서(Dispatch Manual/OCM) 현행본', '교범 개정 이력 및 배포 기록'],
+  'DSP 1.3': ['종합통제실(OCC/FOC) 운영 절차서', '운항통제 비상/비정상 대응 계획'],
+  'DSP 1.4': ['통신절차서(OCC-조종사 직통)', 'ACARS 통신 기록 샘플', '비정상 통신 절차'],
+  'DSP 1.5': ['기상브리핑 절차서', '기상수집·배포 기록', '기장 기상수령 확인서 샘플'],
+  'DSP 1.6': ['NOTAM 검토 절차', 'NOTAM 검토 기록 샘플', 'AIP 현행성 유지 기록'],
+  'DSP 1.7': ['ATC 협조 절차', '출·도착 협조 기록'],
+  'DSP 1.8': ['연료 계획 절차서', '운항 연료 계산서(OFP) 샘플', '최소 연료 기준 조항', '연료 모니터링 기록'],
+  'DSP 1.10': ['기장 위험물 통지서(NOTOC) 수령 확인 절차', 'NOTOC 발행 기록 샘플'],
+  'DSP 1.11': ['보안위협 대응절차(운항관리 관점)', '보안 위협 시 운항통제 절차'],
+  'DSP 1.12': ['승무원 근무시간 계획·모니터링 기록', 'FDP 계산 샘플', '피로위험 모니터링 기록'],
+  'DSP 2.1': ['비행허가서(Dispatch Release/Flight Release) 샘플', '비행 전 계획 기록'],
+  'DSP 2.2': ['항공기 성능 계산 기록', '장거리 특수 운항 성능 산출 기록'],
+  'DSP 2.3': ['교체공항 선정 기록', '연료 계산 샘플(교체 포함)'],
+  'DSP 2.4': ['이착륙 성능 계산서 샘플', 'WAT 한계 검토 기록'],
+  'DSP 2.5': ['특수운항 인가 서류(ETOPS·RVSM·PBN·CAT II/III 등)', '특수운항 승인 현황 목록'],
+  'DSP 3.1': ['ATC 비행계획서(ICAO FPL) 제출 기록', 'ATC 비행계획서 샘플'],
+  'DSP 3.2': ['운항비행계획서(OFP) 샘플', '비행계획 절차서'],
+  'DSP 3.3': ['최저장비목록(MEL) 적용 기록', '항로 자격 기록'],
+  'DSP 3.4': ['탑재중량 계획 기록(Load Planning)', '탑재 지시서 샘플'],
+  'DSP 3.5': ['중량중심 계산서(종합통제 담당 분)', '적재표 확인 기록'],
+  'DSP 3.6': ['항공정보(NOTAM/AIP) 현행성 유지 기록', '차트 현행성 관리 기록'],
+  'DSP 3.7': ['ATC 허가 기록', '지연·변경 대응 절차'],
+  'DSP 4.1': ['운항관리사(항공종사자자격증명) 자격증 사본', '운항관리 교육 프로그램', '신규 입사자 교육 기록'],
+  'DSP 4.2': ['운항관리사 자격 유효성 관리 대장', '정기 자격 심사 기록'],
+  'DSP 4.3': ['정기 훈련·심사(Recurrent Check) 기록', '운항관리 역량 평가 기록'],
+  'DSP 4.4': ['기상학 교육 기록', '기상 판단 역량 평가 기록'],
+  'DSP 4.5': ['위험물 인식 교육 기록(운항관리 대상)', 'DG 교육 수료증'],
+
+  // ════════════════════════════════════════════════════════════
+  //  MNT — 정비 부문 (서브섹션 레벨 매핑)
+  // ════════════════════════════════════════════════════════════
+  'MNT 1.1': ['항공기정비조직인증서(AMO/Part 145 승인서)', '능력범위 목록(Capability List)', '정비 조직 도표'],
+  'MNT 1.2': ['정비관리 절차서(MCC 운영)', '정비관리 기록 샘플'],
+  'MNT 1.3': ['정비 품질보증 절차서', '정비 품질 심사 기록', '시정조치 추적 기록'],
+  'MNT 1.4': ['정비 안전 절차서', '정비 안전 보고 기록', '안전 회의록'],
+  'MNT 1.5': ['정비 사건/결함 보고 절차서', '발생 보고 기록', '국토부 보고 기록'],
+  'MNT 1.6': ['감항성 지시(AD) 추적 대장', 'AD 이행 기록', '부품 서비스 회보(SB) 적용 기록'],
+  'MNT 1.7': ['항공기정비프로그램(AMP) 현행본', '정비 작업 카드(Task Card)', '정비계획 기록'],
+  'MNT 1.8': ['항공기 기술 기록부(Tech Log)', '작업 지시서(Work Order) 샘플', '결함 기록'],
+  'MNT 1.9': ['감항성확인서(CRS) 발행 기록', '항공기 운용 승인 기록', 'CRS 서명자 목록'],
+  'MNT 1.10': ['부품 수입 검사 기록', '사용가능 부품 태그(Serviceable Tag)', '격리 구역 운영 기록'],
+  'MNT 1.11': ['공구 교정(Calibration) 기록', '공구 관리 절차서', 'ETOPS 전용 공구 목록(해당 시)'],
+  'MNT 1.12': ['정비 시설 승인 기록', '격납고·장비 운영 기록'],
+  'MNT 2.1': ['엔진 정비 기록', '엔진 교환 기록', '엔진 수리 기관 인증서'],
+  'MNT 2.2': ['부품 정비 기록(CMM 참조)', '오버홀 기록', '부품 추적 대장'],
+  'MNT 2.3': ['라인 정비 점검 기록(Transit/Daily Check)', '결함 처리 기록'],
+  'MNT 2.4': ['기체 정기 점검(A/C/D Check) 기록', '정기 점검 완료 서류'],
+  'MNT 2.5': ['구조 수리 기록(SRM 참조)', '손상 허용 한계 검토 기록'],
+  'MNT 2.6': ['항공기 중량 측정 기록', '중량·중심 보고서(W&B Report)'],
+  'MNT 2.7': ['도장 정비 기록', '마킹·도색 절차서'],
+  'MNT 2.8': ['항공기 세척·소독 기록', '세척 절차서'],
+  'MNT 2.9': ['특별 점검(낙뢰·하드랜딩 등) 기록', '특별 점검 절차서'],
+  'MNT 2.10': ['지속감항성 관리(CAM) 기록', '감항성 검토 보고서'],
+  'MNT 2.11': ['연료 계통 정비 기록', '연료 오염 방지 절차서'],
+  'MNT 2.12': ['항전/전기 계통 정비 기록', '항전 업데이트 이력'],
+  'MNT 3.1': ['라인 점검(Pre-flight/Transit/Daily) 기록', '점검 체크리스트 샘플'],
+  'MNT 3.2': ['기지 정비 점검 기록', '기지 점검 작업 패키지'],
+  'MNT 3.4': ['연료 탱크 정비 기록', '연료 탱크 진입 절차서'],
+  'MNT 4.1': ['항공정비사(AME) 자격증명 사본', '형식 훈련 기록', '자격 유효성 관리 대장'],
+  'MNT 4.2': ['정비 훈련 프로그램 교과목', '신규 정비사 교육 기록'],
+  'MNT 4.3': ['인가된 서명자(Authorized Signatory) 목록', 'B1/B2 면허 기록', '확인정비사 임명 기록'],
+  'MNT 4.4': ['인적요인(Human Factors/MEDA) 교육 기록', 'HF 교육 수료증'],
+  'MNT 4.5': ['품질심사원 교육 기록', '내부심사원 자격 기록'],
+  'MNT 4.6': ['비파괴검사(NDT)/특수 교육 기록', '전문 기술 자격 기록'],
+  'MNT 4.7': ['정비 관리자 리더십 교육 기록'],
+  'MNT 4.9': ['급유요원 교육 기록', '급유 절차 교육 수료증'],
+  'MNT 4.10': ['안전 교육 기록', '정비 안전 인식 교육 수료증'],
+  'MNT 4.11': ['위험물 취급 교육 기록(정비 대상)', 'DG 인식 교육 수료증'],
+
+  // ════════════════════════════════════════════════════════════
+  //  CAB — 객실 부문 (서브섹션 레벨 매핑)
+  // ════════════════════════════════════════════════════════════
+  'CAB 1.1': ['객실승무원 교범(CCM) 현행본', '교범 개정 이력 및 배포 기록'],
+  'CAB 1.2': ['사무장/CSM 직무 절차서', '객실 브리핑 기록', '감독 점검 기록'],
+  'CAB 1.3': ['비행 전 안전장비 점검 기록(Pre-flight Cabin Check)', '비상장비 점검 체크리스트'],
+  'CAB 1.4': ['구급함(First Aid Kit) 점검 기록', 'AED 점검 기록', '의료 장비 현황'],
+  'CAB 1.5': ['위험물 인식 교육 기록(객실 대상)', '위험물 거절 절차서'],
+  'CAB 1.6': ['승객 안전 브리핑 절차서', '안전 데모 체크리스트', '안전 카드 현행본'],
+  'CAB 1.7': ['조종실-객실 통신 절차서(코드 워드·비상신호)', '통신 훈련 기록'],
+  'CAB 1.9': ['객실 보안 절차서', '불량 승객 대응 절차', '보안 위협 보고 기록'],
+  'CAB 1.10': ['기내 위험물 인식 절차서', '위험물 기내 반입 거절 기록'],
+  'CAB 1.11': ['객실승무원 근무시간 기록(FDP)', '피로 보고 기록'],
+  'CAB 2.1': ['정상 운항 체크리스트(객실)', '객실 서비스 절차서'],
+  'CAB 2.2': ['비정상·비상 절차 체크리스트(객실)', '비상절차 브리핑 기록'],
+  'CAB 2.3': ['탑승·하기 절차서', '탑승교(Jetway) 안전 절차'],
+  'CAB 2.4': ['갤리 장비 운용 절차서'],
+  'CAB 3.1': ['객실승무원 초기 훈련 기록', '전환 훈련 기록', '자격 부여 기록'],
+  'CAB 3.2': ['정기 훈련(Recurrent) 기록', '연간 갱신 교육 기록'],
+  'CAB 3.3': ['비상훈련 기록(탈출·화재·의료)', '비상 드릴 평가 기록'],
+  'CAB 3.4': ['DG 교육 기록', '보안 교육 기록', 'CRM 교육 기록', '응급처치 교육 기록', 'SEP 교육 기록'],
+  'CAB 4.1': ['객실승무원 자격증명 기록', '국토교통부 자격 기록', '자격 유효기간 관리 대장'],
+  'CAB 4.2': ['운항 경험(OE) 기록', '자격 갱신 기록'],
+
+  // ════════════════════════════════════════════════════════════
+  //  GRH — 운송(지상조업) 부문 (서브섹션 레벨 매핑)
+  // ════════════════════════════════════════════════════════════
+  'GRH 1.1': ['지상조업 계약서(SGHA)', '지상운영 절차서(GOM) 현행본', '조업사 인가 서류'],
+  'GRH 1.2': ['지상 안전 감독 기록', '조업사 품질 심사 기록', '감독 점검 보고서'],
+  'GRH 1.3': ['지상 사건 보고 기록', '램프 사고 보고서', '발생 보고 절차서'],
+  'GRH 1.4': ['항공기 취급 절차서(초크·콘 배치)', '항공기 핸들링 기록'],
+  'GRH 1.5': ['급유 절차서', '급유 안전 기록', '연료 품질 검사 기록'],
+  'GRH 1.6': ['탑재지시서(LIR) 샘플', '탑재 계획 기록', '화물 탑재 확인서'],
+  'GRH 1.7': ['여객 처리 절차서', '여객 서비스 기록'],
+  'GRH 1.9': ['램프 보안 절차서', '에어사이드 출입통제 기록', '보안 배지 관리 기록'],
+  'GRH 1.10': ['위험물 수락·탑재 기록(GRH)', 'DG 지상조업 절차서'],
+  'GRH 1.11': ['지상 직원 근무시간 관리 기록', '피로관리 절차서(지상 대상)'],
+  'GRH 2.1': ['램프 운영 절차서', 'FOD 관리 프로그램 기록', 'FOD 점검 기록'],
+  'GRH 2.2': ['항공기 견인(Pushback/Tow) 절차서', '견인 기록', '견인 담당자 자격 기록'],
+  'GRH 2.3': ['제빙·방빙(De-icing/Anti-icing) 절차서', '제빙 기록', '제빙액 혼합비 기록'],
+  'GRH 3.1': ['지상지원장비(GSE) 점검·정비 기록', '장비 인증 기록'],
+  'GRH 3.2': ['휠체어·앰뷸리프트 운영 기록', '특별지원 승객 처리 절차서'],
+  'GRH 3.3': ['케이터링 리프트 운영 절차서', '케이터링 탑재 기록'],
+  'GRH 3.4': ['벨트로더·컨테이너 로더 운영 기록', '장비 점검 기록'],
+  'GRH 3.5': ['지상전원장치(GPU) 운영 기록', '전원 공급 절차서'],
+  'GRH 3.6': ['화장실·식수 서비스 기록', '서비스 절차서'],
+  'GRH 3.7': ['에어컨(ACU) 운영 기록', '공기조화 절차서'],
+  'GRH 4.1': ['지상 직원 교육 프로그램', '초기·정기 교육 기록', '교육 수료증'],
+  'GRH 4.2': ['위험물 지상조업 교육 기록', 'DG 교육 수료증(해당 직원)'],
+
+  // ════════════════════════════════════════════════════════════
+  //  CGO — 화물 부문 (서브섹션 레벨 매핑)
+  // ════════════════════════════════════════════════════════════
+  'CGO 1.1': ['화물 운영 교범(Cargo Manual) 현행본', '교범 개정 이력 및 배포 기록'],
+  'CGO 1.2': ['화물 안전 프로그램 문서', '화물 품질 심사 기록'],
+  'CGO 1.3': ['화물 사건 보고 기록', '화물 손상 보고서'],
+  'CGO 1.4': ['화물 수락 절차서', '화물 선별(Screening) 기록'],
+  'CGO 1.5': ['특수화물 취급 절차서(생동물·귀중품·유해 등)', '특수화물 처리 기록'],
+  'CGO 1.6': ['단위탑재용기(ULD) 관리 기록', '화물 탑재 계획서', 'ULD 점검 기록'],
+  'CGO 1.7': ['수하물 취급 절차서', '수하물 연결 기록'],
+  'CGO 1.9': ['화물 보안 절차서', '알려진 화주(Known Shipper) 관리 기록', '보안 검색 기록'],
+  'CGO 1.10': ['화물 위험물 수락 기록', 'NOTOC 발행 기록', 'DG 신고서(Shipper\'s Declaration) 검토 기록'],
+  'CGO 1.11': ['화물 직원 근무시간 관리 기록'],
+  'CGO 2.1': ['화물 수락 SOP', '화물 계량·측정 기록'],
+  'CGO 2.2': ['ULD 서비스 기능 점검 기록', 'ULD 수리 기록'],
+  'CGO 2.3': ['화물 탑재·하기 기록', '탑재 절차서'],
+  'CGO 3.1': ['화물 적재표(Cargo Load Sheet)', '적재 균형 기록'],
+  'CGO 3.2': ['위험물 화물 탑재 기록', 'NOTOC 사본', 'DG 위치 도표'],
+  'CGO 3.3': ['화물 중량·크기 확인 기록', '초과 화물 처리 기록'],
+  'CGO 3.4': ['위험물 취급 교육 기록(화물 대상)', 'DG 교육 수료증'],
+  'CGO 3.5': ['특수화물 취급 교육 기록'],
+  'CGO 3.6': ['화물 보안 교육 기록', '보안 교육 수료증'],
+  'CGO 3.7': ['생동물 운송 기록(AVI Checklist)', 'IATA LAR 적용 기록'],
+
+  // ════════════════════════════════════════════════════════════
+  //  SEC — 항공보안 부문 (서브섹션 레벨 매핑)
+  // ════════════════════════════════════════════════════════════
+  'SEC 1.1': ['항공보안 계획서(ASP) 현행본', '국토교통부 승인서', '교범 개정 이력'],
+  'SEC 1.2': ['보안 비상 대응 계획(Security Contingency Plan)', '위기 대응 절차서'],
+  'SEC 1.3': ['위협 및 위험 평가 기록', '보안 위협 수준 모니터링 기록'],
+  'SEC 1.4': ['보안 통신 절차서', '비상 연락망(보안 관련)'],
+  'SEC 1.5': ['출입통제 기록', '에어사이드 출입증 발급 기록', '출입 권한 관리 대장'],
+  'SEC 1.6': ['CCTV 운영 기록', '영상 감시 시스템 유지보수 기록'],
+  'SEC 1.8': ['항공기 보안 점검 체크리스트', '항공기 보안 점검 기록', '항공기 수색 기록'],
+  'SEC 1.9': ['탑승객 검색 기록', '금지 물품 적발 기록', '탑승 거절 기록'],
+  'SEC 1.10': ['수하물 대조(Reconciliation) 기록', '비동반 수하물 처리 기록'],
+  'SEC 1.11': ['화물 보안 기록', '공인 화주(Regulated Agent) 관리 기록'],
+  'SEC 1.12': ['케이터링 보안 절차서', '케이터링 업체 인가 기록', '케이터링 보안 점검 기록'],
+  'SEC 2.1': ['보안 조직도', '보안 담당자 임명 공문', '보안 책임자 직무기술서'],
+  'SEC 3.1': ['위탁수하물 보안 검색 기록', '폭발물 탐지 시스템(EDS) 운영 기록'],
+  'SEC 3.3': ['폭발물 탐지 장비 운영 기록', '장비 교정 기록'],
+  'SEC 3.4': ['보안 장비 정비·교정 기록', '보안 장비 목록'],
+  'SEC 3.5': ['보안 사건 기록', '보안 위반 보고서', '국토부 보고 기록'],
+  'SEC 3.6': ['항공보안감독관 탑승 기록(해당 시)', '공중보안관 절차서'],
+  'SEC 3.7': ['조종실 보안 절차서', '조종실 출입 제한 기록'],
+  'SEC 3.8': ['불량 승객(Disruptive Pax) 대응 기록', '기내 보안 사건 처리 기록'],
+  'SEC 3.9': ['승무원 보안 절차서', '승무원 보안 인식 기록'],
+  'SEC 4.1': ['보안 교육 프로그램', '초기 보안 교육 기록', '교육 수료증'],
+  'SEC 4.2': ['정기 보안 교육(Recurrent) 기록', '보안 교육 이수 관리 대장'],
+  'SEC 4.3': ['보안 교관·감사원 자격 기록', '강사 자격 증명서'],
 };
 
 // ── 매뉴얼 근거 자동 적용 함수 ────────────────────────────
@@ -3025,7 +3250,7 @@ ${sectionEntries.length === 0 ? `
     ).join('');
     const finding = (APP_DATA && APP_DATA.cap && APP_DATA.cap.findings||[]).find(f=>f.isarp===e.isarpCode);
     const findingBadge = e.status==='NC' ? `<span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:1px 5px;border-radius:3px;font-size:0.55rem;font-weight:800;">NC</span>` : '';
-    const evidenceItems = ISARP_EVIDENCE_MAP[e.isarpCode] || [];
+    const evidenceItems = getEvidenceItems(e.isarpCode);
     const evBtnHtml = evidenceItems.length > 0
       ? `<button class="cr-ev-btn" onclick="toggleCREvidence('${_esc(e.id)}')" title="증빙자료 목록 보기 (내부심사용)">💼 증빙자료</button>`
       : '';
