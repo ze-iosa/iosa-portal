@@ -917,10 +917,10 @@ function renderDashboardNew() {
     </div>
     <div style="padding:16px 14px 10px;">
       ${[
-        { ym:'2026.06', accent:'#64748b', bg:'#f8fafc', ibg:'#f1f5f9', icon:'fa-graduation-cap',    items:['IATA RBI 교육 이수'],                  tag:'D-'+(Math.max(0,Math.round((new Date('2026-06-01')-new Date())/(86400000)))) },
-        { ym:'2026.07', accent:'#64748b', bg:'#f8fafc', ibg:'#f1f5f9', icon:'fa-chalkboard-teacher', items:['IOSA 내부심사원 교육 실시'],            tag:'D-'+(Math.max(0,Math.round((new Date('2026-07-01')-new Date())/(86400000)))) },
-        { ym:'2026.08', accent:'#4b5563', bg:'#f1f5f9', ibg:'#e2e8f0', icon:'fa-users-gear',         items:['IOSA TFT 발령','IOSA 내부심사 실시'],   tag:'D-'+(Math.max(0,Math.round((new Date('2026-08-01')-new Date())/(86400000)))) },
-        { ym:'2026.10', accent:'#374151', bg:'#f1f5f9', ibg:'#e2e8f0', icon:'fa-calendar-check',     items:['본점검 일정 조율','IATA 요구자료 제출'], tag:'D-'+(Math.max(0,Math.round((new Date('2026-10-01')-new Date())/(86400000)))) },
+        { ym:'2026.06', accent:'#9ca3af', bg:'#f9fafb', ibg:'#f3f4f6', icon:'fa-graduation-cap',    items:['IATA RBI 교육 이수'],                  tag:'D-'+(Math.max(0,Math.round((new Date('2026-06-01')-new Date())/(86400000)))) },
+        { ym:'2026.07', accent:'#9ca3af', bg:'#f9fafb', ibg:'#f3f4f6', icon:'fa-chalkboard-teacher', items:['IOSA 내부심사원 교육 실시'],            tag:'D-'+(Math.max(0,Math.round((new Date('2026-07-01')-new Date())/(86400000)))) },
+        { ym:'2026.08', accent:'#6b7280', bg:'#f3f4f6', ibg:'#e5e7eb', icon:'fa-users-gear',         items:['IOSA TFT 발령','IOSA 내부심사 실시'],   tag:'D-'+(Math.max(0,Math.round((new Date('2026-08-01')-new Date())/(86400000)))) },
+        { ym:'2026.10', accent:'#4b5563', bg:'#f3f4f6', ibg:'#e5e7eb', icon:'fa-calendar-check',     items:['본점검 일정 조율','IATA 요구자료 제출'], tag:'D-'+(Math.max(0,Math.round((new Date('2026-10-01')-new Date())/(86400000)))) },
         { ym:'2027.03', accent:'#d20015', bg:'#fff1f2', ibg:'#fee2e2', icon:'fa-shield-check',        items:['IOSA RBI 재인증 심사'],                tag:'D-'+(Math.max(0,Math.round((new Date('2027-03-01')-new Date())/(86400000)))), final:true },
       ].map((t, i, arr) => `
       <div style="display:flex;gap:10px;">
@@ -1196,23 +1196,22 @@ ${a.placeholder ? `
       </div>
       <div>
         <table class="iata-table">
-          <thead><tr><th>Finding ID</th><th>ISARP</th><th>내용</th><th>상태</th></tr></thead>
+          <thead><tr><th>ISARP</th><th>내용</th><th>상태</th></tr></thead>
           <tbody>
             ${(a.keyCARs||[]).map(car => {
               const capF = (APP_DATA.cap.findings||[]).find(f=>f.id===car.id);
               const status = capF ? capF.status : 'open';
-              const stMap = {open:'pill-red', submitted:'pill-gold', approved:'pill-navy', closed:'pill-green'};
+              const stMap = {open:'pill-red', submitted:'pill-gold', approved:'pill-red', closed:'pill-red'};
               const stLabel = {open:'미결', submitted:'제출', approved:'승인', closed:'종결'};
               return `<tr>
-                <td><strong style="color:var(--eastar-red);">${car.id}</strong></td>
-                <td><span style="font-size:0.76rem;font-weight:700;color:var(--iata-navy);">${car.isarp}</span></td>
+                <td><span style="font-size:0.76rem;font-weight:700;color:var(--eastar-red);">${car.isarp}</span></td>
                 <td style="font-size:0.78rem;">${car.desc}</td>
                 <td>
-                  <span class="pill ${stMap[status]||'pill-gray'}" style="cursor:pointer;" onclick="navigateToHistoryCAP(car.isarp.split(' ')[0])">${stLabel[status]||'미결'}</span>
+                  <span class="pill ${stMap[status]||'pill-red'}" style="cursor:pointer;" onclick="navigateToHistoryCAP(car.isarp.split(' ')[0])">${stLabel[status]||'미결'}</span>
                 </td>
               </tr>`;
             }).join('')}
-            ${(a.keyCARs||[]).length > 0 ? `<tr><td colspan="4" style="font-size:0.74rem;color:#bbb;text-align:center;padding:10px;">+ ${a.totalF - (a.keyCARs||[]).length}건 추가 → 아래 CAP/FAT 섹션 참조</td></tr>` : (a.totalF > 0 ? `<tr><td colspan="4" style="font-size:0.78rem;color:#94a3b8;text-align:center;padding:16px;"><i class="fas fa-info-circle me-1"></i>상세 지적 목록은 IATA Connect IAR에서 확인하세요</td></tr>` : `<tr><td colspan="4" style="font-size:0.78rem;color:#1a7a4a;text-align:center;padding:16px;"><i class="fas fa-check-circle me-1"></i>지적사항 없음</td></tr>`)}
+            ${(a.keyCARs||[]).length > 0 ? `<tr><td colspan="3" style="font-size:0.74rem;color:#bbb;text-align:center;padding:10px;">+ ${a.totalF - (a.keyCARs||[]).length}건 추가 → 아래 CAP/FAT 섹션 참조</td></tr>` : (a.totalF > 0 ? `<tr><td colspan="3" style="font-size:0.78rem;color:#94a3b8;text-align:center;padding:16px;"><i class="fas fa-info-circle me-1"></i>상세 지적 목록은 IATA Connect IAR에서 확인하세요</td></tr>` : `<tr><td colspan="3" style="font-size:0.78rem;color:#d20015;text-align:center;padding:16px;"><i class="fas fa-check-circle me-1"></i>지적사항 없음</td></tr>`)}
           </tbody>
         </table>
       </div>

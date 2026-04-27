@@ -3725,23 +3725,23 @@ function renderISMAnalysis() {
     <div class="stat-box-sub">권고 → 의무 강화</div>
     <div style="margin-top:6px;text-align:center;"><i class="fas fa-chevron-down ism-chev" style="color:#d20015;font-size:0.65rem;transition:transform .2s;"></i></div>
   </div>
-  <div class="stat-box" style="border-top:3px solid #374151;cursor:pointer;transition:box-shadow .15s;" onclick="ismToggle('ism-acc-newst',this)" onmouseenter="this.style.boxShadow='0 4px 16px rgba(55,65,81,.12)'" onmouseleave="this.style.boxShadow=''">
+  <div class="stat-box" style="border-top:3px solid #d20015;cursor:pointer;transition:box-shadow .15s;" onclick="ismToggle('ism-acc-newst',this)" onmouseenter="this.style.boxShadow='0 4px 16px rgba(210,0,21,.15)'" onmouseleave="this.style.boxShadow=''">
     <div class="stat-box-label">신규 Standard 추가</div>
-    <div class="stat-box-num" style="color:#374151;">${NEW_ST.length}</div>
+    <div class="stat-box-num" style="color:#d20015;">${NEW_ST.length}</div>
     <div class="stat-box-sub">신규 의무 조항</div>
-    <div style="margin-top:6px;text-align:center;"><i class="fas fa-chevron-down ism-chev" style="color:#374151;font-size:0.65rem;transition:transform .2s;"></i></div>
+    <div style="margin-top:6px;text-align:center;"><i class="fas fa-chevron-down ism-chev" style="color:#d20015;font-size:0.65rem;transition:transform .2s;"></i></div>
   </div>
-  <div class="stat-box" style="border-top:3px solid #374151;cursor:pointer;transition:box-shadow .15s;" onclick="ismToggle('ism-acc-newrp',this)" onmouseenter="this.style.boxShadow='0 4px 16px rgba(55,65,81,.12)'" onmouseleave="this.style.boxShadow=''">
+  <div class="stat-box" style="border-top:3px solid #d20015;cursor:pointer;transition:box-shadow .15s;" onclick="ismToggle('ism-acc-newrp',this)" onmouseenter="this.style.boxShadow='0 4px 16px rgba(210,0,21,.15)'" onmouseleave="this.style.boxShadow=''">
     <div class="stat-box-label">신규 RP 추가</div>
-    <div class="stat-box-num" style="color:#374151;">${NEW_RP.length}</div>
+    <div class="stat-box-num" style="color:#d20015;">${NEW_RP.length}</div>
     <div class="stat-box-sub">신규 권고 조항</div>
-    <div style="margin-top:6px;text-align:center;"><i class="fas fa-chevron-down ism-chev" style="color:#374151;font-size:0.65rem;transition:transform .2s;"></i></div>
+    <div style="margin-top:6px;text-align:center;"><i class="fas fa-chevron-down ism-chev" style="color:#d20015;font-size:0.65rem;transition:transform .2s;"></i></div>
   </div>
-  <div class="stat-box" style="border-top:3px solid #6b7280;cursor:pointer;transition:box-shadow .15s;" onclick="ismToggle('ism-acc-tech',this)" onmouseenter="this.style.boxShadow='0 4px 16px rgba(107,114,128,.12)'" onmouseleave="this.style.boxShadow=''">
+  <div class="stat-box" style="border-top:3px solid #d20015;cursor:pointer;transition:box-shadow .15s;" onclick="ismToggle('ism-acc-tech',this)" onmouseenter="this.style.boxShadow='0 4px 16px rgba(210,0,21,.15)'" onmouseleave="this.style.boxShadow=''">
     <div class="stat-box-label">기술적 주요 변경</div>
-    <div class="stat-box-num" style="color:#6b7280;">${TECH_CHANGES.reduce((s,g)=>s+g.items.length,0)}</div>
+    <div class="stat-box-num" style="color:#d20015;">${TECH_CHANGES.reduce((s,g)=>s+g.items.length,0)}</div>
     <div class="stat-box-sub">본문 내용 개정</div>
-    <div style="margin-top:6px;text-align:center;"><i class="fas fa-chevron-down ism-chev" style="color:#6b7280;font-size:0.65rem;transition:transform .2s;"></i></div>
+    <div style="margin-top:6px;text-align:center;"><i class="fas fa-chevron-down ism-chev" style="color:#d20015;font-size:0.65rem;transition:transform .2s;"></i></div>
   </div>
 </div>
 
@@ -3913,7 +3913,7 @@ function renderMeetings() {
 <!-- 예정 회의 -->
 <div class="w-card mb-3">
   <div class="w-card-header">
-    <span class="w-card-title"><i class="fas fa-calendar-alt me-2" style="color:var(--iata-navy);"></i>예정 회의 <span class="pill pill-navy" style="margin-left:4px;">${upcoming.length}건</span></span>
+    <span class="w-card-title"><i class="fas fa-calendar-alt me-2" style="color:var(--eastar-red);"></i>예정 회의 <span class="pill pill-red" style="margin-left:4px;">${upcoming.length}건</span></span>
   </div>
   ${upcoming.length === 0 ? `<div class="w-card-body" style="text-align:center;color:#bbb;padding:32px;font-size:0.85rem;"><i class="fas fa-calendar-plus" style="font-size:2rem;display:block;margin-bottom:8px;opacity:0.3;"></i>예정된 회의가 없습니다</div>` : `
   <div class="w-card-body" style="padding:0;">
