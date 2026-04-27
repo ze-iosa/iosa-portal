@@ -813,7 +813,7 @@ function renderPreparation() {
   <div class="col-md-6">
     <div class="status-card">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h6 class="fw-bold mb-0"><i class="fas fa-user-tie me-2" style="color:#065f46;"></i>부문별 심사원 & 담당자 발령</h6>
+        <h6 class="fw-bold mb-0"><i class="fas fa-user-tie me-2" style="color:#d20015;"></i>부문별 심사원 & 담당자 TFT</h6>
         <button class="btn btn-sm btn-iata" onclick="openModal('modal-appointment')"><i class="fas fa-plus me-1"></i>추가</button>
       </div>
       <div class="table-responsive">
@@ -841,7 +841,7 @@ function renderPreparation() {
   <div class="col-md-6">
     <div class="status-card">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h6 class="fw-bold mb-0"><i class="fas fa-chalkboard-teacher me-2" style="color:#7c3aed;"></i>전파교육 실시 현황</h6>
+        <h6 class="fw-bold mb-0"><i class="fas fa-chalkboard-teacher me-2" style="color:#d20015;"></i>전파교육 실시 현황</h6>
         <button class="btn btn-sm btn-iata" onclick="openModal('modal-propagation')"><i class="fas fa-plus me-1"></i>추가</button>
       </div>
       ${p.propagationTrainings.length === 0
@@ -3694,7 +3694,15 @@ function renderISMAnalysis() {
     ]},
   ];
 
-  const tagStyle = { '기술변경':'background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;', '내용추가':'background:#f0faf4;color:#14532d;border:1px solid #bbf7d0;', '삭제':'background:#f8fafc;color:#6b7280;border:1px solid #e2e8f0;', '신규요건':'background:#fff1f2;color:#991b1b;border:1px solid #fecaca;' };
+  const tagStyle = { '기술변경':'background:#f8fafc;color:#374151;border:1px solid #e2e8f0;', '내용추가':'background:#f1f5f9;color:#374151;border:1px solid #cbd5e1;', '삭제':'background:#f8fafc;color:#6b7280;border:1px solid #e2e8f0;', '신규요건':'background:#fff1f2;color:#991b1b;border:1px solid #fecaca;' };
+
+  function ismToggle(id, btn) {
+    var el = document.getElementById(id);
+    var open = el.style.display === 'block';
+    el.style.display = open ? 'none' : 'block';
+    btn.querySelector('.ism-chev').style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+  }
+  window.ismToggle = ismToggle;
 
   document.getElementById('section-ism_analysis').innerHTML = `
 <div class="sect-header">
@@ -3709,130 +3717,130 @@ function renderISMAnalysis() {
   </div>
 </div>
 
-<!-- 요약 통계 -->
-<div class="stats-row mb-4">
-  <div class="stat-box" style="border-top:3px solid #d20015;">
+<!-- 요약 통계 — 클릭하면 해당 섹션 토글 -->
+<div class="stats-row mb-3">
+  <div class="stat-box" style="border-top:3px solid #d20015;cursor:pointer;transition:box-shadow .15s;" onclick="ismToggle('ism-acc-rp2st',this)" onmouseenter="this.style.boxShadow='0 4px 16px rgba(210,0,21,.15)'" onmouseleave="this.style.boxShadow=''">
     <div class="stat-box-label">RP → Standard 격상</div>
     <div class="stat-box-num" style="color:#d20015;">${RP_TO_ST.length}</div>
     <div class="stat-box-sub">권고 → 의무 강화</div>
+    <div style="margin-top:6px;text-align:center;"><i class="fas fa-chevron-down ism-chev" style="color:#d20015;font-size:0.65rem;transition:transform .2s;"></i></div>
   </div>
-  <div class="stat-box" style="border-top:3px solid #7c3aed;">
+  <div class="stat-box" style="border-top:3px solid #374151;cursor:pointer;transition:box-shadow .15s;" onclick="ismToggle('ism-acc-newst',this)" onmouseenter="this.style.boxShadow='0 4px 16px rgba(55,65,81,.12)'" onmouseleave="this.style.boxShadow=''">
     <div class="stat-box-label">신규 Standard 추가</div>
-    <div class="stat-box-num" style="color:#7c3aed;">${NEW_ST.length}</div>
+    <div class="stat-box-num" style="color:#374151;">${NEW_ST.length}</div>
     <div class="stat-box-sub">신규 의무 조항</div>
+    <div style="margin-top:6px;text-align:center;"><i class="fas fa-chevron-down ism-chev" style="color:#374151;font-size:0.65rem;transition:transform .2s;"></i></div>
   </div>
-  <div class="stat-box" style="border-top:3px solid #1a7a4a;">
+  <div class="stat-box" style="border-top:3px solid #374151;cursor:pointer;transition:box-shadow .15s;" onclick="ismToggle('ism-acc-newrp',this)" onmouseenter="this.style.boxShadow='0 4px 16px rgba(55,65,81,.12)'" onmouseleave="this.style.boxShadow=''">
     <div class="stat-box-label">신규 RP 추가</div>
-    <div class="stat-box-num" style="color:#1a7a4a;">${NEW_RP.length}</div>
+    <div class="stat-box-num" style="color:#374151;">${NEW_RP.length}</div>
     <div class="stat-box-sub">신규 권고 조항</div>
+    <div style="margin-top:6px;text-align:center;"><i class="fas fa-chevron-down ism-chev" style="color:#374151;font-size:0.65rem;transition:transform .2s;"></i></div>
   </div>
-  <div class="stat-box" style="border-top:3px solid #0ea5e9;">
+  <div class="stat-box" style="border-top:3px solid #6b7280;cursor:pointer;transition:box-shadow .15s;" onclick="ismToggle('ism-acc-tech',this)" onmouseenter="this.style.boxShadow='0 4px 16px rgba(107,114,128,.12)'" onmouseleave="this.style.boxShadow=''">
     <div class="stat-box-label">기술적 주요 변경</div>
-    <div class="stat-box-num" style="color:#0369a1;">${TECH_CHANGES.reduce((s,g)=>s+g.items.length,0)}</div>
+    <div class="stat-box-num" style="color:#6b7280;">${TECH_CHANGES.reduce((s,g)=>s+g.items.length,0)}</div>
     <div class="stat-box-sub">본문 내용 개정</div>
+    <div style="margin-top:6px;text-align:center;"><i class="fas fa-chevron-down ism-chev" style="color:#6b7280;font-size:0.65rem;transition:transform .2s;"></i></div>
   </div>
 </div>
 
-<div class="row g-3">
-
-  <!-- ① RP→ST 격상 — 가장 중요 -->
-  <div class="col-12">
-    <div class="w-card" style="border-left:4px solid #d20015;">
-      <div class="w-card-header">
-        <span class="w-card-title"><i class="fas fa-arrow-up me-2" style="color:#d20015;"></i>RP → Standard 격상 <span style="color:#d20015;font-weight:900;">${RP_TO_ST.length}건</span></span>
-        <span class="pill pill-red">Finding 대상 ⚠</span>
+<!-- ① RP→ST 아코디언 -->
+<div id="ism-acc-rp2st" style="display:none;margin-bottom:12px;">
+  <div class="w-card" style="border-left:4px solid #d20015;">
+    <div class="w-card-header">
+      <span class="w-card-title"><i class="fas fa-arrow-up me-2" style="color:#d20015;"></i>RP → Standard 격상 <span style="color:#d20015;font-weight:900;">${RP_TO_ST.length}건</span></span>
+      <span class="pill pill-red">Finding 대상 ⚠</span>
+    </div>
+    <div class="w-card-body">
+      <div style="background:#fff5f5;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:#7f1d1d;">
+        <i class="fas fa-exclamation-triangle me-1" style="color:#d20015;"></i>
+        Ed.17에서 <em>권고(should)</em>였던 항목이 Ed.18에서 <em>의무(shall)</em>로 격상 — 미이행 시 <strong>Finding 발행 대상</strong>
       </div>
-      <div class="w-card-body">
-        <div style="background:#fff5f5;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:#7f1d1d;">
-          <i class="fas fa-exclamation-triangle me-1" style="color:#d20015;"></i>
-          Ed.17에서 <em>권고(should)</em>였던 항목이 Ed.18에서 <em>의무(shall)</em>로 격상 — 미이행 시 <strong>Finding 발행 대상</strong>
+      <table class="iata-table">
+        <thead><tr><th style="width:120px;">ISARP</th><th style="width:90px;">부문</th><th>변경 내용</th><th style="width:75px;">Ed.17</th><th style="width:75px;">Ed.18</th></tr></thead>
+        <tbody>
+          ${RP_TO_ST.map(r=>`<tr>
+            <td><strong style="font-family:monospace;color:var(--iata-navy);">${r.code}</strong></td>
+            <td><span class="badge bg-secondary" style="font-size:0.63rem;">${r.code.split(' ')[0]}</span></td>
+            <td style="font-size:0.78rem;">${r.desc}</td>
+            <td><span class="pill pill-gray" style="font-size:0.62rem;">RP (should)</span></td>
+            <td><span class="pill pill-red" style="font-size:0.62rem;">ST (shall)</span></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ② 신규 ST 아코디언 -->
+<div id="ism-acc-newst" style="display:none;margin-bottom:12px;">
+  <div class="w-card" style="border-left:4px solid #374151;">
+    <div class="w-card-header">
+      <span class="w-card-title"><i class="fas fa-plus-circle me-2" style="color:#374151;"></i>신규 Standard 추가 <span style="color:#374151;">${NEW_ST.length}건</span></span>
+      <span class="pill pill-gray">신규 의무</span>
+    </div>
+    <div class="w-card-body">
+      ${NEW_ST.map(r=>`<div style="padding:10px 0;border-bottom:1px solid #f1f5f9;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-family:monospace;font-weight:700;color:#374151;font-size:0.82rem;">${r.code}</span>
+          <span class="pill pill-gray" style="font-size:0.6rem;">신규 ST</span>
         </div>
-        <table class="iata-table">
-          <thead><tr><th style="width:120px;">ISARP</th><th style="width:90px;">부문</th><th>변경 내용</th><th style="width:75px;">Ed.17</th><th style="width:75px;">Ed.18</th></tr></thead>
-          <tbody>
-            ${RP_TO_ST.map(r=>`<tr>
-              <td><strong style="font-family:monospace;color:var(--iata-navy);">${r.code}</strong></td>
-              <td><span class="badge bg-secondary" style="font-size:0.63rem;">${r.code.split(' ')[0]}</span></td>
-              <td style="font-size:0.78rem;">${r.desc}</td>
-              <td><span class="pill pill-gray" style="font-size:0.62rem;">RP (should)</span></td>
-              <td><span class="pill pill-red" style="font-size:0.62rem;">ST (shall)</span></td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>
+        <div style="font-size:0.78rem;color:#374151;">${r.desc}</div>
+      </div>`).join('')}
     </div>
   </div>
+</div>
 
-  <!-- ② 신규 Standard 추가 -->
-  <div class="col-md-6">
-    <div class="w-card h-100" style="border-left:4px solid #7c3aed;">
-      <div class="w-card-header">
-        <span class="w-card-title"><i class="fas fa-plus-circle me-2" style="color:#7c3aed;"></i>신규 Standard 추가 <span style="color:#7c3aed;">${NEW_ST.length}건</span></span>
-        <span class="pill pill-navy" style="background:#f5f3ff;color:#7c3aed;border:1px solid #ddd9fe;">신규 의무</span>
-      </div>
-      <div class="w-card-body">
-        ${NEW_ST.map(r=>`<div style="padding:10px 0;border-bottom:1px solid #f1f5f9;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-            <span style="font-family:monospace;font-weight:700;color:#7c3aed;font-size:0.82rem;">${r.code}</span>
-            <span class="pill pill-navy" style="font-size:0.6rem;background:#f5f3ff;color:#7c3aed;border:1px solid #ddd9fe;">신규 ST</span>
-          </div>
-          <div style="font-size:0.78rem;color:#374151;">${r.desc}</div>
-        </div>`).join('')}
-      </div>
+<!-- ③ 신규 RP 아코디언 -->
+<div id="ism-acc-newrp" style="display:none;margin-bottom:12px;">
+  <div class="w-card" style="border-left:4px solid #374151;">
+    <div class="w-card-header">
+      <span class="w-card-title"><i class="fas fa-plus me-2" style="color:#374151;"></i>신규 RP 추가 <span style="color:#374151;">${NEW_RP.length}건</span></span>
+      <span class="pill pill-gray">신규 권고</span>
+    </div>
+    <div class="w-card-body">
+      ${NEW_RP.map(r=>`<div style="padding:10px 0;border-bottom:1px solid #f1f5f9;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-family:monospace;font-weight:700;color:#374151;font-size:0.82rem;">${r.code}</span>
+          <span class="pill pill-gray" style="font-size:0.6rem;">신규 RP</span>
+        </div>
+        <div style="font-size:0.78rem;color:#374151;">${r.desc}</div>
+      </div>`).join('')}
     </div>
   </div>
+</div>
 
-  <!-- ③ 신규 RP 추가 -->
-  <div class="col-md-6">
-    <div class="w-card h-100" style="border-left:4px solid #1a7a4a;">
-      <div class="w-card-header">
-        <span class="w-card-title"><i class="fas fa-plus me-2" style="color:#1a7a4a;"></i>신규 RP 추가 <span style="color:#1a7a4a;">${NEW_RP.length}건</span></span>
-        <span class="pill pill-green" style="font-size:0.62rem;">신규 권고</span>
-      </div>
-      <div class="w-card-body">
-        ${NEW_RP.map(r=>`<div style="padding:10px 0;border-bottom:1px solid #f1f5f9;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-            <span style="font-family:monospace;font-weight:700;color:#1a7a4a;font-size:0.82rem;">${r.code}</span>
-            <span class="pill pill-green" style="font-size:0.6rem;">신규 RP</span>
-          </div>
-          <div style="font-size:0.78rem;color:#374151;">${r.desc}</div>
-        </div>`).join('')}
-      </div>
+<!-- ④ 기술 변경사항 아코디언 -->
+<div id="ism-acc-tech" style="display:none;margin-bottom:12px;">
+  <div class="w-card" style="border-left:4px solid #6b7280;">
+    <div class="w-card-header">
+      <span class="w-card-title"><i class="fas fa-pen-to-square me-2" style="color:#6b7280;"></i>주요 기술적 변경사항 <span style="color:#6b7280;">${TECH_CHANGES.reduce((s,g)=>s+g.items.length,0)}건</span></span>
+      <span class="pill pill-gray" style="font-size:0.62rem;">문구 변경 / 추가 / 삭제</span>
+    </div>
+    <div class="w-card-body" style="padding:0;">
+      ${TECH_CHANGES.map(g=>`
+      <div style="border-bottom:1px solid #f1f5f9;">
+        <div style="background:#f8fafc;padding:8px 20px;display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="(function(el){var b=el.nextElementSibling;b.style.display=b.style.display==='none'?'block':'none';})(this)">
+          <span class="badge bg-secondary" style="font-size:0.65rem;">${g.sect}</span>
+          <span style="font-size:0.8rem;font-weight:700;color:#1e293b;">${SECT[g.sect]||g.sect}</span>
+          <span style="font-size:0.7rem;color:#94a3b8;margin-left:auto;">${g.items.length}건 <i class="fas fa-chevron-down" style="font-size:0.55rem;"></i></span>
+        </div>
+        <div style="display:none;padding:0 20px 8px;">
+          <table class="iata-table" style="margin:0;">
+            <thead><tr><th style="width:140px;">ISARP</th><th style="width:75px;">유형</th><th>변경 내용</th></tr></thead>
+            <tbody>
+              ${g.items.map(item=>`<tr>
+                <td style="font-family:monospace;font-size:0.75rem;font-weight:700;color:var(--iata-navy);">${item.code}</td>
+                <td><span style="padding:2px 7px;border-radius:10px;font-size:0.62rem;font-weight:700;${tagStyle[item.tag]||''}">${item.tag}</span></td>
+                <td style="font-size:0.78rem;">${item.desc}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`).join('')}
     </div>
   </div>
-
-  <!-- ④ 부문별 기술 변경사항 -->
-  <div class="col-12">
-    <div class="w-card" style="border-left:4px solid #0ea5e9;">
-      <div class="w-card-header">
-        <span class="w-card-title"><i class="fas fa-pen-to-square me-2" style="color:#0369a1;"></i>주요 기술적 변경사항 <span style="color:#0369a1;">${TECH_CHANGES.reduce((s,g)=>s+g.items.length,0)}건</span></span>
-        <span class="pill" style="background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;font-size:0.62rem;">문구 변경 / 추가 / 삭제</span>
-      </div>
-      <div class="w-card-body" style="padding:0;">
-        ${TECH_CHANGES.map(g=>`
-        <div style="border-bottom:1px solid #f1f5f9;">
-          <div style="background:#f8fafc;padding:8px 20px;display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="(function(el){var b=el.nextElementSibling;b.style.display=b.style.display==='none'?'block':'none';})(this)">
-            <span class="badge bg-secondary" style="font-size:0.65rem;">${g.sect}</span>
-            <span style="font-size:0.8rem;font-weight:700;color:#1e293b;">${SECT[g.sect]||g.sect}</span>
-            <span style="font-size:0.7rem;color:#94a3b8;margin-left:auto;">${g.items.length}건 <i class="fas fa-chevron-down" style="font-size:0.55rem;"></i></span>
-          </div>
-          <div style="padding:0 20px 8px;">
-            <table class="iata-table" style="margin:0;">
-              <thead><tr><th style="width:140px;">ISARP</th><th style="width:75px;">유형</th><th>변경 내용</th></tr></thead>
-              <tbody>
-                ${g.items.map(item=>`<tr>
-                  <td style="font-family:monospace;font-size:0.75rem;font-weight:700;color:var(--iata-navy);">${item.code}</td>
-                  <td><span style="padding:2px 7px;border-radius:10px;font-size:0.62rem;font-weight:700;${tagStyle[item.tag]||''}">${item.tag}</span></td>
-                  <td style="font-size:0.78rem;">${item.desc}</td>
-                </tr>`).join('')}
-              </tbody>
-            </table>
-          </div>
-        </div>`).join('')}
-      </div>
-    </div>
-  </div>
-
 </div>`;
 }
 
