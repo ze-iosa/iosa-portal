@@ -857,11 +857,11 @@ function renderDashboardNew() {
   <div style="padding:20px 20px 16px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:#e0e0e0 transparent;">
     <div style="display:flex;align-items:stretch;min-width:max-content;gap:0;position:relative;">
       ${[
-        { ym:'2026.06', color:'#059669', bg:'#ecfdf5', border:'#6ee7b7', icon:'fa-graduation-cap', label:'6월',  items:['IATA RBI 교육 이수'],                                      tag:'D-'+(Math.max(0,Math.round((new Date('2026-06-01')-new Date())/(86400000))))  },
-        { ym:'2026.07', color:'#1d4ed8', bg:'#eff6ff', border:'#93c5fd', icon:'fa-chalkboard-teacher', label:'7월',  items:['IOSA 내부심사원 교육 실시'],                          tag:'D-'+(Math.max(0,Math.round((new Date('2026-07-01')-new Date())/(86400000))))  },
-        { ym:'2026.08', color:'#7c3aed', bg:'#f5f3ff', border:'#c4b5fd', icon:'fa-users-gear',         label:'8월',  items:['IOSA TFT 발령','IOSA 내부심사 실시'],                tag:'D-'+(Math.max(0,Math.round((new Date('2026-08-01')-new Date())/(86400000))))  },
-        { ym:'2026.10', color:'#b45309', bg:'#fffbeb', border:'#fcd34d', icon:'fa-calendar-check',     label:'10월', items:['본점검 일정 조율','IATA 요구자료 제출'],             tag:'D-'+(Math.max(0,Math.round((new Date('2026-10-01')-new Date())/(86400000))))  },
-        { ym:'2027.03', color:'#d20015', bg:'#fff0f0', border:'#fca5a5', icon:'fa-shield-check',        label:'2027.03', items:['IOSA RBI 재인증 심사'],                          tag:'D-'+(Math.max(0,Math.round((new Date('2027-03-01')-new Date())/(86400000)))), final:true },
+        { ym:'2026.06', color:'#64748b', bg:'#fff', border:'#e2e8f0', icon:'fa-graduation-cap',      label:'6월',     items:['IATA RBI 교육 이수'],                    tag:'D-'+(Math.max(0,Math.round((new Date('2026-06-01')-new Date())/(86400000))))  },
+        { ym:'2026.07', color:'#475569', bg:'#fff', border:'#e2e8f0', icon:'fa-chalkboard-teacher', label:'7월',     items:['IOSA 내부심사원 교육 실시'],              tag:'D-'+(Math.max(0,Math.round((new Date('2026-07-01')-new Date())/(86400000))))  },
+        { ym:'2026.08', color:'#334155', bg:'#fff', border:'#e2e8f0', icon:'fa-users-gear',         label:'8월',     items:['IOSA TFT 발령','IOSA 내부심사 실시'],     tag:'D-'+(Math.max(0,Math.round((new Date('2026-08-01')-new Date())/(86400000))))  },
+        { ym:'2026.10', color:'#1e293b', bg:'#fff', border:'#e2e8f0', icon:'fa-calendar-check',    label:'10월',    items:['본점검 일정 조율','IATA 요구자료 제출'],   tag:'D-'+(Math.max(0,Math.round((new Date('2026-10-01')-new Date())/(86400000))))  },
+        { ym:'2027.03', color:'#d20015', bg:'#fff', border:'#fecaca', icon:'fa-shield-check',       label:'2027.03', items:['IOSA RBI 재인증 심사'],                    tag:'D-'+(Math.max(0,Math.round((new Date('2027-03-01')-new Date())/(86400000)))), final:true },
       ].map((t, i, arr) => `
         <div style="display:flex;align-items:center;flex-shrink:0;">
           <!-- 마일스톤 카드 -->
@@ -889,8 +889,8 @@ function renderDashboardNew() {
           <!-- 연결선 (마지막 제외) -->
           ${i < arr.length-1 ? `
           <div style="display:flex;align-items:center;width:32px;flex-shrink:0;">
-            <div style="width:100%;height:2px;background:linear-gradient(to right,${t.color}60,${arr[i+1].color}60);position:relative;">
-              <i class="fas fa-chevron-right" style="position:absolute;right:-4px;top:50%;transform:translateY(-50%);font-size:0.6rem;color:${arr[i+1].color};"></i>
+            <div style="width:100%;height:1.5px;background:#d1d5db;position:relative;">
+              <i class="fas fa-chevron-right" style="position:absolute;right:-4px;top:50%;transform:translateY(-50%);font-size:0.6rem;color:#9ca3af;"></i>
             </div>
           </div>` : ''}
         </div>`).join('')}
