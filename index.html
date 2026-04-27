@@ -1245,13 +1245,20 @@ ${a.placeholder ? `
 </div>
 
 <!-- AUDITOR LIST -->
+${(()=>{
+  const savedAu = JSON.parse(localStorage.getItem('iosa_auditors_'+a.year)||'null');
+  const auList = savedAu || a.auditors || [];
+  return `
 <div class="w-card mt-3">
   <div class="w-card-header">
     <span class="w-card-title"><i class="fas fa-users me-2" style="color:var(--eastar-red);"></i>AUDITOR LIST</span>
-    <span style="font-size:0.75rem;color:var(--text-light);">ISM ${a.ism} 적용</span>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:0.75rem;color:var(--text-light);">ISM ${a.ism} 적용</span>
+      ${isAdmin ? `<button onclick="(function(){var p=document.getElementById('au-edit-${a.year}');p.style.display=p.style.display==='none'?'block':'none';})()" style="padding:2px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;font-size:0.7rem;font-weight:700;cursor:pointer;color:#374151;"><i class="fas fa-pen me-1" style="color:#6b7280;"></i>편집</button>` : ''}
+    </div>
   </div>
   <div class="w-card-body" style="padding:0;">
-    <table class="iata-table" style="margin:0;">
+    <table class="iata-table" style="margin:0;" id="au-table-${a.year}">
       <thead>
         <tr>
           <th style="width:22%;">Name</th>
@@ -1261,10 +1268,10 @@ ${a.placeholder ? `
         </tr>
       </thead>
       <tbody>
-        ${(a.auditors && a.auditors.length > 0) ? a.auditors.map(au => `
+        ${auList.length > 0 ? auList.map(au => `
           <tr>
             <td><strong>${au.name}</strong></td>
-            <td><span style="font-size:0.72rem;font-weight:700;color:var(--iata-navy);background:#f0f4ff;padding:2px 8px;border-radius:3px;">${au.role}</span></td>
+            <td><span style="font-size:0.72rem;font-weight:700;color:var(--eastar-red);background:#fff1f2;padding:2px 8px;border-radius:3px;">${au.role}</span></td>
             <td style="font-size:0.78rem;color:#555;">${au.sections}</td>
             <td style="font-size:0.78rem;color:#888;">${au.nationality}</td>
           </tr>
@@ -1272,7 +1279,30 @@ ${a.placeholder ? `
       </tbody>
     </table>
   </div>
-</div>
+  ${isAdmin ? `
+  <!-- 편집 패널 -->
+  <div id="au-edit-${a.year}" style="display:none;border-top:1px solid #f1f5f9;padding:16px 20px;background:#fafafa;">
+    <div id="au-rows-${a.year}" style="display:grid;gap:8px;">
+      ${auList.map((au,i)=>`
+      <div id="au-row-${a.year}-${i}" style="display:grid;grid-template-columns:1fr 1fr 2fr 1fr auto;gap:6px;align-items:center;">
+        <input class="iata-input" placeholder="이름" value="${au.name}" style="font-size:0.78rem;">
+        <select class="iata-input" style="font-size:0.78rem;">
+          <option value="Lead Auditor" ${au.role==='Lead Auditor'?'selected':''}>Lead Auditor</option>
+          <option value="Auditor" ${au.role==='Auditor'?'selected':''}>Auditor</option>
+          <option value="Observer" ${au.role==='Observer'?'selected':''}>Observer</option>
+        </select>
+        <input class="iata-input" placeholder="예: ORG · FLT · DSP" value="${au.sections}" style="font-size:0.78rem;">
+        <input class="iata-input" placeholder="국적" value="${au.nationality==='—'?'':au.nationality}" style="font-size:0.78rem;">
+        <button onclick="document.getElementById('au-row-${a.year}-${i}').remove()" style="width:28px;height:28px;background:#fff1f2;border:1px solid #fecaca;border-radius:4px;color:#d20015;cursor:pointer;font-size:0.8rem;"><i class="fas fa-trash"></i></button>
+      </div>`).join('')}
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button onclick="auditorAddRow('${a.year}')" style="padding:5px 12px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;color:#374151;"><i class="fas fa-plus me-1"></i>심사원 추가</button>
+      <button onclick="auditorSave('${a.year}')" style="padding:5px 14px;background:var(--eastar-red);border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;color:#fff;"><i class="fas fa-save me-1"></i>저장</button>
+    </div>
+  </div>` : ''}
+</div>`;
+})()}
 
 ${isAdmin && a.savedAt ? `
 <!-- 수동 입력 기록 수정 (관리자 모드) -->

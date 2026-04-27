@@ -3844,6 +3844,55 @@ function renderISMAnalysis() {
 </div>`;
 }
 
+// ─── 심사원 편집 ────────────────────────────────────────────
+function auditorAddRow(year) {
+  const container = document.getElementById('au-rows-' + year);
+  const idx = container.children.length;
+  const div = document.createElement('div');
+  div.id = 'au-row-' + year + '-' + idx;
+  div.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 2fr 1fr auto;gap:6px;align-items:center;';
+  div.innerHTML = `
+    <input class="iata-input" placeholder="이름" style="font-size:0.78rem;">
+    <select class="iata-input" style="font-size:0.78rem;">
+      <option value="Lead Auditor">Lead Auditor</option>
+      <option value="Auditor" selected>Auditor</option>
+      <option value="Observer">Observer</option>
+    </select>
+    <input class="iata-input" placeholder="예: ORG · FLT · DSP" style="font-size:0.78rem;">
+    <input class="iata-input" placeholder="국적" style="font-size:0.78rem;">
+    <button onclick="this.closest('[id^=au-row]').remove()" style="width:28px;height:28px;background:#fff1f2;border:1px solid #fecaca;border-radius:4px;color:#d20015;cursor:pointer;font-size:0.8rem;"><i class="fas fa-trash"></i></button>
+  `;
+  container.appendChild(div);
+}
+
+function auditorSave(year) {
+  const container = document.getElementById('au-rows-' + year);
+  const rows = Array.from(container.children).map(row => {
+    const inputs = row.querySelectorAll('input, select');
+    return {
+      name:        inputs[0].value.trim() || '—',
+      role:        inputs[1].value,
+      sections:    inputs[2].value.trim() || '—',
+      nationality: inputs[3].value.trim() || '—',
+    };
+  });
+  localStorage.setItem('iosa_auditors_' + year, JSON.stringify(rows));
+  // 테이블 즉시 갱신
+  const tbody = document.querySelector('#au-table-' + year + ' tbody');
+  if (tbody) {
+    tbody.innerHTML = rows.length > 0 ? rows.map(au => `
+      <tr>
+        <td><strong>${au.name}</strong></td>
+        <td><span style="font-size:0.72rem;font-weight:700;color:var(--eastar-red);background:#fff1f2;padding:2px 8px;border-radius:3px;">${au.role}</span></td>
+        <td style="font-size:0.78rem;color:#555;">${au.sections}</td>
+        <td style="font-size:0.78rem;color:#888;">${au.nationality}</td>
+      </tr>`).join('') : `<tr><td colspan="4" style="text-align:center;color:#bbb;padding:20px;">심사원 정보가 없습니다</td></tr>`;
+  }
+  // 편집 패널 닫기
+  const panel = document.getElementById('au-edit-' + year);
+  if (panel) panel.style.display = 'none';
+}
+
 // ─── 회의체 관리 ────────────────────────────────────────────
 function renderMeetings() {
   const stored = JSON.parse(localStorage.getItem('iosa_meetings') || '[]');
