@@ -881,19 +881,21 @@ function renderDashboardNew() {
       ].map((t, i, arr) => `
         <div style="flex:1;min-width:0;display:flex;align-items:stretch;">
           <!-- 마일스톤 카드 -->
-          <div style="flex:1;background:${t.bg};border:2px solid ${t.border};border-radius:10px;overflow:hidden;${t.final?'box-shadow:0 4px 20px rgba(210,0,21,0.2);':''}">
-            <div style="height:5px;background:${t.accent};"></div>
-            <div style="padding:12px 14px 14px;">
-              <!-- 월 + D-day -->
+          <div style="flex:1;border:2px solid ${t.border};border-radius:10px;overflow:hidden;display:flex;flex-direction:column;${t.final?'box-shadow:0 4px 20px rgba(210,0,21,0.2);':''}">
+            <!-- 상단 컬러 영역: 날짜 + D-day + 아이콘 -->
+            <div style="background:${t.bg};padding:12px 14px 14px;">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
                 <span style="font-size:0.7rem;font-weight:900;color:${t.accent};letter-spacing:0.5px;">${t.ym}</span>
                 <span style="background:${t.accent};color:#fff;font-size:0.55rem;font-weight:800;padding:2px 7px;border-radius:10px;white-space:nowrap;">${t.tag}</span>
               </div>
-              <!-- 아이콘 -->
-              <div style="width:40px;height:40px;background:${t.ibg};border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+              <div style="width:40px;height:40px;background:${t.ibg};border-radius:9px;display:flex;align-items:center;justify-content:center;">
                 <i class="fas ${t.icon}" style="font-size:1rem;color:${t.accent};"></i>
               </div>
-              <!-- 업무 목록 -->
+            </div>
+            <!-- 구분선 -->
+            <div style="height:1px;background:${t.border};"></div>
+            <!-- 하단 흰색 영역: 업무 목록 -->
+            <div style="background:#fff;padding:10px 14px 14px;flex:1;">
               ${t.items.map(item => `
               <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:5px;">
                 <span style="width:5px;height:5px;border-radius:50%;background:${t.accent};flex-shrink:0;margin-top:5px;"></span>
