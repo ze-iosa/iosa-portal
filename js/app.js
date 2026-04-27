@@ -3601,3 +3601,358 @@ async function exportCRExcel() {
   const dateStr = new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'');
   XLSX.writeFile(wb, `CR_이스타항공_${dateStr}.xlsx`);
 }
+
+// ─── ISM 개정 분석 ──────────────────────────────────────────
+function renderISMAnalysis() {
+  const SECT = {ORG:'조직 및 안전관리',FLT:'비행운항',DSP:'종합통제',MNT:'정비',CAB:'객실',GRH:'지상조업',CGO:'화물',SEC:'항공보안'};
+  const sec = c => c.split(' ')[0];
+  const grp = (arr) => {
+    const g = {};
+    arr.forEach(c => { const s = sec(c); (g[s]||(g[s]=[])).push(c); });
+    return g;
+  };
+
+  const RP_TO_ST = ['GRH 3.4.16','GRH 3.4.17','ORG 2.4.2','ORG 3.1.1','ORG 3.3.5','SEC 1.3.1'];
+  const ST_TO_RP = ['ORG 1.7.9','SEC 4.3.3'];
+  const NEW_18   = ['CAB 3.4.7','CGO 3.6.2','DSP 1.12.2f','DSP 3.2.8','DSP 3.2.8C','DSP 4.3.15','FLT 2.3.1a','FLT 3.1.1a','FLT 3.1.2i','FLT 3.9.5','GRH 3.4.14A','GRH 3.4.14B','GRH 3.4.14C','GRH 3.6.6','MNT 1.11.6f','ORG 2.1.9f','ORG 2.2.3a','ORG 2.2a','SEC 1.11o','SEC 1.2.1o'];
+  const REMOVED  = ['CAB 3.3.6','CAB 3.4.3','CGO 3.4.2','DSP 3.3.2','DSP 3.4.2','FLT 3.1.1i','FLT 3.11.59A','FLT 3.11.59B','FLT 3.13.15','FLT 3.7.4','GRH 3.4.14','GRH 3.7','ORG 1.7.8a','ORG 3.1.2a','SEC 1.2.1G','SEC 1.3.1G','SEC 3.3.2'];
+
+  // RP→ST 설명 (ISM 맥락)
+  const RP_ST_DESC = {
+    'GRH 3.4.16': '지상조업 — 하중 제한 (Load Restriction) 관련 요건 강화',
+    'GRH 3.4.17': '지상조업 — 위험물 탑재 구역 하중 분배 요건 강화',
+    'ORG 2.4.2':  '조직 — 안전 보고 프로그램(Voluntary Safety Reporting) 의무화',
+    'ORG 3.1.1':  '조직 — 품질보증 프로그램 수립 및 운영 의무화',
+    'ORG 3.3.5':  '조직 — SMS 문서화 및 위험도 평가 절차 의무화',
+    'SEC 1.3.1':  '항공보안 — 보안 훈련 프로그램 의무화',
+  };
+
+  const renderCodeList = (arr, badge='pill-navy') => {
+    const g = grp(arr);
+    return Object.entries(g).map(([s, codes]) => `
+      <div style="margin-bottom:12px;">
+        <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#64748b;margin-bottom:6px;">${s} — ${SECT[s]||s}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          ${codes.map(c=>`<span class="pill ${badge}" style="font-family:monospace;font-size:0.75rem;">${c}</span>`).join('')}
+        </div>
+      </div>`).join('');
+  };
+
+  const sectionStats = Object.keys(SECT).map(s => {
+    const rp2st = RP_TO_ST.filter(c=>sec(c)===s).length;
+    const st2rp = ST_TO_RP.filter(c=>sec(c)===s).length;
+    const nw    = NEW_18.filter(c=>sec(c)===s).length;
+    const rm    = REMOVED.filter(c=>sec(c)===s).length;
+    const total = rp2st + st2rp + nw + rm;
+    return { s, name:SECT[s], rp2st, st2rp, nw, rm, total };
+  }).filter(r=>r.total>0);
+
+  document.getElementById('section-ism_analysis').innerHTML = `
+<div class="sect-header">
+  <div>
+    <h2 class="sect-title">ISM 개정 분석</h2>
+    <p class="sect-sub">ISM Ed.17 → Ed.18 ISARP 변경사항 — PDF 자동 추출 분석</p>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="background:#f0f5ff;border:1px solid #bfdbfe;color:#1e3a5f;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;">Ed.17: 1,092 ISARPs</span>
+    <i class="fas fa-arrow-right" style="color:#94a3b8;font-size:0.7rem;"></i>
+    <span style="background:#fff1f2;border:1px solid #fca5a5;color:#d20015;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;">Ed.18: 1,095 ISARPs</span>
+  </div>
+</div>
+
+<!-- 요약 통계 -->
+<div class="stats-row mb-4">
+  <div class="stat-box" style="border-top:3px solid #d20015;">
+    <div class="stat-box-label">RP → Standard 격상 ⬆</div>
+    <div class="stat-box-num" style="color:#d20015;">${RP_TO_ST.length}</div>
+    <div class="stat-box-sub">권고→의무로 강화</div>
+  </div>
+  <div class="stat-box" style="border-top:3px solid #f59e0b;">
+    <div class="stat-box-label">Standard → RP 하향 ⬇</div>
+    <div class="stat-box-num" style="color:#b45309;">${ST_TO_RP.length}</div>
+    <div class="stat-box-sub">의무→권고로 완화</div>
+  </div>
+  <div class="stat-box" style="border-top:3px solid #1a7a4a;">
+    <div class="stat-box-label">신규 추가 ISARP ✚</div>
+    <div class="stat-box-num" style="color:#1a7a4a;">${NEW_18.length}</div>
+    <div class="stat-box-sub">Ed.18에서 신규</div>
+  </div>
+  <div class="stat-box" style="border-top:3px solid #6b7280;">
+    <div class="stat-box-label">삭제된 ISARP ✕</div>
+    <div class="stat-box-num" style="color:#374151;">${REMOVED.length}</div>
+    <div class="stat-box-sub">Ed.17에서 제거됨</div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <!-- RP→ST 격상 (핵심 — 제일 중요) -->
+  <div class="col-12">
+    <div class="w-card" style="border-left:4px solid #d20015;">
+      <div class="w-card-header">
+        <span class="w-card-title"><i class="fas fa-arrow-up me-2" style="color:#d20015;"></i>RP → Standard 격상 <span style="color:#d20015;font-weight:900;">${RP_TO_ST.length}건</span></span>
+        <span class="pill pill-red">재심사 영향 직결</span>
+      </div>
+      <div class="w-card-body">
+        <div style="background:#fff5f5;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:0.78rem;color:#7f1d1d;">
+          <i class="fas fa-exclamation-triangle me-2" style="color:#d20015;"></i>
+          <strong>재인증 심사 중요 포인트:</strong> 아래 항목은 Ed.17에서 <em>권고(should)</em>였으나 Ed.18에서 <em>의무(shall)</em>로 격상됩니다. 이행하지 않을 경우 Finding 발행 대상입니다.
+        </div>
+        <table class="iata-table">
+          <thead><tr><th style="width:130px;">ISARP 코드</th><th style="width:100px;">부문</th><th>변경 내용</th><th style="width:80px;">Ed.17</th><th style="width:80px;">Ed.18</th></tr></thead>
+          <tbody>
+            ${RP_TO_ST.map(c=>`
+            <tr>
+              <td><strong style="font-family:monospace;color:var(--iata-navy);">${c}</strong></td>
+              <td><span class="badge bg-secondary" style="font-size:0.65rem;">${sec(c)} — ${SECT[sec(c)]||sec(c)}</span></td>
+              <td style="font-size:0.78rem;">${RP_ST_DESC[c]||'—'}</td>
+              <td><span class="pill pill-gray" style="font-size:0.65rem;">RP (should)</span></td>
+              <td><span class="pill pill-red" style="font-size:0.65rem;">ST (shall)</span></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ST→RP 완화 -->
+  <div class="col-md-6">
+    <div class="w-card h-100" style="border-left:4px solid #f59e0b;">
+      <div class="w-card-header">
+        <span class="w-card-title"><i class="fas fa-arrow-down me-2" style="color:#b45309;"></i>Standard → RP 완화 <span style="color:#b45309;">${ST_TO_RP.length}건</span></span>
+      </div>
+      <div class="w-card-body">
+        ${renderCodeList(ST_TO_RP,'pill-gold')}
+        <div style="font-size:0.75rem;color:#94a3b8;margin-top:8px;">* 의무→권고 완화 — Ed.18 적용 시 Finding 기준에서 제외</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 신규 추가 -->
+  <div class="col-md-6">
+    <div class="w-card h-100" style="border-left:4px solid #1a7a4a;">
+      <div class="w-card-header">
+        <span class="w-card-title"><i class="fas fa-plus-circle me-2" style="color:#1a7a4a;"></i>신규 추가 ISARP <span style="color:#1a7a4a;">${NEW_18.length}건</span></span>
+      </div>
+      <div class="w-card-body">
+        ${renderCodeList(NEW_18,'pill-green')}
+      </div>
+    </div>
+  </div>
+
+  <!-- 삭제 -->
+  <div class="col-md-6">
+    <div class="w-card h-100" style="border-left:4px solid #6b7280;">
+      <div class="w-card-header">
+        <span class="w-card-title"><i class="fas fa-minus-circle me-2" style="color:#6b7280;"></i>삭제된 ISARP <span style="color:#6b7280;">${REMOVED.length}건</span></span>
+      </div>
+      <div class="w-card-body">
+        ${renderCodeList(REMOVED,'pill-gray')}
+      </div>
+    </div>
+  </div>
+
+  <!-- 부문별 요약 -->
+  <div class="col-md-6">
+    <div class="w-card h-100">
+      <div class="w-card-header">
+        <span class="w-card-title"><i class="fas fa-chart-bar me-2" style="color:var(--iata-navy);"></i>부문별 변경 건수</span>
+      </div>
+      <div class="w-card-body" style="padding:0;">
+        <table class="iata-table" style="margin:0;">
+          <thead><tr><th>부문</th><th>RP→ST</th><th>ST→RP</th><th>신규</th><th>삭제</th></tr></thead>
+          <tbody>
+            ${sectionStats.map(r=>`<tr>
+              <td><span class="badge bg-secondary" style="font-size:0.65rem;">${r.s}</span> <span style="font-size:0.75rem;">${r.name}</span></td>
+              <td style="text-align:center;">${r.rp2st>0?`<span style="color:#d20015;font-weight:700;">${r.rp2st}</span>`:'<span style="color:#ddd;">-</span>'}</td>
+              <td style="text-align:center;">${r.st2rp>0?`<span style="color:#b45309;font-weight:700;">${r.st2rp}</span>`:'<span style="color:#ddd;">-</span>'}</td>
+              <td style="text-align:center;">${r.nw>0?`<span style="color:#1a7a4a;font-weight:700;">${r.nw}</span>`:'<span style="color:#ddd;">-</span>'}</td>
+              <td style="text-align:center;">${r.rm>0?`<span style="color:#6b7280;font-weight:700;">${r.rm}</span>`:'<span style="color:#ddd;">-</span>'}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+// ─── 회의체 관리 ────────────────────────────────────────────
+function renderMeetings() {
+  const stored = JSON.parse(localStorage.getItem('iosa_meetings') || '[]');
+
+  const MTYPES = [
+    { value:'iosa_tft',    label:'IOSA TFT',         color:'#1e3a5f', bg:'#eff6ff' },
+    { value:'safety',      label:'안전위원회',          color:'#1a7a4a', bg:'#f0faf4' },
+    { value:'dept_review', label:'부문별 심사대비',     color:'#7c3aed', bg:'#f5f3ff' },
+    { value:'cap_review',  label:'CAP 검토회의',       color:'#d20015', bg:'#fff1f2' },
+    { value:'other',       label:'기타',               color:'#6b7280', bg:'#f8fafc' },
+  ];
+  const typeMap = Object.fromEntries(MTYPES.map(t=>[t.value,t]));
+
+  const upcoming = stored.filter(m=>new Date(m.date)>=new Date()).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const past     = stored.filter(m=>new Date(m.date)< new Date()).sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  document.getElementById('section-meetings').innerHTML = `
+<div class="sect-header">
+  <div>
+    <h2 class="sect-title">회의체 관리</h2>
+    <p class="sect-sub">IOSA 관련 회의 일정 · 결과 · 자료 공유</p>
+  </div>
+  <div class="sect-actions">
+    ${isAdmin ? `<button class="btn-primary btn-primary-sm" onclick="openMeetingForm()"><i class="fas fa-plus me-1"></i>회의 추가</button>` : ''}
+  </div>
+</div>
+
+<!-- 회의 추가/수정 모달 -->
+<div id="meeting-form-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:2000;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;padding:28px 32px;width:100%;max-width:540px;box-shadow:0 16px 48px rgba(0,0,0,0.2);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h6 style="font-weight:800;margin:0;">회의 등록 / 수정</h6>
+      <button onclick="closeMeetingForm()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;color:#888;">×</button>
+    </div>
+    <input type="hidden" id="mtg-edit-id">
+    <div style="display:grid;gap:12px;">
+      <div><label class="form-label">회의 종류</label>
+        <select class="iata-input" id="mtg-type">
+          ${MTYPES.map(t=>`<option value="${t.value}">${t.label}</option>`).join('')}
+        </select>
+      </div>
+      <div><label class="form-label">회의명</label>
+        <input class="iata-input" id="mtg-title" placeholder="예: 2026년 1분기 IOSA TFT 회의"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><label class="form-label">일자</label><input class="iata-input" type="date" id="mtg-date"></div>
+        <div><label class="form-label">시간</label><input class="iata-input" type="time" id="mtg-time" value="10:00"></div>
+      </div>
+      <div><label class="form-label">장소</label>
+        <input class="iata-input" id="mtg-location" placeholder="예: 대회의실 / 화상회의(Teams)"></div>
+      <div><label class="form-label">주요 안건 (줄바꿈으로 구분)</label>
+        <textarea class="iata-input" id="mtg-agenda" rows="3" placeholder="1. ISM Ed.18 개정 현황 공유&#10;2. CR 작성 진행상황 보고" style="resize:vertical;"></textarea>
+      </div>
+      <div><label class="form-label">회의 결과 / 주요 결정사항</label>
+        <textarea class="iata-input" id="mtg-result" rows="3" placeholder="회의 종료 후 결과 입력" style="resize:vertical;"></textarea>
+      </div>
+      <div><label class="form-label">자료 링크 (URL, 한 줄에 하나)</label>
+        <textarea class="iata-input" id="mtg-links" rows="2" placeholder="https://example.com/회의자료.pdf" style="resize:vertical;"></textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end;">
+      <button class="btn-outline btn-outline-sm" onclick="closeMeetingForm()">취소</button>
+      <button class="btn-primary btn-primary-sm" onclick="saveMeeting()"><i class="fas fa-save me-1"></i>저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 예정 회의 -->
+<div class="w-card mb-3">
+  <div class="w-card-header">
+    <span class="w-card-title"><i class="fas fa-calendar-alt me-2" style="color:var(--iata-navy);"></i>예정 회의 <span class="pill pill-navy" style="margin-left:4px;">${upcoming.length}건</span></span>
+  </div>
+  ${upcoming.length === 0 ? `<div class="w-card-body" style="text-align:center;color:#bbb;padding:32px;font-size:0.85rem;"><i class="fas fa-calendar-plus" style="font-size:2rem;display:block;margin-bottom:8px;opacity:0.3;"></i>예정된 회의가 없습니다</div>` : `
+  <div class="w-card-body" style="padding:0;">
+    ${upcoming.map(m=>renderMeetingCard(m, typeMap, true)).join('')}
+  </div>`}
+</div>
+
+<!-- 지난 회의 -->
+<div class="w-card">
+  <div class="w-card-header">
+    <span class="w-card-title"><i class="fas fa-history me-2" style="color:#6b7280;"></i>지난 회의 <span class="pill pill-gray" style="margin-left:4px;">${past.length}건</span></span>
+  </div>
+  ${past.length === 0 ? `<div class="w-card-body" style="text-align:center;color:#bbb;padding:32px;font-size:0.85rem;">지난 회의 기록이 없습니다</div>` : `
+  <div class="w-card-body" style="padding:0;">
+    ${past.map(m=>renderMeetingCard(m, typeMap, false)).join('')}
+  </div>`}
+</div>`;
+}
+
+function renderMeetingCard(m, typeMap, upcoming) {
+  const t = typeMap[m.type] || typeMap['other'];
+  const agendaItems = (m.agenda||'').split('\n').filter(x=>x.trim());
+  const links = (m.links||'').split('\n').filter(x=>x.trim());
+  return `
+<div style="border-bottom:1px solid #f1f5f9;padding:16px 20px;${upcoming?'':'opacity:0.85;'}">
+  <div style="display:flex;align-items:flex-start;gap:12px;">
+    <div style="width:48px;flex-shrink:0;text-align:center;background:${t.bg};border:1px solid ${t.color}33;border-radius:8px;padding:6px 4px;">
+      <div style="font-size:0.6rem;font-weight:800;color:${t.color};text-transform:uppercase;letter-spacing:0.5px;">${new Date(m.date).toLocaleString('ko-KR',{month:'short'})}</div>
+      <div style="font-size:1.3rem;font-weight:900;color:${t.color};line-height:1;">${new Date(m.date).getDate()}</div>
+      <div style="font-size:0.55rem;color:${t.color}99;">${new Date(m.date).getFullYear()}</div>
+    </div>
+    <div style="flex:1;min-width:0;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+        <span style="background:${t.bg};color:${t.color};border:1px solid ${t.color}44;padding:2px 8px;border-radius:10px;font-size:0.62rem;font-weight:700;">${t.label}</span>
+        <strong style="font-size:0.88rem;">${m.title}</strong>
+        ${m.time?`<span style="font-size:0.72rem;color:#94a3b8;">${m.time}</span>`:''}
+      </div>
+      ${m.location?`<div style="font-size:0.75rem;color:#64748b;margin-bottom:6px;"><i class="fas fa-map-marker-alt me-1"></i>${m.location}</div>`:''}
+      ${agendaItems.length>0?`<div style="font-size:0.75rem;color:#475569;margin-bottom:6px;">
+        <span style="font-weight:700;color:#64748b;">안건:</span>
+        ${agendaItems.map(a=>`<span style="display:inline-block;background:#f8fafc;border:1px solid #e2e8f0;padding:1px 7px;border-radius:10px;margin:2px 3px 2px 0;font-size:0.7rem;">${a}</span>`).join('')}
+      </div>`:''}
+      ${m.result?`<div style="font-size:0.78rem;background:#f0faf4;border:1px solid #bbf7d0;border-radius:6px;padding:8px 12px;margin-bottom:6px;color:#14532d;">
+        <i class="fas fa-check-circle me-1" style="color:#1a7a4a;"></i><strong>결과:</strong> ${m.result}
+      </div>`:''}
+      ${links.length>0?`<div style="display:flex;gap:6px;flex-wrap:wrap;">
+        ${links.map((l,i)=>`<a href="${l}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:#f0f5ff;border:1px solid #bfdbfe;border-radius:10px;font-size:0.68rem;font-weight:600;color:#1e3a5f;text-decoration:none;"><i class="fas fa-paperclip"></i>자료 ${i+1}</a>`).join('')}
+      </div>`:''}
+    </div>
+    ${isAdmin?`<div style="display:flex;gap:4px;flex-shrink:0;">
+      <button onclick="editMeeting('${m.id}')" style="background:none;border:1px solid #e2e8f0;border-radius:5px;padding:4px 8px;cursor:pointer;font-size:0.68rem;color:#64748b;"><i class="fas fa-pen"></i></button>
+      <button onclick="deleteMeeting('${m.id}')" style="background:none;border:1px solid #fee2e2;border-radius:5px;padding:4px 8px;cursor:pointer;font-size:0.68rem;color:#dc3545;"><i class="fas fa-trash"></i></button>
+    </div>`:''}
+  </div>
+</div>`;
+}
+
+function openMeetingForm(m) {
+  const modal = document.getElementById('meeting-form-modal');
+  if (!modal) return;
+  document.getElementById('mtg-edit-id').value = m ? m.id : '';
+  document.getElementById('mtg-title').value = m ? m.title : '';
+  document.getElementById('mtg-type').value = m ? m.type : 'iosa_tft';
+  document.getElementById('mtg-date').value = m ? m.date : '';
+  document.getElementById('mtg-time').value = m ? (m.time||'10:00') : '10:00';
+  document.getElementById('mtg-location').value = m ? (m.location||'') : '';
+  document.getElementById('mtg-agenda').value = m ? (m.agenda||'') : '';
+  document.getElementById('mtg-result').value = m ? (m.result||'') : '';
+  document.getElementById('mtg-links').value = m ? (m.links||'') : '';
+  modal.style.display = 'flex';
+}
+function closeMeetingForm() {
+  const modal = document.getElementById('meeting-form-modal');
+  if (modal) modal.style.display = 'none';
+}
+function saveMeeting() {
+  const title = document.getElementById('mtg-title').value.trim();
+  const date  = document.getElementById('mtg-date').value;
+  if (!title || !date) { alert('회의명과 일자를 입력하세요.'); return; }
+  const stored = JSON.parse(localStorage.getItem('iosa_meetings') || '[]');
+  const editId = document.getElementById('mtg-edit-id').value;
+  const entry = {
+    id:       editId || Date.now().toString(),
+    type:     document.getElementById('mtg-type').value,
+    title,
+    date,
+    time:     document.getElementById('mtg-time').value,
+    location: document.getElementById('mtg-location').value.trim(),
+    agenda:   document.getElementById('mtg-agenda').value.trim(),
+    result:   document.getElementById('mtg-result').value.trim(),
+    links:    document.getElementById('mtg-links').value.trim(),
+  };
+  const idx = stored.findIndex(m=>m.id===editId);
+  if (idx>=0) stored[idx]=entry; else stored.push(entry);
+  localStorage.setItem('iosa_meetings', JSON.stringify(stored));
+  closeMeetingForm();
+  if (typeof showCRSavedToast === 'function') showCRSavedToast();
+  renderMeetings();
+}
+function editMeeting(id) {
+  const stored = JSON.parse(localStorage.getItem('iosa_meetings') || '[]');
+  const m = stored.find(x=>x.id===id);
+  if (m) openMeetingForm(m);
+}
+function deleteMeeting(id) {
+  if (!confirm('이 회의 기록을 삭제하시겠습니까?')) return;
+  const stored = JSON.parse(localStorage.getItem('iosa_meetings') || '[]').filter(m=>m.id!==id);
+  localStorage.setItem('iosa_meetings', JSON.stringify(stored));
+  renderMeetings();
+}

@@ -46,6 +46,16 @@
       </span>
     </li>
     <li class="nav-item">
+      <span class="nav-link-top" id="navbtn-ism_analysis" onclick="navigate('ism_analysis')">
+        ISM 분석
+      </span>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link-top" id="navbtn-meetings" onclick="navigate('meetings')">
+        회의체
+      </span>
+    </li>
+    <li class="nav-item">
       <span class="nav-link-top" id="navbtn-resources" onclick="navigate('manuals')">
         자료실 <i class="fas fa-chevron-down" style="font-size:0.55rem;opacity:0.6;"></i>
       </span>
@@ -306,6 +316,8 @@
   <div class="page-section" id="section-manuals"></div>
   <div class="page-section" id="section-board"></div>
   <div class="page-section" id="section-cr"></div>
+  <div class="page-section" id="section-ism_analysis"></div>
+  <div class="page-section" id="section-meetings"></div>
 </div>
 
 <!-- ═══ SECTION DETAIL OVERLAY ═══ -->
@@ -697,6 +709,8 @@ function renderSectionAll(s) {
     manuals: renderManuals,
     board: renderBoard,
     cr: renderCR,
+    ism_analysis: renderISMAnalysis,
+    meetings: renderMeetings,
   };
   if (map[s]) map[s]();
 }
@@ -726,6 +740,7 @@ function renderDashboardNew() {
       links:[
         {label:'IOSA 인증 정보', section:'certification'},
         {label:'ISM 개정 관리',  section:'ism'},
+        {label:'ISM 개정 분석',  section:'ism_analysis'},
       ]
     },
     {
@@ -750,6 +765,7 @@ function renderDashboardNew() {
       links:[
         {label:'매뉴얼 다운로드', section:'manuals'},
         {label:'연간 일정',      section:'schedule'},
+        {label:'회의체 관리',    section:'meetings'},
       ]
     },
   ];
@@ -848,50 +864,47 @@ function renderDashboardNew() {
   <!-- 헤더 -->
   <div style="background:#f8fafc;border-bottom:1px solid #e5e7eb;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;">
     <div style="display:flex;align-items:center;gap:8px;">
-      <i class="fas fa-route" style="color:#6b7280;font-size:0.9rem;"></i>
-      <span style="color:#374151;font-size:0.85rem;font-weight:800;letter-spacing:0.3px;">재인증 준비 로드맵</span>
+      <i class="fas fa-route" style="color:var(--eastar-red);font-size:0.9rem;"></i>
+      <span style="color:#1e293b;font-size:0.88rem;font-weight:800;letter-spacing:0.3px;">재인증 준비 로드맵</span>
     </div>
     <span style="background:#fff;color:#6b7280;border:1px solid #e5e7eb;padding:3px 10px;border-radius:20px;font-size:0.62rem;font-weight:700;letter-spacing:0.8px;">ISM Ed.18 · RBI 재인증</span>
   </div>
   <!-- 타임라인 트랙 -->
-  <div style="padding:20px 20px 16px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:#e0e0e0 transparent;">
-    <div style="display:flex;align-items:stretch;min-width:max-content;gap:0;position:relative;">
+  <div style="padding:16px 20px 18px;">
+    <div style="display:flex;align-items:stretch;gap:0;width:100%;">
       ${[
-        { ym:'2026.06', color:'#6b7280', bg:'#fff', border:'#e5e7eb', icon:'fa-graduation-cap',      label:'6월',     items:['IATA RBI 교육 이수'],                    tag:'D-'+(Math.max(0,Math.round((new Date('2026-06-01')-new Date())/(86400000))))  },
-        { ym:'2026.07', color:'#6b7280', bg:'#fff', border:'#e5e7eb', icon:'fa-chalkboard-teacher', label:'7월',     items:['IOSA 내부심사원 교육 실시'],              tag:'D-'+(Math.max(0,Math.round((new Date('2026-07-01')-new Date())/(86400000))))  },
-        { ym:'2026.08', color:'#6b7280', bg:'#fff', border:'#e5e7eb', icon:'fa-users-gear',         label:'8월',     items:['IOSA TFT 발령','IOSA 내부심사 실시'],     tag:'D-'+(Math.max(0,Math.round((new Date('2026-08-01')-new Date())/(86400000))))  },
-        { ym:'2026.10', color:'#6b7280', bg:'#fff', border:'#e5e7eb', icon:'fa-calendar-check',    label:'10월',    items:['본점검 일정 조율','IATA 요구자료 제출'],   tag:'D-'+(Math.max(0,Math.round((new Date('2026-10-01')-new Date())/(86400000))))  },
-        { ym:'2027.03', color:'#d20015', bg:'#fff', border:'#fecaca', icon:'fa-shield-check',       label:'2027.03', items:['IOSA RBI 재인증 심사'],                    tag:'D-'+(Math.max(0,Math.round((new Date('2027-03-01')-new Date())/(86400000)))), final:true },
+        { ym:'2026.06', accent:'#1e3a5f', bg:'#eff6ff', border:'#93c5fd', ibg:'#dbeafe', icon:'fa-graduation-cap',     items:['IATA RBI 교육 이수'],                  tag:'D-'+(Math.max(0,Math.round((new Date('2026-06-01')-new Date())/(86400000))))  },
+        { ym:'2026.07', accent:'#1e3a5f', bg:'#eff6ff', border:'#93c5fd', ibg:'#dbeafe', icon:'fa-chalkboard-teacher',  items:['IOSA 내부심사원 교육 실시'],            tag:'D-'+(Math.max(0,Math.round((new Date('2026-07-01')-new Date())/(86400000))))  },
+        { ym:'2026.08', accent:'#1e3a5f', bg:'#eff6ff', border:'#93c5fd', ibg:'#dbeafe', icon:'fa-users-gear',          items:['IOSA TFT 발령','IOSA 내부심사 실시'],   tag:'D-'+(Math.max(0,Math.round((new Date('2026-08-01')-new Date())/(86400000))))  },
+        { ym:'2026.10', accent:'#1e3a5f', bg:'#eff6ff', border:'#93c5fd', ibg:'#dbeafe', icon:'fa-calendar-check',      items:['본점검 일정 조율','IATA 요구자료 제출'], tag:'D-'+(Math.max(0,Math.round((new Date('2026-10-01')-new Date())/(86400000))))  },
+        { ym:'2027.03', accent:'#d20015', bg:'#fff1f2', border:'#fca5a5', ibg:'#fee2e2', icon:'fa-shield-check',         items:['IOSA RBI 재인증 심사'],                tag:'D-'+(Math.max(0,Math.round((new Date('2027-03-01')-new Date())/(86400000)))), final:true },
       ].map((t, i, arr) => `
-        <div style="display:flex;align-items:center;flex-shrink:0;">
+        <div style="flex:1;min-width:0;display:flex;align-items:stretch;">
           <!-- 마일스톤 카드 -->
-          <div style="width:160px;background:${t.bg};border:2px solid ${t.border};border-radius:10px;overflow:hidden;position:relative;${t.final?'box-shadow:0 4px 20px rgba(210,0,21,0.15);':''}" >
-            <!-- 컬러 탑바 -->
-            <div style="height:4px;background:${t.color};"></div>
+          <div style="flex:1;background:${t.bg};border:2px solid ${t.border};border-radius:10px;overflow:hidden;${t.final?'box-shadow:0 4px 20px rgba(210,0,21,0.2);':''}">
+            <div style="height:5px;background:${t.accent};"></div>
             <div style="padding:12px 14px 14px;">
               <!-- 월 + D-day -->
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                <span style="font-size:0.65rem;font-weight:900;color:${t.color};letter-spacing:1.5px;text-transform:uppercase;">${t.ym}</span>
-                <span style="background:${t.color};color:#fff;font-size:0.55rem;font-weight:800;padding:2px 6px;border-radius:10px;">${t.tag}</span>
+                <span style="font-size:0.7rem;font-weight:900;color:${t.accent};letter-spacing:0.5px;">${t.ym}</span>
+                <span style="background:${t.accent};color:#fff;font-size:0.55rem;font-weight:800;padding:2px 7px;border-radius:10px;white-space:nowrap;">${t.tag}</span>
               </div>
               <!-- 아이콘 -->
-              <div style="width:44px;height:44px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                <i class="fas ${t.icon}" style="font-size:1.1rem;color:${t.color};"></i>
+              <div style="width:40px;height:40px;background:${t.ibg};border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+                <i class="fas ${t.icon}" style="font-size:1rem;color:${t.accent};"></i>
               </div>
               <!-- 업무 목록 -->
               ${t.items.map(item => `
               <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:5px;">
-                <span style="width:5px;height:5px;border-radius:50%;background:${t.color};flex-shrink:0;margin-top:5px;"></span>
-                <span style="font-size:0.73rem;color:#222;font-weight:700;line-height:1.4;">${item}</span>
+                <span style="width:5px;height:5px;border-radius:50%;background:${t.accent};flex-shrink:0;margin-top:5px;"></span>
+                <span style="font-size:0.73rem;color:#1e293b;font-weight:600;line-height:1.4;">${item}</span>
               </div>`).join('')}
             </div>
           </div>
           <!-- 연결선 (마지막 제외) -->
           ${i < arr.length-1 ? `
-          <div style="display:flex;align-items:center;width:32px;flex-shrink:0;">
-            <div style="width:100%;height:1.5px;background:#d1d5db;position:relative;">
-              <i class="fas fa-chevron-right" style="position:absolute;right:-4px;top:50%;transform:translateY(-50%);font-size:0.6rem;color:#9ca3af;"></i>
-            </div>
+          <div style="width:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-chevron-right" style="font-size:0.65rem;color:#94a3b8;"></i>
           </div>` : ''}
         </div>`).join('')}
     </div>
@@ -1053,7 +1066,19 @@ function renderHistory() {
   const customEntries = JSON.parse(localStorage.getItem('iosa_history_entries') || '{}');
   Object.entries(customEntries).forEach(([yr, custom]) => {
     if (AUDIT_HISTORY[yr] && custom.dates) {
-      AUDIT_HISTORY[yr] = { ...AUDIT_HISTORY[yr], ...custom };
+      const base = AUDIT_HISTORY[yr];
+      AUDIT_HISTORY[yr] = {
+        ...base, ...custom,
+        placeholder: false,
+        keyCARs:  base.keyCARs  || [],
+        auditors: base.auditors || (custom.auditor && custom.auditor !== '—'
+          ? [{ name: custom.auditor, role: 'Lead Auditor', sections: 'All Sections', nationality: '—' }]
+          : []),
+        expiry: base.expiry || '—',
+        fleet:  base.fleet  || '—',
+        files:  base.files  || [],
+        status: 'REGISTERED',
+      };
     }
   });
 
@@ -1153,7 +1178,7 @@ ${a.placeholder ? `
   </div>
   <div class="stat-box">
     <div class="stat-box-label">Not Applicable (N/A)</div>
-    <div class="stat-box-num">${a.totalNA}</div>
+    <div class="stat-box-num">${a.totalNA ?? '—'}</div>
     <div class="stat-box-sub">해당 없음</div>
   </div>
   <div class="stat-box green">
@@ -1175,7 +1200,7 @@ ${a.placeholder ? `
         <table class="iata-table">
           <thead><tr><th>Finding ID</th><th>ISARP</th><th>내용</th><th>상태</th></tr></thead>
           <tbody>
-            ${a.keyCARs.map(car => {
+            ${(a.keyCARs||[]).map(car => {
               const capF = (APP_DATA.cap.findings||[]).find(f=>f.id===car.id);
               const status = capF ? capF.status : 'open';
               const stMap = {open:'pill-red', submitted:'pill-gold', approved:'pill-navy', closed:'pill-green'};
@@ -1189,7 +1214,7 @@ ${a.placeholder ? `
                 </td>
               </tr>`;
             }).join('')}
-            <tr><td colspan="4" style="font-size:0.74rem;color:#bbb;text-align:center;padding:10px;">+ ${a.totalF - a.keyCARs.length}건 추가 → 아래 CAP/FAT 섹션 참조</td></tr>
+            ${(a.keyCARs||[]).length > 0 ? `<tr><td colspan="4" style="font-size:0.74rem;color:#bbb;text-align:center;padding:10px;">+ ${a.totalF - (a.keyCARs||[]).length}건 추가 → 아래 CAP/FAT 섹션 참조</td></tr>` : (a.totalF > 0 ? `<tr><td colspan="4" style="font-size:0.78rem;color:#94a3b8;text-align:center;padding:16px;"><i class="fas fa-info-circle me-1"></i>상세 지적 목록은 IATA Connect IAR에서 확인하세요</td></tr>` : `<tr><td colspan="4" style="font-size:0.78rem;color:#1a7a4a;text-align:center;padding:16px;"><i class="fas fa-check-circle me-1"></i>지적사항 없음</td></tr>`)}
           </tbody>
         </table>
       </div>
@@ -1213,9 +1238,9 @@ ${a.placeholder ? `
             <td style="padding:8px 0;font-weight:600;border-bottom:1px solid var(--border-light);">${v}</td>
           </tr>`).join('')}
         </table>
-        ${isAdmin && a.files.length > 0 ? `
+        ${isAdmin && (a.files||[]).length > 0 ? `
         <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
-          ${a.files.map(f=>`<a href="${f.path}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:var(--eastar-red);color:#fff;border-radius:3px;font-size:0.72rem;font-weight:700;text-decoration:none;"><i class="fas fa-file-pdf"></i> ${f.label}</a>`).join('')}
+          ${(a.files||[]).map(f=>`<a href="${f.path}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:var(--eastar-red);color:#fff;border-radius:3px;font-size:0.72rem;font-weight:700;text-decoration:none;"><i class="fas fa-file-pdf"></i> ${f.label}</a>`).join('')}
         </div>` : ''}
       </div>
     </div>
@@ -1251,6 +1276,35 @@ ${a.placeholder ? `
     </table>
   </div>
 </div>
+
+${isAdmin && a.savedAt ? `
+<!-- 수동 입력 기록 수정 (관리자 모드) -->
+<div class="w-card mt-3">
+  <div class="w-card-header" style="cursor:pointer;" onclick="(function(){var b=document.getElementById('hist-edit-body-${a.year}'),ic=document.getElementById('hist-edit-ic-${a.year}');b.style.display=b.style.display==='none'?'block':'none';ic.className='fas fa-chevron-'+(b.style.display==='none'?'down':'up');})()">
+    <span class="w-card-title"><i class="fas fa-pen me-2" style="color:#6b7280;"></i>심사 기록 수정 <span style="font-size:0.7rem;color:#94a3b8;font-weight:500;">(관리자 모드)</span></span>
+    <i class="fas fa-chevron-down" id="hist-edit-ic-${a.year}" style="color:#9ca3af;font-size:0.75rem;"></i>
+  </div>
+  <div id="hist-edit-body-${a.year}" style="display:none;padding:16px 20px;">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:left;">
+      <div><label class="form-label">심사 기간</label><input class="iata-input" id="hist-dates-${a.year}" placeholder="예: 2018.11.05~11.09" value="${a.dates||''}"></div>
+      <div><label class="form-label">Lead Auditor</label><input class="iata-input" id="hist-auditor-${a.year}" placeholder="심사원 이름" value="${a.auditor||''}"></div>
+      <div><label class="form-label">적용 ISM</label><input class="iata-input" id="hist-ism-${a.year}" placeholder="예: Ed.12" value="${a.ism||''}"></div>
+      <div><label class="form-label">총 Finding</label><input class="iata-input" type="number" id="hist-findings-${a.year}" placeholder="0" value="${a.totalF!=null?a.totalF:''}"></div>
+      <div><label class="form-label">총 OBS</label><input class="iata-input" type="number" id="hist-obs-${a.year}" placeholder="0" value="${a.totalO!=null?a.totalO:''}"></div>
+      <div><label class="form-label">IAR ID</label><input class="iata-input" id="hist-iar-${a.year}" placeholder="IOSA-ESR-..." value="${a.iar||''}"></div>
+      <div style="grid-column:1/-1;"><label class="form-label">심사 종류</label>
+        <select class="iata-input" id="hist-type-${a.year}">
+          <option value="INITIAL" ${a.type==='INITIAL'?'selected':''}>INITIAL — 초도심사</option>
+          <option value="RENEWAL" ${a.type==='RENEWAL'?'selected':''}>RENEWAL — 갱신심사</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn-primary btn-primary-sm" onclick="saveHistoryEntry(${a.year})"><i class="fas fa-save me-1"></i>저장</button>
+      <button class="btn-outline btn-outline-sm" onclick="deleteHistoryEntry(${a.year})" style="color:#dc3545;border-color:#dc3545;"><i class="fas fa-trash me-1"></i>초기화</button>
+    </div>
+  </div>
+</div>` : ''}
 
 ${historyTab === '2025' ? `
 <!-- CAP / FAT Section (2025 초도심사) -->
