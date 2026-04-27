@@ -3605,108 +3605,157 @@ async function exportCRExcel() {
 // ─── ISM 개정 분석 ──────────────────────────────────────────
 function renderISMAnalysis() {
   const SECT = {ORG:'조직 및 안전관리',FLT:'비행운항',DSP:'종합통제',MNT:'정비',CAB:'객실',GRH:'지상조업',CGO:'화물',SEC:'항공보안'};
-  const sec = c => c.split(' ')[0];
-  const grp = (arr) => {
-    const g = {};
-    arr.forEach(c => { const s = sec(c); (g[s]||(g[s]=[])).push(c); });
-    return g;
-  };
 
-  const RP_TO_ST = ['GRH 3.4.16','GRH 3.4.17','ORG 2.4.2','ORG 3.1.1','ORG 3.3.5','SEC 1.3.1'];
-  const ST_TO_RP = ['ORG 1.7.9','SEC 4.3.3'];
-  const NEW_18   = ['CAB 3.4.7','CGO 3.6.2','DSP 1.12.2f','DSP 3.2.8','DSP 3.2.8C','DSP 4.3.15','FLT 2.3.1a','FLT 3.1.1a','FLT 3.1.2i','FLT 3.9.5','GRH 3.4.14A','GRH 3.4.14B','GRH 3.4.14C','GRH 3.6.6','MNT 1.11.6f','ORG 2.1.9f','ORG 2.2.3a','ORG 2.2a','SEC 1.11o','SEC 1.2.1o'];
-  const REMOVED  = ['CAB 3.3.6','CAB 3.4.3','CGO 3.4.2','DSP 3.3.2','DSP 3.4.2','FLT 3.1.1i','FLT 3.11.59A','FLT 3.11.59B','FLT 3.13.15','FLT 3.7.4','GRH 3.4.14','GRH 3.7','ORG 1.7.8a','ORG 3.1.2a','SEC 1.2.1G','SEC 1.3.1G','SEC 3.3.2'];
+  // ── 공식 ISM ED 18 Revision Highlights 기반 데이터 ──────────
+  // ① RP → Standard 격상 (4건) — Finding 대상으로 격상
+  const RP_TO_ST = [
+    { code:'ORG 2.4.2', desc:'자발적 안전 보고 프로그램(Voluntary Safety Reporting) 의무화' },
+    { code:'ORG 3.4.1', desc:'안전 위험성 평가(Safety Risk Assessment) 프로그램 의무화' },
+    { code:'GRH 3.4.16', desc:'하중 제한(Load Restriction) 기준 — CGO 3.3.1과 정렬' },
+    { code:'GRH 3.4.17', desc:'하중 제한(Load Restriction) 기준 — CGO 3.3.1과 정렬' },
+  ];
 
-  // RP→ST 설명 (ISM 맥락)
-  const RP_ST_DESC = {
-    'GRH 3.4.16': '지상조업 — 하중 제한 (Load Restriction) 관련 요건 강화',
-    'GRH 3.4.17': '지상조업 — 위험물 탑재 구역 하중 분배 요건 강화',
-    'ORG 2.4.2':  '조직 — 안전 보고 프로그램(Voluntary Safety Reporting) 의무화',
-    'ORG 3.1.1':  '조직 — 품질보증 프로그램 수립 및 운영 의무화',
-    'ORG 3.3.5':  '조직 — SMS 문서화 및 위험도 평가 절차 의무화',
-    'SEC 1.3.1':  '항공보안 — 보안 훈련 프로그램 의무화',
-  };
+  // ② 신규 Standard 추가 (3건) — 기존에 없던 새 의무 조항
+  const NEW_ST = [
+    { code:'DSP 3.2.8C', desc:'비행 준비 계획 단계에서의 안전 위험성 평가(SRA) 신규 의무화' },
+    { code:'GRH 3.4.14A', desc:'ULD 운영 총괄 기준 Standard 신규 추가 (CGO 3.5.1 정렬)' },
+    { code:'GRH 3.6.6',  desc:'화물 탑재 항공기 위험물(DG) 사고 보고 의무화 (CGO 3.2.18 정렬)' },
+  ];
 
-  const renderCodeList = (arr, badge='pill-navy') => {
-    const g = grp(arr);
-    return Object.entries(g).map(([s, codes]) => `
-      <div style="margin-bottom:12px;">
-        <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#64748b;margin-bottom:6px;">${s} — ${SECT[s]||s}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          ${codes.map(c=>`<span class="pill ${badge}" style="font-family:monospace;font-size:0.75rem;">${c}</span>`).join('')}
-        </div>
-      </div>`).join('');
-  };
+  // ③ 신규 RP 추가 (2건)
+  const NEW_RP = [
+    { code:'GRH 3.4.14C', desc:'ULD 보관 기준 RP 신규 추가 (CGO 3.5.3 정렬)' },
+    { code:'CGO 3.6.2',   desc:'PED(개인 전자기기) 관련 화물 권고사항 신규 추가' },
+  ];
 
-  const sectionStats = Object.keys(SECT).map(s => {
-    const rp2st = RP_TO_ST.filter(c=>sec(c)===s).length;
-    const st2rp = ST_TO_RP.filter(c=>sec(c)===s).length;
-    const nw    = NEW_18.filter(c=>sec(c)===s).length;
-    const rm    = REMOVED.filter(c=>sec(c)===s).length;
-    const total = rp2st + st2rp + nw + rm;
-    return { s, name:SECT[s], rp2st, st2rp, nw, rm, total };
-  }).filter(r=>r.total>0);
+  // ④ 주요 기술적 변경사항 (섹션별) — ISM 본문 내용 변경
+  const TECH_CHANGES = [
+    { sect:'ORG', items:[
+      { code:'ORG 2.1.4',    tag:'기술변경', desc:'내부심사 기간 관련 Note: 5개월 → 6개월로 개정' },
+      { code:'ORG 2.2.3',    tag:'기술변경', desc:'새 Note 추가 — ISSA 등록도 심사원 요건 충족 수단으로 인정' },
+      { code:'ORG 3.3.1',    tag:'기술변경', desc:'FDA 프로그램 ICAO 항공기 중량 기준 개정 (27,000kg / 15,000kg+승객19명+CoA 2027.1.1이후)' },
+      { code:'ORG 3.3.2',    tag:'기술변경', desc:'RP — FDA 요건에 ICAO 신규 중량 기준 (15,000kg 초과) 반영' },
+      { code:'ORG 3.6.1',    tag:'기술변경', desc:'Note 추가 — 향후 RP 격상 예정일 고지' },
+      { code:'ORG Table 1.2',tag:'삭제',     desc:'Sub-item(v) 삭제 — 내부심사원 조치사항 기록 요건 삭제' },
+    ]},
+    { sect:'FLT', items:[
+      { code:'FLT 1.12.2 Guidance', tag:'기술변경', desc:'GPS 재밍/스푸핑(Jamming & Spoofing) 예시 추가' },
+      { code:'FLT 2.2.16B',         tag:'기술변경', desc:'화산재 훈련 범위 확대 — 노선/공항 → 영향 지역(area) 전체로' },
+      { code:'FLT 2.4.1',           tag:'기술변경', desc:'특수공항 및/또는 지역 훈련 요건 명확화' },
+      { code:'FLT 3.3.5',           tag:'기술변경', desc:'국가별 다른 최대 비행 연령 제한 허용 (EASA/FAA 정렬)' },
+      { code:'FLT 3.3.10',          tag:'기술변경', desc:'특수공항 자격 요건 — 규제당국 요건 정렬' },
+      { code:'FLT 3.6.5 (RP)',      tag:'기술변경', desc:'RVR/CMV 제한 — 당국 지정 기준 인정 조항 추가' },
+      { code:'FLT 3.11.17',         tag:'기술변경', desc:'Sterile Flight Deck 정책·절차 — EASA/FAA 정렬' },
+      { code:'FLT 3.11.50B (RP)',   tag:'기술변경', desc:'정책(policy) + 절차(procedures) 모두 요구로 강화' },
+      { code:'FLT 3.13.11',         tag:'내용추가',  desc:'객실 승무원 없이 운항 시 통신 요건 sub-item(iii) 신규 추가' },
+    ]},
+    { sect:'DSP', items:[
+      { code:'DSP 1.12.2 Guidance', tag:'기술변경', desc:'GPS 재밍/스푸핑 예시 추가 (FLT와 동일)' },
+      { code:'DSP 3.2.8B',          tag:'기술변경', desc:'Note 삭제 — 내용을 신규 DSP 3.2.8C로 이관' },
+      { code:'DSP 3.2.9C',          tag:'기술변경', desc:'증분값(incremental values) — "국가 요구 시" 지정으로 완화 (EASA/FAA 정렬)' },
+    ]},
+    { sect:'MNT', items:[
+      { code:'MNT 1.11.6',           tag:'기술변경', desc:'훈련/훈련 자료 제공 절차 문구 개정' },
+      { code:'MNT 4.5.7',            tag:'내용추가',  desc:'정비원의 항공기 지상 이동(Taxiing) 관련 Guidance Material 신규 추가' },
+      { code:'MNT Table 4.11(xiv)',  tag:'기술변경', desc:'Active Implementation 기한: 2026년 12월 31일' },
+      { code:'MNT Table 4.11(xxx)',  tag:'기술변경', desc:'Active Implementation 기한: 2026년 12월 31일' },
+      { code:'MNT Table 4.11(xxxi)',tag:'신규요건',  desc:'ROASS(정비조직평가시스템) 신규 요건 — 기한: 2027년 12월 31일' },
+    ]},
+    { sect:'CAB', items:[
+      { code:'CAB 1.10.1A',    tag:'기술변경', desc:'서비스 제공업체 선정 기준에 보안(security) 요소 추가' },
+      { code:'CAB 2.2.2',      tag:'기술변경', desc:'AQP만 적용 — ATQP·EBT 삭제 (적용 불가 훈련 방식 제거)' },
+      { code:'CAB 2.2.10 Note',tag:'기술변경', desc:'합동 훈련 개발 가능하나 비행기 승무원과 별도 시행 명확화' },
+      { code:'CAB 2.3.1',      tag:'기술변경', desc:'각 항공사별 초도 훈련 중 감독 노선비행 요건 명확화' },
+      { code:'CAB 3.1.3',      tag:'내용추가',  desc:'FLT 3.1.2 참조 추가 — 공통 지정 언어(Designated Language) 적용' },
+      { code:'CAB 3.2.4A',     tag:'기술변경', desc:'지상직원(ground staff) 포함으로 적용 범위 확대' },
+    ]},
+    { sect:'GRH', items:[
+      { code:'GRH 1.10.1A',  tag:'기술변경', desc:'서비스 제공업체 선정 기준에 보안 요소 추가' },
+      { code:'GRH 3.2.3(i)', tag:'기술변경', desc:'IGOM 절차와 언어 정렬' },
+      { code:'GRH 3.3.4',    tag:'기술변경', desc:'Sub-item (v)(a)(b), (vi), (viii), (x) 문구 개정 — CGO 3.2.14 정렬' },
+      { code:'GRH 3.4.14B',  tag:'기술변경', desc:'구 GRH 3.4.14 번호 변경 (내용 동일) — 3.4.14A 추가에 따른 재번호' },
+      { code:'GRH 3.7.10',   tag:'기술변경', desc:'항공보안 "적절한 검색(appropriate screening)" 개념 추가' },
+    ]},
+    { sect:'CGO', items:[
+      { code:'CGO 2.2.4',    tag:'기술변경', desc:'화물 훈련 요건에 평가(assessment) 개념 추가, Note 삭제' },
+      { code:'CGO 3.1.1',    tag:'기술변경', desc:'sub-item(i) 조건부 요건 삭제, 비수익 화물 = 수익 화물 동일 기준' },
+      { code:'CGO 3.4.2',    tag:'삭제',     desc:'삭제 — Ed.17에서 이미 삭제된 조항 Ed.18 반영' },
+      { code:'CGO (전반)',    tag:'기술변경', desc:'비수익(non-revenue) 화물을 수익 화물과 동일 기준 적용으로 일원화' },
+    ]},
+    { sect:'SEC', items:[
+      { code:'SEC 1.1.1',    tag:'기술변경', desc:'SSPs(Supplementary Station Procedures) 포함 — 보안 문서 체계 확대' },
+      { code:'SEC 1.1.2',    tag:'기술변경', desc:'AOSP에 Associated SSPs 연계 요건 추가' },
+      { code:'SEC 1.2.1',    tag:'기술변경', desc:'공식 보안 프로그램 구성 요건 개정 (SSPs 포함)' },
+      { code:'SEC 1.5.2',    tag:'기술변경', desc:'AOSP → SeMS 참조 변경; 역량(competencies) 선정 기준 추가' },
+      { code:'SEC 1.5.3',    tag:'내용추가',  desc:'Sub-item(iii) — 통제구역(controlled areas) 개념 추가' },
+      { code:'SEC 1.12.2',   tag:'기술변경', desc:'기타 보안 발생사건(other security occurrences) 포함으로 적용 범위 확대' },
+      { code:'SEC 3.3.3',    tag:'내용추가',  desc:'Sub-item(iii) — "이송(transfer)" 포함' },
+      { code:'SEC 3.6.6',    tag:'기술변경', desc:'위험성 평가(risk assessment) 요건 삭제 — 완화' },
+    ]},
+  ];
+
+  const tagStyle = { '기술변경':'background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;', '내용추가':'background:#f0faf4;color:#14532d;border:1px solid #bbf7d0;', '삭제':'background:#f8fafc;color:#6b7280;border:1px solid #e2e8f0;', '신규요건':'background:#fff1f2;color:#991b1b;border:1px solid #fecaca;' };
 
   document.getElementById('section-ism_analysis').innerHTML = `
 <div class="sect-header">
   <div>
     <h2 class="sect-title">ISM 개정 분석</h2>
-    <p class="sect-sub">ISM Ed.17 → Ed.18 ISARP 변경사항 — PDF 자동 추출 분석</p>
+    <p class="sect-sub">ISM Ed.17 → Ed.18 공식 Revision Highlights 기반 — IOSA Standards Manual Ed.18 Rev.1</p>
   </div>
-  <div style="display:flex;gap:8px;align-items:center;">
-    <span style="background:#f0f5ff;border:1px solid #bfdbfe;color:#1e3a5f;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;">Ed.17: 1,092 ISARPs</span>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+    <span style="background:#f0f5ff;border:1px solid #bfdbfe;color:#1e3a5f;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;">Ed.17 기준</span>
     <i class="fas fa-arrow-right" style="color:#94a3b8;font-size:0.7rem;"></i>
-    <span style="background:#fff1f2;border:1px solid #fca5a5;color:#d20015;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;">Ed.18: 1,095 ISARPs</span>
+    <span style="background:#fff1f2;border:1px solid #fca5a5;color:#d20015;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;">Ed.18 Rev.1 · 2026.01.01 발효</span>
   </div>
 </div>
 
 <!-- 요약 통계 -->
 <div class="stats-row mb-4">
   <div class="stat-box" style="border-top:3px solid #d20015;">
-    <div class="stat-box-label">RP → Standard 격상 ⬆</div>
+    <div class="stat-box-label">RP → Standard 격상</div>
     <div class="stat-box-num" style="color:#d20015;">${RP_TO_ST.length}</div>
-    <div class="stat-box-sub">권고→의무로 강화</div>
+    <div class="stat-box-sub">권고 → 의무 강화</div>
   </div>
-  <div class="stat-box" style="border-top:3px solid #f59e0b;">
-    <div class="stat-box-label">Standard → RP 하향 ⬇</div>
-    <div class="stat-box-num" style="color:#b45309;">${ST_TO_RP.length}</div>
-    <div class="stat-box-sub">의무→권고로 완화</div>
+  <div class="stat-box" style="border-top:3px solid #7c3aed;">
+    <div class="stat-box-label">신규 Standard 추가</div>
+    <div class="stat-box-num" style="color:#7c3aed;">${NEW_ST.length}</div>
+    <div class="stat-box-sub">신규 의무 조항</div>
   </div>
   <div class="stat-box" style="border-top:3px solid #1a7a4a;">
-    <div class="stat-box-label">신규 추가 ISARP ✚</div>
-    <div class="stat-box-num" style="color:#1a7a4a;">${NEW_18.length}</div>
-    <div class="stat-box-sub">Ed.18에서 신규</div>
+    <div class="stat-box-label">신규 RP 추가</div>
+    <div class="stat-box-num" style="color:#1a7a4a;">${NEW_RP.length}</div>
+    <div class="stat-box-sub">신규 권고 조항</div>
   </div>
-  <div class="stat-box" style="border-top:3px solid #6b7280;">
-    <div class="stat-box-label">삭제된 ISARP ✕</div>
-    <div class="stat-box-num" style="color:#374151;">${REMOVED.length}</div>
-    <div class="stat-box-sub">Ed.17에서 제거됨</div>
+  <div class="stat-box" style="border-top:3px solid #0ea5e9;">
+    <div class="stat-box-label">기술적 주요 변경</div>
+    <div class="stat-box-num" style="color:#0369a1;">${TECH_CHANGES.reduce((s,g)=>s+g.items.length,0)}</div>
+    <div class="stat-box-sub">본문 내용 개정</div>
   </div>
 </div>
 
 <div class="row g-3">
-  <!-- RP→ST 격상 (핵심 — 제일 중요) -->
+
+  <!-- ① RP→ST 격상 — 가장 중요 -->
   <div class="col-12">
     <div class="w-card" style="border-left:4px solid #d20015;">
       <div class="w-card-header">
         <span class="w-card-title"><i class="fas fa-arrow-up me-2" style="color:#d20015;"></i>RP → Standard 격상 <span style="color:#d20015;font-weight:900;">${RP_TO_ST.length}건</span></span>
-        <span class="pill pill-red">재심사 영향 직결</span>
+        <span class="pill pill-red">Finding 대상 ⚠</span>
       </div>
       <div class="w-card-body">
-        <div style="background:#fff5f5;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:0.78rem;color:#7f1d1d;">
-          <i class="fas fa-exclamation-triangle me-2" style="color:#d20015;"></i>
-          <strong>재인증 심사 중요 포인트:</strong> 아래 항목은 Ed.17에서 <em>권고(should)</em>였으나 Ed.18에서 <em>의무(shall)</em>로 격상됩니다. 이행하지 않을 경우 Finding 발행 대상입니다.
+        <div style="background:#fff5f5;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:#7f1d1d;">
+          <i class="fas fa-exclamation-triangle me-1" style="color:#d20015;"></i>
+          Ed.17에서 <em>권고(should)</em>였던 항목이 Ed.18에서 <em>의무(shall)</em>로 격상 — 미이행 시 <strong>Finding 발행 대상</strong>
         </div>
         <table class="iata-table">
-          <thead><tr><th style="width:130px;">ISARP 코드</th><th style="width:100px;">부문</th><th>변경 내용</th><th style="width:80px;">Ed.17</th><th style="width:80px;">Ed.18</th></tr></thead>
+          <thead><tr><th style="width:120px;">ISARP</th><th style="width:90px;">부문</th><th>변경 내용</th><th style="width:75px;">Ed.17</th><th style="width:75px;">Ed.18</th></tr></thead>
           <tbody>
-            ${RP_TO_ST.map(c=>`
-            <tr>
-              <td><strong style="font-family:monospace;color:var(--iata-navy);">${c}</strong></td>
-              <td><span class="badge bg-secondary" style="font-size:0.65rem;">${sec(c)} — ${SECT[sec(c)]||sec(c)}</span></td>
-              <td style="font-size:0.78rem;">${RP_ST_DESC[c]||'—'}</td>
-              <td><span class="pill pill-gray" style="font-size:0.65rem;">RP (should)</span></td>
-              <td><span class="pill pill-red" style="font-size:0.65rem;">ST (shall)</span></td>
+            ${RP_TO_ST.map(r=>`<tr>
+              <td><strong style="font-family:monospace;color:var(--iata-navy);">${r.code}</strong></td>
+              <td><span class="badge bg-secondary" style="font-size:0.63rem;">${r.code.split(' ')[0]}</span></td>
+              <td style="font-size:0.78rem;">${r.desc}</td>
+              <td><span class="pill pill-gray" style="font-size:0.62rem;">RP (should)</span></td>
+              <td><span class="pill pill-red" style="font-size:0.62rem;">ST (shall)</span></td>
             </tr>`).join('')}
           </tbody>
         </table>
@@ -3714,65 +3763,76 @@ function renderISMAnalysis() {
     </div>
   </div>
 
-  <!-- ST→RP 완화 -->
+  <!-- ② 신규 Standard 추가 -->
   <div class="col-md-6">
-    <div class="w-card h-100" style="border-left:4px solid #f59e0b;">
+    <div class="w-card h-100" style="border-left:4px solid #7c3aed;">
       <div class="w-card-header">
-        <span class="w-card-title"><i class="fas fa-arrow-down me-2" style="color:#b45309;"></i>Standard → RP 완화 <span style="color:#b45309;">${ST_TO_RP.length}건</span></span>
+        <span class="w-card-title"><i class="fas fa-plus-circle me-2" style="color:#7c3aed;"></i>신규 Standard 추가 <span style="color:#7c3aed;">${NEW_ST.length}건</span></span>
+        <span class="pill pill-navy" style="background:#f5f3ff;color:#7c3aed;border:1px solid #ddd9fe;">신규 의무</span>
       </div>
       <div class="w-card-body">
-        ${renderCodeList(ST_TO_RP,'pill-gold')}
-        <div style="font-size:0.75rem;color:#94a3b8;margin-top:8px;">* 의무→권고 완화 — Ed.18 적용 시 Finding 기준에서 제외</div>
+        ${NEW_ST.map(r=>`<div style="padding:10px 0;border-bottom:1px solid #f1f5f9;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <span style="font-family:monospace;font-weight:700;color:#7c3aed;font-size:0.82rem;">${r.code}</span>
+            <span class="pill pill-navy" style="font-size:0.6rem;background:#f5f3ff;color:#7c3aed;border:1px solid #ddd9fe;">신규 ST</span>
+          </div>
+          <div style="font-size:0.78rem;color:#374151;">${r.desc}</div>
+        </div>`).join('')}
       </div>
     </div>
   </div>
 
-  <!-- 신규 추가 -->
+  <!-- ③ 신규 RP 추가 -->
   <div class="col-md-6">
     <div class="w-card h-100" style="border-left:4px solid #1a7a4a;">
       <div class="w-card-header">
-        <span class="w-card-title"><i class="fas fa-plus-circle me-2" style="color:#1a7a4a;"></i>신규 추가 ISARP <span style="color:#1a7a4a;">${NEW_18.length}건</span></span>
+        <span class="w-card-title"><i class="fas fa-plus me-2" style="color:#1a7a4a;"></i>신규 RP 추가 <span style="color:#1a7a4a;">${NEW_RP.length}건</span></span>
+        <span class="pill pill-green" style="font-size:0.62rem;">신규 권고</span>
       </div>
       <div class="w-card-body">
-        ${renderCodeList(NEW_18,'pill-green')}
+        ${NEW_RP.map(r=>`<div style="padding:10px 0;border-bottom:1px solid #f1f5f9;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <span style="font-family:monospace;font-weight:700;color:#1a7a4a;font-size:0.82rem;">${r.code}</span>
+            <span class="pill pill-green" style="font-size:0.6rem;">신규 RP</span>
+          </div>
+          <div style="font-size:0.78rem;color:#374151;">${r.desc}</div>
+        </div>`).join('')}
       </div>
     </div>
   </div>
 
-  <!-- 삭제 -->
-  <div class="col-md-6">
-    <div class="w-card h-100" style="border-left:4px solid #6b7280;">
+  <!-- ④ 부문별 기술 변경사항 -->
+  <div class="col-12">
+    <div class="w-card" style="border-left:4px solid #0ea5e9;">
       <div class="w-card-header">
-        <span class="w-card-title"><i class="fas fa-minus-circle me-2" style="color:#6b7280;"></i>삭제된 ISARP <span style="color:#6b7280;">${REMOVED.length}건</span></span>
-      </div>
-      <div class="w-card-body">
-        ${renderCodeList(REMOVED,'pill-gray')}
-      </div>
-    </div>
-  </div>
-
-  <!-- 부문별 요약 -->
-  <div class="col-md-6">
-    <div class="w-card h-100">
-      <div class="w-card-header">
-        <span class="w-card-title"><i class="fas fa-chart-bar me-2" style="color:var(--iata-navy);"></i>부문별 변경 건수</span>
+        <span class="w-card-title"><i class="fas fa-pen-to-square me-2" style="color:#0369a1;"></i>주요 기술적 변경사항 <span style="color:#0369a1;">${TECH_CHANGES.reduce((s,g)=>s+g.items.length,0)}건</span></span>
+        <span class="pill" style="background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;font-size:0.62rem;">문구 변경 / 추가 / 삭제</span>
       </div>
       <div class="w-card-body" style="padding:0;">
-        <table class="iata-table" style="margin:0;">
-          <thead><tr><th>부문</th><th>RP→ST</th><th>ST→RP</th><th>신규</th><th>삭제</th></tr></thead>
-          <tbody>
-            ${sectionStats.map(r=>`<tr>
-              <td><span class="badge bg-secondary" style="font-size:0.65rem;">${r.s}</span> <span style="font-size:0.75rem;">${r.name}</span></td>
-              <td style="text-align:center;">${r.rp2st>0?`<span style="color:#d20015;font-weight:700;">${r.rp2st}</span>`:'<span style="color:#ddd;">-</span>'}</td>
-              <td style="text-align:center;">${r.st2rp>0?`<span style="color:#b45309;font-weight:700;">${r.st2rp}</span>`:'<span style="color:#ddd;">-</span>'}</td>
-              <td style="text-align:center;">${r.nw>0?`<span style="color:#1a7a4a;font-weight:700;">${r.nw}</span>`:'<span style="color:#ddd;">-</span>'}</td>
-              <td style="text-align:center;">${r.rm>0?`<span style="color:#6b7280;font-weight:700;">${r.rm}</span>`:'<span style="color:#ddd;">-</span>'}</td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
+        ${TECH_CHANGES.map(g=>`
+        <div style="border-bottom:1px solid #f1f5f9;">
+          <div style="background:#f8fafc;padding:8px 20px;display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="(function(el){var b=el.nextElementSibling;b.style.display=b.style.display==='none'?'block':'none';})(this)">
+            <span class="badge bg-secondary" style="font-size:0.65rem;">${g.sect}</span>
+            <span style="font-size:0.8rem;font-weight:700;color:#1e293b;">${SECT[g.sect]||g.sect}</span>
+            <span style="font-size:0.7rem;color:#94a3b8;margin-left:auto;">${g.items.length}건 <i class="fas fa-chevron-down" style="font-size:0.55rem;"></i></span>
+          </div>
+          <div style="padding:0 20px 8px;">
+            <table class="iata-table" style="margin:0;">
+              <thead><tr><th style="width:140px;">ISARP</th><th style="width:75px;">유형</th><th>변경 내용</th></tr></thead>
+              <tbody>
+                ${g.items.map(item=>`<tr>
+                  <td style="font-family:monospace;font-size:0.75rem;font-weight:700;color:var(--iata-navy);">${item.code}</td>
+                  <td><span style="padding:2px 7px;border-radius:10px;font-size:0.62rem;font-weight:700;${tagStyle[item.tag]||''}">${item.tag}</span></td>
+                  <td style="font-size:0.78rem;">${item.desc}</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`).join('')}
       </div>
     </div>
   </div>
+
 </div>`;
 }
 
