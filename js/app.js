@@ -2410,15 +2410,27 @@ function toggleCRReq(el) {
   el.classList.toggle('cr-req-expanded');
 }
 
+// ─── Toggle evidence panel (내부심사용 — Excel 미포함) ────
+function toggleCREvidence(id) {
+  const panel = document.getElementById('cr-ev-' + id);
+  if (!panel) return;
+  const isHidden = panel.style.display === 'none' || panel.style.display === '';
+  panel.style.display = isHidden ? 'block' : 'none';
+  const btn = panel.previousElementSibling && panel.previousElementSibling.querySelector('.cr-ev-btn');
+  if (btn) btn.style.background = isHidden ? '#dbeafe' : '';
+}
+
 // ════════════════════════════════════════════════════════════
 //  사내 매뉴얼 근거 자동 매핑 테이블
-//  출처: 품질규정 Rev.17 / SMS 매뉴얼 Rev.14 / ERP Rev.12 / FDAP 운영지침 Rev.12
+//  출처: 2025 Initial Audit (IOSA-ESR-IA-2025) 실제 심사 결과 기반 검증
+//  품질규정 Rev.17 / SMS 매뉴얼 Rev.14 / JDM Rev.7 / CMM Rev.5
+//  DCM Rev.10 / HRM / MPM Rev.6 / SIG / LFSD-014 / ERP Rev.12 / FDAP Rev.12
 // ════════════════════════════════════════════════════════════
 const ISARP_DOC_REF_MAP = {
   // ── ORG 1.1  최고경영관리자(AE) 및 통합관리시스템 ──────────────
   'ORG 1.1.1': '안전관리시스템 매뉴얼 Rev.14, 2.3절 (안전 조직); 품질규정 Rev.17, 2.4절 (품질시스템 조직)',
-  'ORG 1.1.2': '안전관리시스템 매뉴얼 Rev.14, 2.3절; 품질규정 Rev.17, 2.5.1절 (최고경영관리자)',
-  'ORG 1.1.3': '안전관리시스템 매뉴얼 Rev.14, 2.1절 (안전정책), 2.3절 (안전조직)',
+  'ORG 1.1.2': '안전관리시스템 매뉴얼 Rev.14, 2.3절; 업무분장매뉴얼(ESR-JDM) Rev.7, CEO·AE 직무기술서',
+  'ORG 1.1.3': '업무분장매뉴얼(ESR-JDM) Rev.7, 1.2.1절, 1.2.2.1절 (책임 및 권한)',
   'ORG 1.1.4': '안전관리시스템 매뉴얼 Rev.14, 2.4절 (안전 회의체)',
 
   // ── ORG 1.2  선임관리자 / Nominated Persons ───────────────────
@@ -2427,8 +2439,8 @@ const ISARP_DOC_REF_MAP = {
   'ORG 1.2.3': '안전관리시스템 매뉴얼 Rev.14, 2.3절; 품질규정 Rev.17, 2.5절',
 
   // ── ORG 1.3  안전관리자(Safety Manager) ──────────────────────
-  'ORG 1.3.1': '안전관리시스템 매뉴얼 Rev.14, 2.3절 (안전조직)',
-  'ORG 1.3.2': '안전관리시스템 매뉴얼 Rev.14, 2.3절',
+  'ORG 1.3.1': '업무분장매뉴얼(ESR-JDM) Rev.7, 전체 (Safety Manager 직무기술서)',
+  'ORG 1.3.2': '업무분장매뉴얼(ESR-JDM) Rev.7, 6절, 1.2.1절, 1.2.2.1절',
   'ORG 1.3.3': '안전관리시스템 매뉴얼 Rev.14, 2.3절',
 
   // ── ORG 1.4  안전위원회 / Safety Review Board ─────────────────
@@ -2436,17 +2448,17 @@ const ISARP_DOC_REF_MAP = {
   'ORG 1.4.2': '안전관리시스템 매뉴얼 Rev.14, 2.4절',
 
   // ── ORG 1.5  문서관리(Documentation System) ──────────────────
-  'ORG 1.5.1': '안전관리시스템 매뉴얼 Rev.14, 1.5절 (구성 및 배포), 1.6절 (문서 및 기록물 관리); 품질규정 Rev.17, 1.3절 (제정 및 개정)',
+  'ORG 1.5.1': 'SMS 운영지침(ESR-SMSOG), 1.8절; 안전관리시스템 매뉴얼 Rev.14, 1.7절 (문서 목록)',
   'ORG 1.5.2': '안전관리시스템 매뉴얼 Rev.14, 1.6절; 품질규정 Rev.17, 1.3절',
   'ORG 1.5.3': '안전관리시스템 매뉴얼 Rev.14, 1.6절',
-  'ORG 1.5.4': '안전관리시스템 매뉴얼 Rev.14, 1.5절 (배포); 품질규정 Rev.17, 1.3절',
-  'ORG 1.5.5': '안전관리시스템 매뉴얼 Rev.14, 1.6절; 품질규정 Rev.17, 2.11절 (품질심사 자료관리)',
+  'ORG 1.5.4': '인사관리규정(ESR-HRM), 15절; 안전관리시스템 매뉴얼 Rev.14, 5.1.2절',
+  'ORG 1.5.5': '약물 및 주류 통제 매뉴얼(ESR-LFSD-014) Rev.14, 2.3절',
   'ORG 1.5.6': '안전관리시스템 매뉴얼 Rev.14, 1.6절; 품질규정 Rev.17, 2.11절',
-  'ORG 1.5.7': '안전관리시스템 매뉴얼 Rev.14, 1.6절',
+  'ORG 1.5.7': '약물 및 주류 통제 매뉴얼(ESR-LFSD-014) Rev.14, 1.1절',
 
   // ── ORG 1.6  외주협력업체 위탁활동 관리 ──────────────────────
-  'ORG 1.6.1': '품질규정 Rev.17, 2.12절 (공급업체 및 외주협력업체 관리)',
-  'ORG 1.6.2': '품질규정 Rev.17, 2.12절, 2.12.1절 (외주협력업체 선정 절차)',
+  'ORG 1.6.1': '계약관리규정(ESR-CMM) Rev.5, 2.3.6절 (외주협력업체 안전 감독)',
+  'ORG 1.6.2': '계약관리규정(ESR-CMM) Rev.5, 제2장 (외주협력업체 관리 전반)',
 
   // ── ORG 1.7  변화관리(Management of Change) ──────────────────
   'ORG 1.7.1':  '안전관리시스템 매뉴얼 Rev.14, 4.5절 (변화관리)',
@@ -2479,7 +2491,7 @@ const ISARP_DOC_REF_MAP = {
   'ORG 2.2.4': '품질규정 Rev.17, 2.9.4절, 2.9.5절 (품질심사팀 구성)',
 
   // ── ORG 2.3  시정조치 프로세스 ───────────────────────────────
-  'ORG 2.3.1': '품질규정 Rev.17, 3.9절 (심사 결과 후속조치)',
+  'ORG 2.3.1': '자재구매지침(ESR-MPM) Rev.6, 2.4절; 품질규정 Rev.17, 3.9절 (심사 결과 후속조치)',
 
   // ── ORG 2.4  외주협력업체 평가(QMS 관점) ─────────────────────
   'ORG 2.4.1': '품질규정 Rev.17, 2.12절 (외주협력업체 관리)',
@@ -2488,13 +2500,13 @@ const ISARP_DOC_REF_MAP = {
   'ORG 2.4.4': '품질규정 Rev.17, 2.12절',
 
   // ── ORG 2.5  안전보증 / Safety Assurance (QMS 연계) ──────────
-  'ORG 2.5.1': '품질규정 Rev.17, 2.6절 (품질보증 프로그램); 안전관리시스템 매뉴얼 Rev.14, 4.2절 (안전 감사)',
-  'ORG 2.5.3': '품질규정 Rev.17, 2.6절; 안전관리시스템 매뉴얼 Rev.14, 4.3절 (안전성과지표)',
+  'ORG 2.5.1': '비행안전문서시스템 운영매뉴얼(ESR-LFSD-001); 문서관리매뉴얼(ESR-DCM) Rev.10, 1.3.3.3절, 1.3.9절, 1.3.10.2절',
+  'ORG 2.5.3': '문서관리매뉴얼(ESR-DCM) Rev.10, 제2장',
   'ORG 2.5.4': '품질규정 Rev.17, 2.6절; 안전관리시스템 매뉴얼 Rev.14, 4.1절 (안전성과 모니터링)',
 
   // ── ORG 2.6  경영자 검토(Management Review) ──────────────────
-  'ORG 2.6.1': '품질규정 Rev.17, 2.13절 (최고경영관리자의 검토)',
-  'ORG 2.6.2': '품질규정 Rev.17, 2.13절',
+  'ORG 2.6.1': '문서관리매뉴얼(ESR-DCM) Rev.10, 1.2.1절, 1.3.9절; 비행안전문서시스템 매뉴얼(ESR-LFSD-001)',
+  'ORG 2.6.2': '문서관리매뉴얼(ESR-DCM) Rev.10, 1.3.10절; 안전관리시스템 매뉴얼 Rev.14, 6.2절',
 
   // ── ORG 3.1  안전관리시스템(SMS) 구성 ────────────────────────
   'ORG 3.1.1': '안전관리시스템 매뉴얼 Rev.14, 2.1절 (안전정책), 2.2절 (안전목표)',
@@ -2517,15 +2529,15 @@ const ISARP_DOC_REF_MAP = {
   // ── ORG 3.4  안전보고 시스템 ─────────────────────────────────
   'ORG 3.4.1': '안전관리시스템 매뉴얼 Rev.14, 3.6절 (안전보고), 3.7절 (안전조사)',
 
-  // ── ORG 3.5  변화관리(SMS) ────────────────────────────────────
-  'ORG 3.5.1': '안전관리시스템 매뉴얼 Rev.14, 4.5절 (변화관리)',
-  'ORG 3.5.2': '안전관리시스템 매뉴얼 Rev.14, 4.5절',
+  // ── ORG 3.5  안전조사(Safety Investigation) ──────────────────
+  'ORG 3.5.1': '안전조사지침(ESR-SIG), 5.2절',
+  'ORG 3.5.2': '안전조사지침(ESR-SIG), 1.3절, 4.4절, 5.2절',
 
   // ── ORG 3.6  비상대응계획(ERP) ───────────────────────────────
   'ORG 3.6.1': '사고처리절차교범 Rev.12, 제1장~제8장; 안전관리시스템 매뉴얼 Rev.14, 2.5절 (위기대응계획)',
 
   // ── ORG 4.1  교육훈련 프로그램 ───────────────────────────────
-  'ORG 4.1.1': '안전관리시스템 매뉴얼 Rev.14, 5.1절 (SMS 교육); 품질규정 Rev.17, 2.9.4절 (심사원 교육훈련)',
+  'ORG 4.1.1': 'SMS 운영지침(ESR-SMSOG), 교육 관련 절; 안전관리시스템 매뉴얼 Rev.14, 5.1절 (SMS 교육)',
   'ORG 4.1.2': '안전관리시스템 매뉴얼 Rev.14, 5.1절',
   'ORG 4.1.3': '안전관리시스템 매뉴얼 Rev.14, 5.1절',
 
@@ -2535,6 +2547,133 @@ const ISARP_DOC_REF_MAP = {
   // ── ORG 4.3  비행자료분석 프로그램(FDAP/FOQA) ────────────────
   'ORG 4.3.1': '비행자료분석 프로그램 운영지침 Rev.12, 제1장 (총칙); 안전관리시스템 매뉴얼 Rev.14, 4.6절 (FDAP)',
   'ORG 4.3.2': '비행자료분석 프로그램 운영지침 Rev.12, 제2장~제6장 (자료분석·처리·위원회)',
+};
+
+// ════════════════════════════════════════════════════════════
+//  증빙자료 매핑 테이블 (내부심사용 — Excel 미포함)
+//  출처: 2025 Initial Audit (IOSA-ESR-IA-2025) Verification Evidence 기반
+// ════════════════════════════════════════════════════════════
+const ISARP_EVIDENCE_MAP = {
+  // ── ORG 1.1  최고경영관리자(AE) 및 통합관리시스템
+  'ORG 1.1.1': ['조직도 (최신 개정본)', '안전관리시스템 매뉴얼 (SMS Manual) 현행본', '품질규정 현행본'],
+  'ORG 1.1.2': ['업무분장매뉴얼(JDM) CEO/AE 직무기술서', 'AE 임명장 또는 지명 공문', '안전조직도'],
+  'ORG 1.1.3': ['업무분장매뉴얼(JDM) 책임·권한 조항', '각 부문별 직무기술서', '조직도'],
+  'ORG 1.1.4': ['안전위원회(SRB) 운영규정 또는 ToR', '최근 2년 SRB 회의록', '회의 참석자 명단'],
+
+  // ── ORG 1.2  선임관리자 / Nominated Persons
+  'ORG 1.2.1': ['선임관리자(NP) 임명 공문', '업무분장매뉴얼 NP 직무기술서', '국토교통부 인가·승인 서류'],
+  'ORG 1.2.2': ['부문별 품질책임자 임명 공문', '직무기술서 (해당 부문)', '품질규정 책임·권한 조항'],
+  'ORG 1.2.3': ['선임관리자 자격 증명 서류', '경력 및 훈련 기록', '임명장'],
+
+  // ── ORG 1.3  안전관리자(Safety Manager)
+  'ORG 1.3.1': ['업무분장매뉴얼(JDM) Safety Manager 직무기술서', 'Safety Manager 임명 공문', '안전조직도'],
+  'ORG 1.3.2': ['Safety Manager 접근 권한 확인 서류', '보고 체계 조직도', '업무분장매뉴얼 관련 조항'],
+  'ORG 1.3.3': ['Safety Manager 경력 및 자격 기록', '관련 교육훈련 수료증', '이력서(CV)'],
+
+  // ── ORG 1.4  안전위원회(SRB)
+  'ORG 1.4.1': ['SRB 운영 규정(Terms of Reference)', '최근 SRB 회의 개최 일정 및 공지', '참석자 명단'],
+  'ORG 1.4.2': ['최근 2회 이상 SRB 회의록', '안전성과 검토 자료', '조치 사항 추적 기록'],
+
+  // ── ORG 1.5  문서관리(Documentation System)
+  'ORG 1.5.1': ['SMS 운영지침(ESR-SMSOG) 현행본', '비행안전문서목록(ESR-LFSD-001)', '문서 목록(Master Document List)'],
+  'ORG 1.5.2': ['문서 배포 기록', '최신 개정 이력', '전자문서시스템 배포 화면'],
+  'ORG 1.5.3': ['사용 중인 교범 현행 개정 상태 확인 기록', '현장 교범 현행성 점검 기록'],
+  'ORG 1.5.4': ['인사관리규정(ESR-HRM) 알코올·약물 관련 조항', '임직원 주류·약물 통제 정책 공지 기록'],
+  'ORG 1.5.5': ['약물·주류 통제 매뉴얼(ESR-LFSD-014) 현행본', '검사 기록 및 결과 보고서', '훈련 기록'],
+  'ORG 1.5.6': ['구 교범 회수·폐기 기록', '개정 공지 기록', '전자문서 접근 통제 화면'],
+  'ORG 1.5.7': ['약물·주류 통제 매뉴얼(ESR-LFSD-014) 적용 범위 조항', '프로그램 범위 검토 기록'],
+
+  // ── ORG 1.6  외주협력업체 위탁활동 관리
+  'ORG 1.6.1': ['계약관리규정(ESR-CMM) 현행본', '외주업체 감독 계획 및 기록', '위탁 계약서 목록'],
+  'ORG 1.6.2': ['외주협력업체 선정·평가 기록', '계약관리규정 제2장', '공급업체 목록(Approved Vendor List)'],
+
+  // ── ORG 1.7  변화관리(Management of Change)
+  'ORG 1.7.1':  ['변화관리 절차서(SMS 매뉴얼 4.5절)', '변화 등록 대장(Change Register)', '최근 변화관리 사례 기록'],
+  'ORG 1.7.2':  ['변화관리 위험평가 기록', '변화 등록 대장'],
+  'ORG 1.7.3':  ['변화관리 위험 경감 조치 기록', '변화관리 승인 기록'],
+  'ORG 1.7.4':  ['변화관리 모니터링 기록', '변화 후 검토 보고서'],
+  'ORG 1.7.5':  ['변화관리 의사소통 기록', '관련 부서 공지 기록'],
+  'ORG 1.7.6':  ['변화관리 관련 교육 기록', '브리핑 자료'],
+  'ORG 1.7.7':  ['변화관리 문서 개정 이력', '개정 공지 기록'],
+  'ORG 1.7.8':  ['외부 변화(법규·규정 개정) 모니터링 기록', '법규 검토 보고서'],
+  'ORG 1.7.9':  ['조직 변경 변화관리 기록', '조직도 개정 이력'],
+  'ORG 1.7.10': ['시스템·장비 변경 변화관리 기록', '기술 변경 평가 보고서'],
+  'ORG 1.7.11': ['비상 변화 처리 기록', '임시 절차 운영 기록'],
+  'ORG 1.7.12': ['변화관리 효과성 검토 기록', '변화관리 감사 결과'],
+
+  // ── ORG 2.1  품질관리시스템(QMS)
+  'ORG 2.1.1': ['품질규정 현행본', '품질방침(Quality Policy) 공표 기록', '경영자 서명 문서'],
+  'ORG 2.1.2': ['품질조직도', '품질 책임 배분 기록', '품질규정 조직 관련 조항'],
+  'ORG 2.1.4': ['총괄품질관리자(QM) 임명 공문', '직무기술서', '자격 기록'],
+  'ORG 2.1.5': ['총괄품질관리자 접근 권한·독립성 확인 서류', '보고 체계 조직도'],
+  'ORG 2.1.6': ['부문별 품질책임자 임명 공문', '직무기술서', '부서별 품질 책임 조항'],
+  'ORG 2.1.7': ['품질성과지표(QPI) 목록 및 측정 기록', '품질 성과 모니터링 보고서'],
+  'ORG 2.1.8': ['품질 회의록', '품질 의사소통 공지 기록', '내부 품질 뉴스레터'],
+  'ORG 2.1.9': ['품질심사원 교육 계획', '교육 수료 기록(이수증)', '심사원 자격 목록'],
+
+  // ── ORG 2.2  내부품질심사
+  'ORG 2.2.1': ['연간 내부 심사 계획서', '심사 보고서(최근 2년)', '심사 체크리스트'],
+  'ORG 2.2.2': ['ISARP 심사 프로그램', 'ISARP 심사 결과 기록', '심사 주기 계획'],
+  'ORG 2.2.3': ['심사 분야 및 범위 정의 문서', '부문별 심사 계획', '심사 종류별 절차서'],
+  'ORG 2.2.4': ['심사팀 구성 기록', '심사원 자격 증명 서류', '심사원 임명 공문'],
+
+  // ── ORG 2.3  시정조치 프로세스
+  'ORG 2.3.1': ['시정조치 추적 대장(CAR Log)', '시정조치 완료 기록', '효과성 검증 기록'],
+
+  // ── ORG 2.4  외주협력업체 평가(QMS 관점)
+  'ORG 2.4.1': ['공급업체 목록(AVL)', '외주업체 평가 기록', '품질규정 외주 관련 조항'],
+  'ORG 2.4.2': ['외주업체 선정 절차서', '선정 평가 기록', '계약서 목록'],
+  'ORG 2.4.3': ['외주업체 감사·점검 기록', '감사 보고서'],
+  'ORG 2.4.4': ['외주업체 성과 모니터링 기록', '계약 갱신·종료 평가 기록'],
+
+  // ── ORG 2.5  안전보증(Safety Assurance)
+  'ORG 2.5.1': ['비행안전문서시스템(ESR-LFSD-001) 현행본', '문서관리매뉴얼(ESR-DCM) 현행본', '문서 통제 절차 확인 기록'],
+  'ORG 2.5.3': ['문서관리매뉴얼(ESR-DCM) 제2장', '개정 및 배포 기록', '문서 접근 통제 기록'],
+  'ORG 2.5.4': ['안전성과지표(SPI) 모니터링 보고서', '트렌드 분석 자료', '안전 감사 결과'],
+
+  // ── ORG 2.6  경영자 검토(Management Review)
+  'ORG 2.6.1': ['경영자 검토 회의록', '문서관리매뉴얼 경영자 검토 관련 조항', '검토 입력 자료 목록'],
+  'ORG 2.6.2': ['경영자 검토 결과 보고서', '조치 사항 추적 기록', '개선 계획 문서'],
+
+  // ── ORG 3.1  안전관리시스템(SMS) 구성
+  'ORG 3.1.1': ['SMS 매뉴얼 안전방침 서명 페이지', '안전목표 설정 기록', '직원 공지 기록'],
+  'ORG 3.1.2': ['SMS 매뉴얼 조직 구조도', 'SMS 책임자 임명 공문', '안전 역할 기술 문서'],
+  'ORG 3.1.3': ['SMS 매뉴얼 적용 범위 조항', '계열사·위탁사 포함 여부 확인 문서'],
+  'ORG 3.1.4': ['SMS 문서 목록', '개정 이력', '배포 기록'],
+  'ORG 3.1.5': ['통합 안전관리시스템(ISMS) 관련 문서', 'QMS-SMS 연계 구조도', '통합 회의록'],
+
+  // ── ORG 3.2  위해요인 식별 및 위험관리
+  'ORG 3.2.1': ['위해요인 등록부(Hazard Register)', '위해요인 식별 기록', '안전 보고서 처리 기록'],
+  'ORG 3.2.2': ['위험평가 기록(Risk Assessment Record)', '위험 경감 조치 계획 및 결과', '위험 수용 결정 기록'],
+
+  // ── ORG 3.3  안전성과 모니터링
+  'ORG 3.3.1': ['안전성과지표(SPI) 목록', '지표별 목표치 및 경보 수준', '최근 모니터링 결과'],
+  'ORG 3.3.2': ['SPI 트렌드 분석 보고서', '월별/분기별 성과 보고서'],
+  'ORG 3.3.3': ['안전데이터 수집 절차', '데이터 분석 보고서', '데이터베이스 스크린샷'],
+  'ORG 3.3.4': ['안전 감사 계획서', '안전 감사 보고서(최근)', '시정조치 추적 기록'],
+  'ORG 3.3.5': ['SMS 지속 개선 계획', '개선 사항 추적 대장', '안전 성과 검토 회의록'],
+
+  // ── ORG 3.4  안전보고 시스템
+  'ORG 3.4.1': ['안전 보고 양식(ASR 등)', '최근 6개월 보고 건수 통계', '비처벌 정책 공표 기록', '보고 처리 절차 및 추적 기록'],
+
+  // ── ORG 3.5  안전조사(Safety Investigation)
+  'ORG 3.5.1': ['안전조사지침(ESR-SIG) 현행본', '안전조사 보고서 (최근 사례)', '조사 결과 배포 기록'],
+  'ORG 3.5.2': ['안전조사 착수 기록', '조사 과정 기록', '시정 권고사항 추적 기록'],
+
+  // ── ORG 3.6  비상대응계획(ERP)
+  'ORG 3.6.1': ['사고처리절차교범(ERP) 현행본', '비상 연락망', '최근 2년 ERP 훈련 기록', 'ERP 훈련 평가 보고서'],
+
+  // ── ORG 4.1  교육훈련 프로그램
+  'ORG 4.1.1': ['SMS 교육 계획서', '교육 수료 기록(이수증)', 'SMS 운영지침 교육 관련 조항'],
+  'ORG 4.1.2': ['직위별 SMS 교육 요건 정의 문서', '교육 내용 및 자료'],
+  'ORG 4.1.3': ['초기·정기·직위별 SMS 교육 기록', '교육 효과성 평가 기록'],
+
+  // ── ORG 4.2  안전의사소통 / Safety Promotion
+  'ORG 4.2.1': ['안전 소식지(Safety Newsletter) 발행 기록', '안전 게시판 사진', '안전 회의 공지 기록', '안전 캠페인 자료'],
+
+  // ── ORG 4.3  비행자료분석 프로그램(FDAP/FOQA)
+  'ORG 4.3.1': ['비행자료분석 프로그램 운영지침 현행본', 'FDAP 운영 조직도', 'FADEC/QAR 장착 현황'],
+  'ORG 4.3.2': ['FDAP 분석 보고서(최근 분기)', 'FDAP 위원회 회의록', '초과 이벤트 처리 기록', '자료 보안 및 접근 통제 절차'],
 };
 
 // ── 매뉴얼 근거 자동 적용 함수 ────────────────────────────
@@ -2730,6 +2869,16 @@ function _renderCRContent(container, allEntries, crManuals) {
 /* Add modal */
 #cr-add-modal { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.45); }
 #cr-add-modal-box { background:#fff; border-radius:10px; padding:28px 32px; width:480px; max-width:95vw; box-shadow:0 20px 60px rgba(0,0,0,0.2); }
+/* Evidence panel */
+.cr-row-wrap { position:relative; }
+.cr-ev-panel { background:linear-gradient(135deg,#eff6ff,#f0f9ff); border:1px solid #bfdbfe; border-top:none; border-radius:0 0 6px 6px; padding:10px 16px 12px; margin-bottom:2px; }
+.cr-ev-panel-title { font-size:0.6rem; font-weight:900; color:#1d4ed8; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:5px; }
+.cr-ev-item { font-size:0.72rem; color:#374151; padding:3px 0 3px 14px; position:relative; line-height:1.45; }
+.cr-ev-item::before { content:'▸'; position:absolute; left:0; color:#3b82f6; font-size:0.65rem; }
+.cr-ev-note { width:100%; min-height:36px; border:1px solid #bfdbfe; border-radius:4px; padding:5px 8px; font-size:0.72rem; font-family:inherit; background:#fff; outline:none; resize:vertical; color:#333; margin-top:8px; line-height:1.5; }
+.cr-ev-note:focus { border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59,130,246,0.15); }
+.cr-ev-btn { display:inline-flex; align-items:center; gap:3px; padding:2px 7px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:3px; font-size:0.58rem; font-weight:800; color:#1d4ed8; cursor:pointer; white-space:nowrap; margin-top:2px; transition:background 140ms; }
+.cr-ev-btn:hover { background:#dbeafe; }
 </style>`;
 
   container.innerHTML = tableStyles + `
@@ -2876,9 +3025,21 @@ ${sectionEntries.length === 0 ? `
     ).join('');
     const finding = (APP_DATA && APP_DATA.cap && APP_DATA.cap.findings||[]).find(f=>f.isarp===e.isarpCode);
     const findingBadge = e.status==='NC' ? `<span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:1px 5px;border-radius:3px;font-size:0.55rem;font-weight:800;">NC</span>` : '';
-    return `<div class="cr-row" data-id="${_esc(e.id)}" style="border-left-color:${st.color};background:${rowBg};${rowOp}">
+    const evidenceItems = ISARP_EVIDENCE_MAP[e.isarpCode] || [];
+    const evBtnHtml = evidenceItems.length > 0
+      ? `<button class="cr-ev-btn" onclick="toggleCREvidence('${_esc(e.id)}')" title="증빙자료 목록 보기 (내부심사용)">💼 증빙자료</button>`
+      : '';
+    const evPanelHtml = evidenceItems.length > 0 ? `
+<div id="cr-ev-${_esc(e.id)}" class="cr-ev-panel" style="display:none;">
+  <div class="cr-ev-panel-title"><i class="fas fa-folder-open"></i> 제출 증빙자료 목록 <span style="font-size:0.55rem;font-weight:600;color:#64748b;margin-left:4px;">내부심사용 · Excel 미포함</span></div>
+  ${evidenceItems.map(item => `<div class="cr-ev-item">${_esc(item)}</div>`).join('')}
+  <textarea class="cr-ev-note" placeholder="추가 메모 (준비 현황, 파일명 등)..."
+    onblur="debouncedCRSave('${_esc(e.id)}','evidenceNotes',this.value)">${_esc(e.evidenceNotes||'')}</textarea>
+</div>` : '';
+    return `<div class="cr-row-wrap">
+<div class="cr-row" data-id="${_esc(e.id)}" style="border-left-color:${st.color};background:${rowBg};${rowOp}">
   <div class="cr-cell cr-num">${idx+1}</div>
-  <div class="cr-cell cr-isarp">${_esc(e.isarpCode)}${findingBadge?'<br>'+findingBadge:''}</div>
+  <div class="cr-cell cr-isarp">${_esc(e.isarpCode)}${findingBadge?'<br>'+findingBadge:''}${evBtnHtml?'<br>'+evBtnHtml:''}</div>
   <div class="cr-cell" style="padding:4px 6px;">
     <input type="date" value="${_esc(e.auditDate||'')}"
       style="width:100%;border:1px solid #eee;border-radius:3px;padding:4px 5px;font-size:0.7rem;font-family:inherit;background:transparent;color:#333;outline:none;"
@@ -2899,6 +3060,7 @@ ${sectionEntries.length === 0 ? `
   <div class="cr-cell"><textarea placeholder="근본 원인 분석" onblur="debouncedCRSave('${_esc(e.id)}','rootCause',this.value)">${_esc(e.rootCause||'')}</textarea></div>
   <div class="cr-cell"><textarea placeholder="시정조치 계획 및 내용" onblur="debouncedCRSave('${_esc(e.id)}','correctiveAction',this.value)">${_esc(e.correctiveAction||'')}</textarea></div>
   <div class="cr-cell cr-del-btn"><button onclick="deleteCREntry('${_esc(e.id)}')" title="삭제"><i class="fas fa-times"></i></button></div>
+</div>${evPanelHtml}
 </div>`;
   }).join('')}
   <!-- Add row button -->
