@@ -3724,6 +3724,10 @@ function renderISMAnalysis() {
   ];
 
   const tagStyle = { '기술변경':'background:#f8fafc;color:#374151;border:1px solid #e2e8f0;', '내용추가':'background:#f1f5f9;color:#374151;border:1px solid #cbd5e1;', '삭제':'background:#f8fafc;color:#6b7280;border:1px solid #e2e8f0;', '신규요건':'background:#fff1f2;color:#991b1b;border:1px solid #fecaca;' };
+  const SECT_COLOR = {ORG:'#1d4ed8',FLT:'#0369a1',DSP:'#7c3aed',MNT:'#b45309',CAB:'#db2777',GRH:'#059669',CGO:'#d97706',SEC:'#dc2626'};
+  const SECT_ICON  = {ORG:'fa-building',FLT:'fa-plane',DSP:'fa-satellite-dish',MNT:'fa-wrench',CAB:'fa-couch',GRH:'fa-truck-ramp-box',CGO:'fa-box-open',SEC:'fa-shield-halved'};
+  const TAG_STYLE  = {'기술변경':'background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;','내용추가':'background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;','신규요건':'background:#fff1f2;color:#d20015;border:1px solid #fca5a5;','삭제':'background:#f9fafb;color:#9ca3af;border:1px solid #e5e7eb;'};
+  const TAG_BORDER = {'기술변경':'#94a3b8','내용추가':'#3b82f6','신규요건':'#d20015','삭제':'#d1d5db'};
 
   function ismToggle(id, btn) {
     var el = document.getElementById(id);
@@ -3774,100 +3778,159 @@ function renderISMAnalysis() {
   </div>
 </div>
 
-<!-- ① RP→ST 아코디언 -->
+<!-- ① RP→ST 아코디언 — 격상 쇼케이스 카드 -->
 <div id="ism-acc-rp2st" style="display:none;margin-bottom:12px;">
   <div class="w-card" style="border-left:4px solid #d20015;">
     <div class="w-card-header">
       <span class="w-card-title"><i class="fas fa-arrow-up me-2" style="color:#d20015;"></i>RP → Standard 격상 <span style="color:#d20015;font-weight:900;">${RP_TO_ST.length}건</span></span>
-      <span class="pill pill-red">Finding 대상 ⚠</span>
+      <span class="pill pill-red"><i class="fas fa-triangle-exclamation me-1"></i>Finding 대상</span>
     </div>
     <div class="w-card-body">
-      <div style="background:#fff5f5;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:#7f1d1d;">
-        <i class="fas fa-exclamation-triangle me-1" style="color:#d20015;"></i>
-        Ed.18에서 <em>권고(should)</em>였던 항목이 Ed.19에서 <em>의무(shall)</em>로 격상 — 미이행 시 <strong>Finding 발행 대상</strong>
+      <!-- 경고 배너 -->
+      <div style="background:linear-gradient(135deg,#fff5f5,#fff1f2);border:1.5px solid #fca5a5;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:flex-start;gap:10px;">
+        <div style="width:32px;height:32px;background:#d20015;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fas fa-triangle-exclamation" style="color:white;font-size:0.75rem;"></i>
+        </div>
+        <div>
+          <div style="font-size:0.8rem;font-weight:700;color:#7f1d1d;margin-bottom:3px;">즉각 대응 필요</div>
+          <div style="font-size:0.75rem;color:#991b1b;line-height:1.5;">Ed.18에서 <em>권고(should)</em>였던 항목이 Ed.19에서 <em>의무(shall)</em>로 격상 — 미이행 시 <strong>Finding 발행 대상</strong>. 2027.01.01 발효 전 절차 수립 완료 필요.</div>
+        </div>
       </div>
-      <table class="iata-table">
-        <thead><tr><th style="width:120px;">ISARP</th><th style="width:90px;">부문</th><th>변경 내용</th><th style="width:75px;">Ed.18</th><th style="width:75px;">Ed.19</th></tr></thead>
-        <tbody>
-          ${RP_TO_ST.map(r=>`<tr>
-            <td><strong style="font-family:monospace;color:var(--iata-navy);">${r.code}</strong></td>
-            <td><span class="badge bg-secondary" style="font-size:0.63rem;">${r.code.split(' ')[0]}</span></td>
-            <td style="font-size:0.78rem;">${r.desc}</td>
-            <td><span class="pill pill-gray" style="font-size:0.62rem;">RP (should)</span></td>
-            <td><span class="pill pill-red" style="font-size:0.62rem;">ST (shall)</span></td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
+      <!-- 격상 카드 그리드 -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px;">
+        ${RP_TO_ST.map(r=>`
+        <div style="border-radius:12px;border:2px solid #fecaca;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(210,0,21,.08);">
+          <div style="background:linear-gradient(135deg,#fff1f2,#fee2e2);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-family:monospace;font-size:1.05rem;font-weight:900;color:#d20015;letter-spacing:.02em;">${r.code}</span>
+            <span style="background:#fff;border:1.5px solid #d20015;color:#d20015;padding:3px 10px;border-radius:20px;font-size:0.62rem;font-weight:700;">⚠ Finding 대상</span>
+          </div>
+          <div style="padding:16px 18px;display:flex;align-items:center;gap:12px;">
+            <div style="flex:1;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px;text-align:center;">
+              <div style="font-size:0.58rem;color:#94a3b8;letter-spacing:.08em;font-weight:600;margin-bottom:6px;">ED.18</div>
+              <div style="font-size:1.4rem;font-weight:900;color:#9ca3af;">RP</div>
+              <div style="font-size:0.65rem;color:#9ca3af;font-style:italic;margin-top:2px;">should</div>
+              <div style="margin-top:8px;"><span style="background:#f3f4f6;color:#9ca3af;padding:2px 10px;border-radius:20px;font-size:0.6rem;font-weight:600;">권고 사항</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
+              <div style="width:36px;height:36px;background:#d20015;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(210,0,21,.3);">
+                <i class="fas fa-arrow-right" style="color:white;font-size:0.75rem;"></i>
+              </div>
+              <div style="font-size:0.58rem;color:#d20015;font-weight:700;white-space:nowrap;">격상</div>
+            </div>
+            <div style="flex:1;background:#fff1f2;border:2px solid #d20015;border-radius:10px;padding:12px;text-align:center;">
+              <div style="font-size:0.58rem;color:#d20015;letter-spacing:.08em;font-weight:600;margin-bottom:6px;">ED.19</div>
+              <div style="font-size:1.4rem;font-weight:900;color:#d20015;">ST</div>
+              <div style="font-size:0.65rem;color:#d20015;font-style:italic;margin-top:2px;">shall</div>
+              <div style="margin-top:8px;"><span style="background:#d20015;color:white;padding:2px 10px;border-radius:20px;font-size:0.6rem;font-weight:600;">의무 사항</span></div>
+            </div>
+          </div>
+          <div style="margin:0 18px;border-top:1px solid #fee2e2;padding:12px 0 16px;">
+            <div style="font-size:0.77rem;color:#374151;line-height:1.65;">${r.desc}</div>
+          </div>
+        </div>`).join('')}
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ② 신규 ST 아코디언 -->
+<!-- ② 신규 ST 아코디언 — 섹션별 컬러 카드 -->
 <div id="ism-acc-newst" style="display:none;margin-bottom:12px;">
   <div class="w-card" style="border-left:4px solid #374151;">
     <div class="w-card-header">
       <span class="w-card-title"><i class="fas fa-plus-circle me-2" style="color:#374151;"></i>신규 Standard 추가 <span style="color:#374151;">${NEW_ST.length}건</span></span>
-      <span class="pill pill-gray">신규 의무</span>
+      <span class="pill pill-gray">신규 의무 조항</span>
     </div>
     <div class="w-card-body">
-      ${NEW_ST.map(r=>`<div style="padding:10px 0;border-bottom:1px solid #f1f5f9;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-          <span style="font-family:monospace;font-weight:700;color:#374151;font-size:0.82rem;">${r.code}</span>
-          <span class="pill pill-gray" style="font-size:0.6rem;">신규 ST</span>
-        </div>
-        <div style="font-size:0.78rem;color:#374151;">${r.desc}</div>
-      </div>`).join('')}
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;">
+        ${NEW_ST.map(r=>{const sect=r.code.split(' ')[0]||'';const sc=SECT_COLOR[sect]||'#374151';const si=SECT_ICON[sect]||'fa-circle';return `
+        <div style="border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+          <div style="background:${sc};padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:9px;">
+              <div style="width:30px;height:30px;background:rgba(255,255,255,.2);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="fas ${si}" style="color:white;font-size:0.72rem;"></i>
+              </div>
+              <span style="font-family:monospace;color:white;font-weight:900;font-size:0.92rem;">${r.code}</span>
+            </div>
+            <span style="background:rgba(255,255,255,.22);color:white;padding:2px 9px;border-radius:20px;font-size:0.6rem;font-weight:700;white-space:nowrap;">신규 ST</span>
+          </div>
+          <div style="padding:14px 16px 10px;">
+            <div style="font-size:0.77rem;color:#374151;line-height:1.65;">${r.desc}</div>
+          </div>
+          <div style="padding:8px 16px 12px;display:flex;align-items:center;gap:6px;border-top:1px solid #f1f5f9;">
+            <i class="fas fa-calendar-check" style="color:${sc};font-size:0.65rem;"></i>
+            <span style="font-size:0.63rem;color:#6b7280;">2027.01.01부터 Finding 대상</span>
+          </div>
+        </div>`; }).join('')}
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ③ 삭제 조항 아코디언 -->
+<!-- ③ 삭제 조항 아코디언 — 취소선 카드 -->
 <div id="ism-acc-deleted" style="display:none;margin-bottom:12px;">
   <div class="w-card" style="border-left:4px solid #6b7280;">
     <div class="w-card-header">
       <span class="w-card-title"><i class="fas fa-trash-alt me-2" style="color:#6b7280;"></i>삭제된 조항 <span style="color:#6b7280;">${DELETED.length}건</span></span>
-      <span class="pill pill-gray">폐지·통합</span>
+      <span class="pill pill-gray">폐지 · 통합</span>
     </div>
     <div class="w-card-body">
-      ${DELETED.map(r=>`<div style="padding:10px 0;border-bottom:1px solid #f1f5f9;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-          <span style="font-family:monospace;font-weight:700;color:#6b7280;font-size:0.82rem;">${r.code}</span>
-          <span class="pill pill-gray" style="font-size:0.6rem;">삭제</span>
-        </div>
-        <div style="font-size:0.78rem;color:#374151;">${r.desc}</div>
-      </div>`).join('')}
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;">
+        ${DELETED.map(r=>`
+        <div style="border-radius:9px;border:1px solid #e5e7eb;background:#fafafa;padding:13px 16px;display:flex;gap:11px;align-items:flex-start;">
+          <div style="width:32px;height:32px;background:#f3f4f6;border:1.5px solid #e5e7eb;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fas fa-ban" style="color:#9ca3af;font-size:0.68rem;"></i>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-family:monospace;font-weight:700;color:#9ca3af;text-decoration:line-through;font-size:0.83rem;margin-bottom:5px;">${r.code}</div>
+            <div style="font-size:0.74rem;color:#6b7280;line-height:1.55;">${r.desc}</div>
+          </div>
+        </div>`).join('')}
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ④ 기술 변경사항 아코디언 -->
+<!-- ④ 기술 변경사항 아코디언 — 섹션 컬러 패널 + 미니카드 -->
 <div id="ism-acc-tech" style="display:none;margin-bottom:12px;">
   <div class="w-card" style="border-left:4px solid #6b7280;">
-    <div class="w-card-header">
+    <div class="w-card-header" style="flex-wrap:wrap;gap:8px;">
       <span class="w-card-title"><i class="fas fa-pen-to-square me-2" style="color:#6b7280;"></i>주요 기술적 변경사항 <span style="color:#6b7280;">${TECH_CHANGES.reduce((s,g)=>s+g.items.length,0)}건</span></span>
-      <span class="pill pill-gray" style="font-size:0.62rem;">문구 변경 / 추가 / 삭제</span>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;">
+        <span style="padding:2px 8px;border-radius:8px;font-size:0.6rem;font-weight:700;background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;">기술변경</span>
+        <span style="padding:2px 8px;border-radius:8px;font-size:0.6rem;font-weight:700;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">내용추가</span>
+        <span style="padding:2px 8px;border-radius:8px;font-size:0.6rem;font-weight:700;background:#fff1f2;color:#d20015;border:1px solid #fca5a5;">신규요건</span>
+      </div>
     </div>
     <div class="w-card-body" style="padding:0;">
-      ${TECH_CHANGES.map(g=>`
+      ${TECH_CHANGES.map(g=>{const sc=SECT_COLOR[g.sect]||'#374151';const si=SECT_ICON[g.sect]||'fa-circle';const nNew=g.items.filter(i=>i.tag==='신규요건').length;const nAdd=g.items.filter(i=>i.tag==='내용추가').length;return `
       <div style="border-bottom:1px solid #f1f5f9;">
-        <div style="background:#f8fafc;padding:8px 20px;display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="(function(el){var b=el.nextElementSibling;b.style.display=b.style.display==='none'?'block':'none';})(this)">
-          <span class="badge bg-secondary" style="font-size:0.65rem;">${g.sect}</span>
-          <span style="font-size:0.8rem;font-weight:700;color:#1e293b;">${SECT[g.sect]||g.sect}</span>
-          <span style="font-size:0.7rem;color:#94a3b8;margin-left:auto;">${g.items.length}건 <i class="fas fa-chevron-down" style="font-size:0.55rem;"></i></span>
+        <div style="padding:10px 20px;display:flex;align-items:center;gap:11px;cursor:pointer;background:#fafafa;transition:background .15s;" onmouseenter="this.style.background='#f3f4f6'" onmouseleave="this.style.background='#fafafa'" onclick="(function(el){var b=el.nextElementSibling;var open=b.style.display==='block';b.style.display=open?'none':'block';el.querySelector('.sc-chev').style.transform=open?'rotate(0deg)':'rotate(180deg)';})(this)">
+          <div style="width:36px;height:36px;background:${sc};border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px ${sc}44;">
+            <i class="fas ${si}" style="color:white;font-size:0.75rem;"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:0.83rem;font-weight:700;color:#1e293b;">${SECT[g.sect]||g.sect}</div>
+            <div style="font-size:0.63rem;color:#94a3b8;margin-top:1px;">${g.sect} · 총 ${g.items.length}건</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+            ${nNew>0?`<span style="background:#fff1f2;color:#d20015;border:1px solid #fca5a5;padding:1px 8px;border-radius:10px;font-size:0.6rem;font-weight:700;">${nNew}건 신규</span>`:''}
+            ${nAdd>0?`<span style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;padding:1px 8px;border-radius:10px;font-size:0.6rem;font-weight:700;">${nAdd}건 추가</span>`:''}
+            <i class="fas fa-chevron-down sc-chev" style="color:#cbd5e1;font-size:0.62rem;transition:transform .2s;margin-left:4px;"></i>
+          </div>
         </div>
-        <div style="display:none;padding:0 20px 8px;">
-          <table class="iata-table" style="margin:0;">
-            <thead><tr><th style="width:140px;">ISARP</th><th style="width:75px;">유형</th><th>변경 내용</th></tr></thead>
-            <tbody>
-              ${g.items.map(item=>`<tr>
-                <td style="font-family:monospace;font-size:0.75rem;font-weight:700;color:var(--iata-navy);">${item.code}</td>
-                <td><span style="padding:2px 7px;border-radius:10px;font-size:0.62rem;font-weight:700;${tagStyle[item.tag]||''}">${item.tag}</span></td>
-                <td style="font-size:0.78rem;">${item.desc}</td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
+        <div style="display:none;padding:14px 16px 16px;background:#fdfdfe;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:9px;">
+            ${g.items.map(item=>{const tb=TAG_BORDER[item.tag]||'#e2e8f0';const ts=TAG_STYLE[item.tag]||'';return `
+            <div style="border-radius:8px;background:#fff;border:1px solid #e8ecf0;border-left:4px solid ${tb};padding:11px 13px;box-shadow:0 1px 3px rgba(0,0,0,.04);">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
+                <span style="font-family:monospace;font-size:0.8rem;font-weight:900;color:#1e293b;">${item.code}</span>
+                <span style="padding:2px 7px;border-radius:8px;font-size:0.59rem;font-weight:700;${ts}">${item.tag}</span>
+              </div>
+              <div style="font-size:0.76rem;color:#374151;line-height:1.65;">${item.desc}</div>
+            </div>`;}).join('')}
+          </div>
         </div>
-      </div>`).join('')}
+      </div>`;}).join('')}
     </div>
   </div>
 </div>`;
