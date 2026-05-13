@@ -3606,91 +3606,99 @@ async function exportCRExcel() {
 function renderISMAnalysis() {
   const SECT = {ORG:'조직 및 안전관리',FLT:'비행운항',DSP:'종합통제',MNT:'정비',CAB:'객실',GRH:'지상조업',CGO:'화물',SEC:'항공보안'};
 
-  // ── 공식 ISM ED 18 Revision Highlights 기반 데이터 ──────────
-  // ① RP → Standard 격상 (4건) — Finding 대상으로 격상
+  // ── 공식 ISM ED 19 Revision Highlights 기반 데이터 (2027.01.01 발효) ──
+  // ① RP → Standard 격상 (2건)
   const RP_TO_ST = [
-    { code:'ORG 2.4.2', desc:'자발적 안전 보고 프로그램(Voluntary Safety Reporting) 의무화' },
-    { code:'ORG 3.4.1', desc:'안전 위험성 평가(Safety Risk Assessment) 프로그램 의무화' },
-    { code:'GRH 3.4.16', desc:'하중 제한(Load Restriction) 기준 — CGO 3.3.1과 정렬' },
-    { code:'GRH 3.4.17', desc:'하중 제한(Load Restriction) 기준 — CGO 3.3.1과 정렬' },
+    { code:'ORG 3.6.1', desc:'안전 보고 관련 ISARP — RP에서 Standard로 공식 격상' },
+    { code:'FLT 3.12.6', desc:'런웨이 침입(Runway Incursion) 방지 절차 — RP에서 Standard로 격상' },
   ];
 
-  // ② 신규 Standard 추가 (3건) — 기존에 없던 새 의무 조항
+  // ② 신규 Standard 추가 / 이관 (5건)
   const NEW_ST = [
-    { code:'DSP 3.2.8C', desc:'비행 준비 계획 단계에서의 안전 위험성 평가(SRA) 신규 의무화' },
-    { code:'GRH 3.4.14A', desc:'ULD 운영 총괄 기준 Standard 신규 추가 (CGO 3.5.1 정렬)' },
-    { code:'GRH 3.6.6',  desc:'화물 탑재 항공기 위험물(DG) 사고 보고 의무화 (CGO 3.2.18 정렬)' },
+    { code:'GRH 3.7.12', desc:'운항 보안 요건 — SEC 3.1.3에서 GRH로 이관 (지상조업 통합 관리)' },
+    { code:'GRH 3.7.13', desc:'운항 보안 요건 — SEC 3.3.3에서 GRH로 이관 (지상조업 통합 관리)' },
+    { code:'GRH 3.7.14', desc:'운항 보안 요건 — SEC 3.4.7에서 GRH로 이관 (지상조업 통합 관리)' },
+    { code:'CGO 3.8.1',  desc:'화물 구역 휴대 전자기기(PEDC) 사용 통제·승인 신규 의무 요건' },
+    { code:'SEC 1.10.1A',desc:'SeMS 품질통제(Quality Control) 프로그램 신규 Standard — 보안 관리 강화' },
   ];
 
-  // ③ 신규 RP 추가 (2건)
-  const NEW_RP = [
-    { code:'GRH 3.4.14C', desc:'ULD 보관 기준 RP 신규 추가 (CGO 3.5.3 정렬)' },
-    { code:'CGO 3.6.2',   desc:'PED(개인 전자기기) 관련 화물 권고사항 신규 추가' },
+  // ③ 신규 RP 추가 (0건)
+  const NEW_RP = [];
+
+  // ④ 삭제된 Standards (13건 — 참고용)
+  const DELETED = [
+    { code:'ORG 1.7.8~1.7.12', desc:'ERP 관련 5개 조항 삭제 — ORG 1.7.1~1.7.7로 내용 통합 재편' },
+    { code:'FLT 2.2.25',       desc:'비행승무원·정비사 외 항공기 외부검사 교육 요건 — 더 이상 불필요' },
+    { code:'FLT 3.8.6B',       desc:'삭제' },
+    { code:'DSP 4.5.2',        desc:'DSP 4.5.1로 내용 통합 후 삭제' },
+    { code:'SEC 3.1.3',        desc:'GRH 3.7.12로 이관 후 삭제' },
+    { code:'SEC 3.3.3',        desc:'GRH 3.7.13으로 이관 후 삭제' },
+    { code:'SEC 3.4.5',        desc:'SEC 3.4.2로 통합 후 삭제' },
+    { code:'SEC 3.4.7',        desc:'GRH 3.7.14로 이관 후 삭제' },
+    { code:'SEC 3.6.6',        desc:'SEC 3.6.1로 통합 후 삭제' },
   ];
 
-  // ④ 주요 기술적 변경사항 (섹션별) — ISM 본문 내용 변경
+  // ⑤ 주요 기술적 변경사항 (섹션별)
   const TECH_CHANGES = [
     { sect:'ORG', items:[
-      { code:'ORG 2.1.4',    tag:'기술변경', desc:'내부심사 기간 관련 Note: 5개월 → 6개월로 개정' },
-      { code:'ORG 2.2.3',    tag:'기술변경', desc:'새 Note 추가 — ISSA 등록도 심사원 요건 충족 수단으로 인정' },
-      { code:'ORG 3.3.1',    tag:'기술변경', desc:'FDA 프로그램 ICAO 항공기 중량 기준 개정 (27,000kg / 15,000kg+승객19명+CoA 2027.1.1이후)' },
-      { code:'ORG 3.3.2',    tag:'기술변경', desc:'RP — FDA 요건에 ICAO 신규 중량 기준 (15,000kg 초과) 반영' },
-      { code:'ORG 3.6.1',    tag:'기술변경', desc:'Note 추가 — 향후 RP 격상 예정일 고지' },
-      { code:'ORG Table 1.2',tag:'삭제',     desc:'Sub-item(v) 삭제 — 내부심사원 조치사항 기록 요건 삭제' },
+      { code:'ORG 1.1.3 GM',   tag:'기술변경', desc:'책임자(Postholder) — 안전·보안 리스크 관리 책임 문구 명확화' },
+      { code:'ORG 1.1.4',      tag:'기술변경', desc:'Safety Manager 자격 요건 — 적절한 자격(appropriate qualifications) 보유 명시' },
+      { code:'ORG 1.7.1~1.7.7',tag:'기술변경', desc:'ERP(비상대응계획) 요건 전면 개정 — ICAO 신규 요건 반영, 파트너 협력/인도주의 지원/지역 ERP/정보 처리 등 세분화' },
+      { code:'ORG 2.2.3',      tag:'기술변경', desc:'코드쉐어·습식임대 상황에 따른 조건부 요건으로 수정 (컴플라이언스 고려사항 추가)' },
+      { code:'ORG 4.3.1',      tag:'기술변경', desc:'SMS 교육 — 초도(initial) + 반복(recurrent) 훈련 모두 의무화' },
     ]},
     { sect:'FLT', items:[
-      { code:'FLT 1.12.2 Guidance', tag:'기술변경', desc:'GPS 재밍/스푸핑(Jamming & Spoofing) 예시 추가' },
-      { code:'FLT 2.2.16B',         tag:'기술변경', desc:'화산재 훈련 범위 확대 — 노선/공항 → 영향 지역(area) 전체로' },
-      { code:'FLT 2.4.1',           tag:'기술변경', desc:'특수공항 및/또는 지역 훈련 요건 명확화' },
-      { code:'FLT 3.3.5',           tag:'기술변경', desc:'국가별 다른 최대 비행 연령 제한 허용 (EASA/FAA 정렬)' },
-      { code:'FLT 3.3.10',          tag:'기술변경', desc:'특수공항 자격 요건 — 규제당국 요건 정렬' },
-      { code:'FLT 3.6.5 (RP)',      tag:'기술변경', desc:'RVR/CMV 제한 — 당국 지정 기준 인정 조항 추가' },
-      { code:'FLT 3.11.17',         tag:'기술변경', desc:'Sterile Flight Deck 정책·절차 — EASA/FAA 정렬' },
-      { code:'FLT 3.11.50B (RP)',   tag:'기술변경', desc:'정책(policy) + 절차(procedures) 모두 요구로 강화' },
-      { code:'FLT 3.13.11',         tag:'내용추가',  desc:'객실 승무원 없이 운항 시 통신 요건 sub-item(iii) 신규 추가' },
+      { code:'FLT 2.2.20',     tag:'기술변경', desc:'영어 능력(ELP) — ICAO Level 6 Expert 명시, 조건부 적용 추가, 국가 면허 요건 수용 Note 신설' },
+      { code:'FLT 2.2.22',     tag:'기술변경', desc:'ELP 전문가 수준 주기적 평가 — 조건부 적용으로 변경, ICAO Level 6 참조 명확화' },
+      { code:'FLT 3.8.6A',     tag:'기술변경', desc:'Walk-around 검사 위임 — 비행승무원 또는 면허 정비사 위임 가능 문구 명확화' },
+      { code:'FLT 3.11.17',    tag:'기술변경', desc:'문구 명확성 및 정확성 개선' },
+      { code:'FLT 3.11.20',    tag:'내용추가',  desc:'독립 성능 계산(independent performance calculations) 관련 신규 sub-item 추가' },
+      { code:'FLT 3.11.32(iii)',tag:'내용추가', desc:'ATC 전송 오류(ATC transmission errors) 포함' },
+      { code:'FLT 3.11.59(iv)',tag:'기술변경', desc:'Sub-item(iv) 조건부 적용으로 변경' },
     ]},
     { sect:'DSP', items:[
-      { code:'DSP 1.12.2 Guidance', tag:'기술변경', desc:'GPS 재밍/스푸핑 예시 추가 (FLT와 동일)' },
-      { code:'DSP 3.2.8B',          tag:'기술변경', desc:'Note 삭제 — 내용을 신규 DSP 3.2.8C로 이관' },
-      { code:'DSP 3.2.9C',          tag:'기술변경', desc:'증분값(incremental values) — "국가 요구 시" 지정으로 완화 (EASA/FAA 정렬)' },
+      { code:'DSP 1.8.4',      tag:'기술변경', desc:'문구 명확화' },
+      { code:'DSP 1.8.6',      tag:'기술변경', desc:'관련 참조 내용 포함, Guidance 정렬' },
+      { code:'DSP 4.2.3',      tag:'기술변경', desc:'PCO 관련 내용 및 Note 삭제' },
+      { code:'DSP 4.3.13',     tag:'기술변경', desc:'문구 명확화' },
+      { code:'DSP 4.5.1',      tag:'기술변경', desc:'DSP 4.5.2 내용 통합 — 단일 조항으로 통합' },
+      { code:'DSP Table 3.4(xvi)',tag:'내용추가',desc:'비행 정보 요소(flight information elements) 추가' },
     ]},
     { sect:'MNT', items:[
-      { code:'MNT 1.11.6',           tag:'기술변경', desc:'훈련/훈련 자료 제공 절차 문구 개정' },
-      { code:'MNT 4.5.7',            tag:'내용추가',  desc:'정비원의 항공기 지상 이동(Taxiing) 관련 Guidance Material 신규 추가' },
-      { code:'MNT Table 4.11(xiv)',  tag:'기술변경', desc:'Active Implementation 기한: 2026년 12월 31일' },
-      { code:'MNT Table 4.11(xxx)',  tag:'기술변경', desc:'Active Implementation 기한: 2026년 12월 31일' },
-      { code:'MNT Table 4.11(xxxi)',tag:'신규요건',  desc:'ROASS(정비조직평가시스템) 신규 요건 — 기한: 2027년 12월 31일' },
+      { code:'MNT 1.11.5(ii)', tag:'내용추가',  desc:'비승인 부품(SUP) — 공급망 시스템 등록 강화 (공급망 신뢰성 향상)' },
+      { code:'MNT 1.12.2 GM',  tag:'기술변경', desc:'정비 운영 위험 목록 — 피로(fatigue) 및 정보 보안(information security) 추가' },
+      { code:'MNT 4.6.5(iii)', tag:'내용추가',  desc:'비승인 부품(SUP) 식별 프로세스 요구 신규 sub-item 추가' },
+      { code:'MNT Table 4.11(xxx)',tag:'기술변경',desc:'ADT Active Implementation 기한 2027년 12월 31일로 연장' },
+      { code:'MNT Table 4.11(xv)',tag:'기술변경',desc:'적용성 명확화, DLC AI 기한 Note 삭제' },
     ]},
     { sect:'CAB', items:[
-      { code:'CAB 1.10.1A',    tag:'기술변경', desc:'서비스 제공업체 선정 기준에 보안(security) 요소 추가' },
-      { code:'CAB 2.2.2',      tag:'기술변경', desc:'AQP만 적용 — ATQP·EBT 삭제 (적용 불가 훈련 방식 제거)' },
-      { code:'CAB 2.2.10 Note',tag:'기술변경', desc:'합동 훈련 개발 가능하나 비행기 승무원과 별도 시행 명확화' },
-      { code:'CAB 2.3.1',      tag:'기술변경', desc:'각 항공사별 초도 훈련 중 감독 노선비행 요건 명확화' },
-      { code:'CAB 3.1.3',      tag:'내용추가',  desc:'FLT 3.1.2 참조 추가 — 공통 지정 언어(Designated Language) 적용' },
-      { code:'CAB 3.2.4A',     tag:'기술변경', desc:'지상직원(ground staff) 포함으로 적용 범위 확대' },
+      { code:'CAB 2.2.5',      tag:'기술변경', desc:'비상구 유형 다양화 수용 — 다양한 객실 비상구 유형 적용 가능하도록 개정' },
     ]},
     { sect:'GRH', items:[
-      { code:'GRH 1.10.1A',  tag:'기술변경', desc:'서비스 제공업체 선정 기준에 보안 요소 추가' },
-      { code:'GRH 3.2.3(i)', tag:'기술변경', desc:'IGOM 절차와 언어 정렬' },
-      { code:'GRH 3.3.4',    tag:'기술변경', desc:'Sub-item (v)(a)(b), (vi), (viii), (x) 문구 개정 — CGO 3.2.14 정렬' },
-      { code:'GRH 3.4.14B',  tag:'기술변경', desc:'구 GRH 3.4.14 번호 변경 (내용 동일) — 3.4.14A 추가에 따른 재번호' },
-      { code:'GRH 3.7.10',   tag:'기술변경', desc:'항공보안 "적절한 검색(appropriate screening)" 개념 추가' },
+      { code:'GRH 1.11.2 GM',  tag:'기술변경', desc:'문구 명확화' },
+      { code:'GRH 3.3.1(iii)', tag:'기술변경', desc:'문구 명확화' },
+      { code:'GRH 3.3.4(vi)',  tag:'기술변경', desc:'IATA DGR 정렬 — 명확성 개선' },
+      { code:'GRH 3.6.5 GM',   tag:'기술변경', desc:'문구 명확화' },
+      { code:'GRH 3.6.6',      tag:'기술변경', desc:'잘못된 참조(incorrect references) 삭제' },
     ]},
     { sect:'CGO', items:[
-      { code:'CGO 2.2.4',    tag:'기술변경', desc:'화물 훈련 요건에 평가(assessment) 개념 추가, Note 삭제' },
-      { code:'CGO 3.1.1',    tag:'기술변경', desc:'sub-item(i) 조건부 요건 삭제, 비수익 화물 = 수익 화물 동일 기준' },
-      { code:'CGO 3.4.2',    tag:'삭제',     desc:'삭제 — Ed.17에서 이미 삭제된 조항 Ed.18 반영' },
-      { code:'CGO (전반)',    tag:'기술변경', desc:'비수익(non-revenue) 화물을 수익 화물과 동일 기준 적용으로 일원화' },
+      { code:'CGO 2.1.1(ii)',   tag:'기술변경', desc:'반복 훈련 참조(references for recurrent training) 개정' },
+      { code:'CGO 2.2.4 AA5',  tag:'기술변경', desc:'24개월 초과 반복 훈련 기간 심사원 행동 기준 개정' },
+      { code:'CGO 3.2.14(vi)', tag:'기술변경', desc:'IATA DGR 정확한 문구 적용 (정렬)' },
+      { code:'CGO 3.6.1 GM',   tag:'기술변경', desc:'특수 화물(special loads) 명확화 개정' },
+      { code:'CGO 3.8',        tag:'내용추가',  desc:'신규 섹션 — 화물 구역 휴대 전자기기(PEDC) 관련 요건 신설' },
     ]},
     { sect:'SEC', items:[
-      { code:'SEC 1.1.1',    tag:'기술변경', desc:'SSPs(Supplementary Station Procedures) 포함 — 보안 문서 체계 확대' },
-      { code:'SEC 1.1.2',    tag:'기술변경', desc:'AOSP에 Associated SSPs 연계 요건 추가' },
-      { code:'SEC 1.2.1',    tag:'기술변경', desc:'공식 보안 프로그램 구성 요건 개정 (SSPs 포함)' },
-      { code:'SEC 1.5.2',    tag:'기술변경', desc:'AOSP → SeMS 참조 변경; 역량(competencies) 선정 기준 추가' },
-      { code:'SEC 1.5.3',    tag:'내용추가',  desc:'Sub-item(iii) — 통제구역(controlled areas) 개념 추가' },
-      { code:'SEC 1.12.2',   tag:'기술변경', desc:'기타 보안 발생사건(other security occurrences) 포함으로 적용 범위 확대' },
-      { code:'SEC 3.3.3',    tag:'내용추가',  desc:'Sub-item(iii) — "이송(transfer)" 포함' },
-      { code:'SEC 3.6.6',    tag:'기술변경', desc:'위험성 평가(risk assessment) 요건 삭제 — 완화' },
+      { code:'SEC 1.1.1',      tag:'기술변경', desc:'위험 평가(iii) 및 품질 보증·통제(v) 포함으로 확대' },
+      { code:'SEC 1.2.1',      tag:'기술변경', desc:'보안 민감 정보(sensitive aviation security information) 정의 개정' },
+      { code:'SEC 1.5.3',      tag:'내용추가',  desc:'비에스코트 항공기 접근 제한구역 관련 신규 sub-item(iv) 추가' },
+      { code:'SEC 1.10',       tag:'기술변경', desc:'섹션 제목 개정 — 품질 보증 및 품질 통제(QA & QC) 포함' },
+      { code:'SEC 3.1.1',      tag:'기술변경', desc:'배타적 제한 구역 통제 명확화, 신규 sub-item(ii) — 인원 검색 요건 추가' },
+      { code:'SEC 3.4.2',      tag:'기술변경', desc:'SEC 3.4.5 내용 통합' },
+      { code:'SEC 3.4.3(iii)', tag:'내용추가',  desc:'환승 승객(transit) 및 기내 수하물 무단 간섭 방지 신규 sub-item' },
+      { code:'SEC 3.4.6',      tag:'기술변경', desc:'보안 인원 행동 인식(behavioral awareness) 문구 개정' },
+      { code:'SEC 3.6.1',      tag:'내용추가',  desc:'환승 수하물(transfer hold baggage) 보안 검색 강화 — 신규 sub-items(iii)(iv)(v) 추가' },
+      { code:'SEC 3.7.1',      tag:'내용추가',  desc:'우편물 보안 통제(mail security controls) 포함' },
     ]},
   ];
 
@@ -3708,12 +3716,12 @@ function renderISMAnalysis() {
 <div class="sect-header">
   <div>
     <h2 class="sect-title">ISM 개정 분석</h2>
-    <p class="sect-sub">ISM Ed.17 → Ed.18 공식 Revision Highlights 기반 — IOSA Standards Manual Ed.18 Rev.1</p>
+    <p class="sect-sub">ISM Ed.18 → Ed.19 공식 Revision Highlights 기반 — IOSA Standards Manual Ed.19 (2027.01.01 발효)</p>
   </div>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-    <span style="background:#f0f5ff;border:1px solid #bfdbfe;color:#1e3a5f;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;">Ed.17 기준</span>
+    <span style="background:#f9fafb;border:1px solid #e2e8f0;color:#6b7280;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;">Ed.18 기준</span>
     <i class="fas fa-arrow-right" style="color:#94a3b8;font-size:0.7rem;"></i>
-    <span style="background:#fff1f2;border:1px solid #fca5a5;color:#d20015;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;">Ed.18 Rev.1 · 2026.01.01 발효</span>
+    <span style="background:#fff1f2;border:1px solid #fca5a5;color:#d20015;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;">Ed.19 · 2027.01.01 발효</span>
   </div>
 </div>
 
@@ -3731,10 +3739,10 @@ function renderISMAnalysis() {
     <div class="stat-box-sub">신규 의무 조항</div>
     <div style="margin-top:6px;text-align:center;"><i class="fas fa-chevron-down ism-chev" style="color:#d20015;font-size:0.65rem;transition:transform .2s;"></i></div>
   </div>
-  <div class="stat-box" style="border-top:3px solid #d20015;cursor:pointer;transition:box-shadow .15s;" onclick="ismToggle('ism-acc-newrp',this)" onmouseenter="this.style.boxShadow='0 4px 16px rgba(210,0,21,.15)'" onmouseleave="this.style.boxShadow=''">
-    <div class="stat-box-label">신규 RP 추가</div>
-    <div class="stat-box-num" style="color:#d20015;">${NEW_RP.length}</div>
-    <div class="stat-box-sub">신규 권고 조항</div>
+  <div class="stat-box" style="border-top:3px solid #d20015;cursor:pointer;transition:box-shadow .15s;" onclick="ismToggle('ism-acc-deleted',this)" onmouseenter="this.style.boxShadow='0 4px 16px rgba(210,0,21,.15)'" onmouseleave="this.style.boxShadow=''">
+    <div class="stat-box-label">조항 삭제</div>
+    <div class="stat-box-num" style="color:#d20015;">${DELETED.length}</div>
+    <div class="stat-box-sub">폐지·통합된 조항</div>
     <div style="margin-top:6px;text-align:center;"><i class="fas fa-chevron-down ism-chev" style="color:#d20015;font-size:0.65rem;transition:transform .2s;"></i></div>
   </div>
   <div class="stat-box" style="border-top:3px solid #d20015;cursor:pointer;transition:box-shadow .15s;" onclick="ismToggle('ism-acc-tech',this)" onmouseenter="this.style.boxShadow='0 4px 16px rgba(210,0,21,.15)'" onmouseleave="this.style.boxShadow=''">
@@ -3755,10 +3763,10 @@ function renderISMAnalysis() {
     <div class="w-card-body">
       <div style="background:#fff5f5;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:#7f1d1d;">
         <i class="fas fa-exclamation-triangle me-1" style="color:#d20015;"></i>
-        Ed.17에서 <em>권고(should)</em>였던 항목이 Ed.18에서 <em>의무(shall)</em>로 격상 — 미이행 시 <strong>Finding 발행 대상</strong>
+        Ed.18에서 <em>권고(should)</em>였던 항목이 Ed.19에서 <em>의무(shall)</em>로 격상 — 미이행 시 <strong>Finding 발행 대상</strong>
       </div>
       <table class="iata-table">
-        <thead><tr><th style="width:120px;">ISARP</th><th style="width:90px;">부문</th><th>변경 내용</th><th style="width:75px;">Ed.17</th><th style="width:75px;">Ed.18</th></tr></thead>
+        <thead><tr><th style="width:120px;">ISARP</th><th style="width:90px;">부문</th><th>변경 내용</th><th style="width:75px;">Ed.18</th><th style="width:75px;">Ed.19</th></tr></thead>
         <tbody>
           ${RP_TO_ST.map(r=>`<tr>
             <td><strong style="font-family:monospace;color:var(--iata-navy);">${r.code}</strong></td>
@@ -3792,18 +3800,18 @@ function renderISMAnalysis() {
   </div>
 </div>
 
-<!-- ③ 신규 RP 아코디언 -->
-<div id="ism-acc-newrp" style="display:none;margin-bottom:12px;">
-  <div class="w-card" style="border-left:4px solid #374151;">
+<!-- ③ 삭제 조항 아코디언 -->
+<div id="ism-acc-deleted" style="display:none;margin-bottom:12px;">
+  <div class="w-card" style="border-left:4px solid #6b7280;">
     <div class="w-card-header">
-      <span class="w-card-title"><i class="fas fa-plus me-2" style="color:#374151;"></i>신규 RP 추가 <span style="color:#374151;">${NEW_RP.length}건</span></span>
-      <span class="pill pill-gray">신규 권고</span>
+      <span class="w-card-title"><i class="fas fa-trash-alt me-2" style="color:#6b7280;"></i>삭제된 조항 <span style="color:#6b7280;">${DELETED.length}건</span></span>
+      <span class="pill pill-gray">폐지·통합</span>
     </div>
     <div class="w-card-body">
-      ${NEW_RP.map(r=>`<div style="padding:10px 0;border-bottom:1px solid #f1f5f9;">
+      ${DELETED.map(r=>`<div style="padding:10px 0;border-bottom:1px solid #f1f5f9;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-          <span style="font-family:monospace;font-weight:700;color:#374151;font-size:0.82rem;">${r.code}</span>
-          <span class="pill pill-gray" style="font-size:0.6rem;">신규 RP</span>
+          <span style="font-family:monospace;font-weight:700;color:#6b7280;font-size:0.82rem;">${r.code}</span>
+          <span class="pill pill-gray" style="font-size:0.6rem;">삭제</span>
         </div>
         <div style="font-size:0.78rem;color:#374151;">${r.desc}</div>
       </div>`).join('')}
