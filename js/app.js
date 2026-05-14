@@ -3988,7 +3988,7 @@ function renderISMAnalysis() {
 <!-- ③ 삭제 조항 — 유형별(이관/통합/폐지) 카드 -->
 <div id="ism-acc-deleted" style="display:none;margin-bottom:12px;">
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;">
-    ${DELETED.map(r=>{const typeColor={이관:'#0284c7',통합:'#7c3aed',폐지:'#6b7280'}[r.type]||'#6b7280';const typeIcon={이관:'fa-arrow-right-arrow-left',통합:'fa-object-group',폐지:'fa-ban'}[r.type]||'fa-ban';return `
+    ${DELETED.map(r=>{const typeColor={이관:'#0284c7',통합:'#374151',폐지:'#6b7280'}[r.type]||'#6b7280';const typeIcon={이관:'fa-arrow-right-arrow-left',통합:'fa-object-group',폐지:'fa-ban'}[r.type]||'fa-ban';return `
     <div style="border-radius:10px;overflow:hidden;border:1px solid #e5e7eb;background:#fff;box-shadow:0 1px 5px rgba(0,0,0,.05);">
       <div style="background:#f8fafc;padding:11px 15px;display:flex;align-items:center;gap:9px;border-bottom:1px solid #f1f5f9;">
         <div style="width:30px;height:30px;background:${typeColor}18;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
