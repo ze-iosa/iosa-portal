@@ -3835,22 +3835,22 @@ function renderISMAnalysis() {
   </div>
   <div style="display:flex;flex-direction:column;gap:16px;">
     ${RP_TO_ST.map(r=>{const sc=SECT_COLOR[r.sect]||'#d20015';const si=SECT_ICON[r.sect]||'fa-circle';return `
-    <div style="border-radius:12px;overflow:hidden;border:1.5px solid #e2e8f0;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06);">
+    <div style="border-radius:12px;overflow:hidden;border:1.5px solid #e2e8f0;border-top:3px solid #d20015;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.05);">
       <!-- 헤더 -->
-      <div style="background:#1e293b;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="background:#f8fafc;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e2e8f0;">
         <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:36px;height:36px;background:${sc};border-radius:9px;display:flex;align-items:center;justify-content:center;">
-            <i class="fas ${si}" style="color:white;font-size:0.78rem;"></i>
+          <div style="width:34px;height:34px;background:${sc}18;border:1.5px solid ${sc}44;border-radius:9px;display:flex;align-items:center;justify-content:center;">
+            <i class="fas ${si}" style="color:${sc};font-size:0.75rem;"></i>
           </div>
           <div>
-            <div style="color:#94a3b8;font-size:0.58rem;font-weight:600;letter-spacing:.1em;">${r.sect} · ${SECT[r.sect]||r.sect}</div>
-            <div style="color:white;font-family:monospace;font-size:1.1rem;font-weight:900;">${r.code}</div>
+            <div style="font-size:0.58rem;font-weight:700;color:#94a3b8;letter-spacing:.1em;margin-bottom:1px;">${r.sect} · ${SECT[r.sect]||r.sect}</div>
+            <div style="font-family:monospace;font-size:1.05rem;font-weight:900;color:#d20015;">${r.code}</div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span style="background:#374151;color:#94a3b8;padding:3px 10px;border-radius:6px;font-size:0.62rem;font-weight:700;text-decoration:line-through;">RP · should</span>
-          <i class="fas fa-arrow-right" style="color:#d20015;font-size:0.7rem;"></i>
-          <span style="background:#d20015;color:white;padding:3px 10px;border-radius:6px;font-size:0.62rem;font-weight:700;">ST · shall</span>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="background:#f1f5f9;color:#6b7280;padding:4px 11px;border-radius:6px;font-size:0.62rem;font-weight:700;text-decoration:line-through;border:1px solid #e2e8f0;">RP · should</span>
+          <i class="fas fa-arrow-right" style="color:#d20015;font-size:0.68rem;"></i>
+          <span style="background:#d20015;color:white;padding:4px 11px;border-radius:6px;font-size:0.62rem;font-weight:700;">ST · shall</span>
         </div>
       </div>
       <!-- 세 칼럼 본문 -->
@@ -3921,23 +3921,23 @@ function renderISMAnalysis() {
 <div id="ism-acc-newst" style="display:none;margin-bottom:12px;">
   <div style="display:flex;flex-direction:column;gap:14px;">
     ${NEW_ST.map(r=>{const sc=SECT_COLOR[r.sect]||'#374151';const si=SECT_ICON[r.sect]||'fa-circle';return `
-    <div style="border-radius:12px;overflow:hidden;border:1.5px solid #e2e8f0;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.05);">
+    <div style="border-radius:12px;overflow:hidden;border:1.5px solid #e2e8f0;border-top:3px solid ${sc};background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.05);">
       <!-- 헤더 -->
-      <div style="background:#1e293b;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="background:#f8fafc;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e2e8f0;">
         <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:34px;height:34px;background:${sc};border-radius:8px;display:flex;align-items:center;justify-content:center;">
-            <i class="fas ${si}" style="color:white;font-size:0.78rem;"></i>
+          <div style="width:34px;height:34px;background:${sc}18;border:1.5px solid ${sc}44;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <i class="fas ${si}" style="color:${sc};font-size:0.75rem;"></i>
           </div>
           <div>
-            <div style="color:#94a3b8;font-size:0.58rem;font-weight:600;letter-spacing:.1em;">${r.sect} · ${SECT[r.sect]||r.sect}</div>
+            <div style="font-size:0.58rem;font-weight:700;color:#94a3b8;letter-spacing:.1em;margin-bottom:1px;">${r.sect} · ${SECT[r.sect]||r.sect}</div>
             <div style="display:flex;align-items:center;gap:8px;">
-              <span style="color:white;font-family:monospace;font-size:1rem;font-weight:900;">${r.code}</span>
-              <span style="color:rgba(255,255,255,.85);font-size:0.7rem;font-weight:600;">· ${r.title}</span>
+              <span style="font-family:monospace;font-size:1rem;font-weight:900;color:#1e293b;">${r.code}</span>
+              <span style="font-size:0.72rem;font-weight:600;color:#374151;">· ${r.title}</span>
             </div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
-          ${r.from?`<span style="background:#374151;color:#94a3b8;padding:3px 9px;border-radius:6px;font-size:0.6rem;font-family:monospace;"><i class="fas fa-arrow-right me-1"></i>${r.from} 이관</span>`:''}
+          ${r.from?`<span style="background:#f1f5f9;color:#6b7280;padding:3px 9px;border-radius:6px;font-size:0.6rem;font-family:monospace;border:1px solid #e2e8f0;"><i class="fas fa-arrow-right me-1" style="color:${sc};"></i>${r.from} 이관</span>`:''}
           <span style="background:#d20015;color:white;padding:3px 10px;border-radius:6px;font-size:0.62rem;font-weight:700;">신규 ST</span>
         </div>
       </div>
