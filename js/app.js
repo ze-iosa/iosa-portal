@@ -3609,33 +3609,82 @@ function renderISMAnalysis() {
   // ── 공식 ISM ED 19 Revision Highlights 기반 데이터 (2027.01.01 발효) ──
   // ① RP → Standard 격상 (2건)
   const RP_TO_ST = [
-    { code:'ORG 3.6.1', desc:'안전 보고 관련 ISARP — RP에서 Standard로 공식 격상' },
-    { code:'FLT 3.12.6', desc:'런웨이 침입(Runway Incursion) 방지 절차 — RP에서 Standard로 격상' },
+    {
+      code:'ORG 3.6.1', sect:'ORG',
+      title:'안전 보고 시스템',
+      what:'운항 중 발생하는 위험(Hazard)·사건(Incident)·사고(Accident)를 조직 내 모든 개인이 자유롭게 보고할 수 있도록 독려하는 공식 안전 보고 시스템 구비',
+      changed:'Ed.18에서는 권고(should) 수준이었으나, Ed.19부터 의무(shall)로 격상 — 시스템 미구비 시 Finding 발행',
+      actions:['안전 보고 시스템 공식 절차 수립 및 Manual 반영','익명 보고 채널 포함 여부 확인','OM-A Safety Management 챕터에 반영','전 직원 대상 보고 방법 안내·교육 실시'],
+      penalty:'Finding 발행 → CAR 발행 → 시정조치 미이행 시 IOSA 등록 취소',
+    },
+    {
+      code:'FLT 3.12.6', sect:'FLT',
+      title:'런웨이 이탈 방지 지침',
+      what:'비행승무원이 활주로 이탈(Runway Excursion) 위험을 인식·예방할 수 있도록 구체적인 지침 및 절차 수립 의무화 (ICAO Doc 9870 및 최신 참조 문서 반영)',
+      changed:'Ed.18에서는 권고 수준 절차였으나 Ed.19부터 의무 Standard로 격상 — 절차 미수립 시 Finding 발행',
+      actions:['OM-B/SOP에 Runway Excursion 방지 절차 공식 반영','Briefing card / QRH에 활주로 이탈 체크리스트 포함','비행승무원 훈련 교과 내 Runway Excursion 시나리오 추가','FCOM/FCTM 최신 참조 문서(Ed.19 기준) 업데이트'],
+      penalty:'Finding 발행 → CAR 발행 → 절차서 개정·승인 완료 후 종결',
+    },
   ];
 
   // ② 신규 Standard 추가 / 이관 (5건)
   const NEW_ST = [
-    { code:'GRH 3.7.12', desc:'운항 보안 요건 — SEC 3.1.3에서 GRH로 이관 (지상조업 통합 관리)' },
-    { code:'GRH 3.7.13', desc:'운항 보안 요건 — SEC 3.3.3에서 GRH로 이관 (지상조업 통합 관리)' },
-    { code:'GRH 3.7.14', desc:'운항 보안 요건 — SEC 3.4.7에서 GRH로 이관 (지상조업 통합 관리)' },
-    { code:'CGO 3.8.1',  desc:'화물 구역 휴대 전자기기(PEDC) 사용 통제·승인 신규 의무 요건' },
-    { code:'SEC 1.10.1A',desc:'SeMS 품질통제(Quality Control) 프로그램 신규 Standard — 보안 관리 강화' },
+    {
+      code:'GRH 3.7.12', sect:'GRH',
+      title:'지상조업 운항 보안 — 항공기 접근 통제',
+      from:'SEC 3.1.3',
+      what:'배타적 제한구역 및 지상 조업 중 항공기 접근에 대한 보안 통제 절차 의무화. 기존 보안(SEC) 섹션에서 지상조업(GRH) 섹션으로 이관하여 일원화 관리',
+      why:'SEC·GRH 간 중복 관리 해소. 실제 업무 수행 주체(지상조업)가 직접 관리하도록 체계 정비',
+      actions:['GRH 절차서(Ground Operations Manual)에 보안 통제 섹션 신설','지상조업 인원 대상 운항 보안 교육 프로그램 수립','항공기 접근 통제 기록 관리 절차 마련'],
+    },
+    {
+      code:'GRH 3.7.13', sect:'GRH',
+      title:'지상조업 운항 보안 — 승객·수하물 조화',
+      from:'SEC 3.3.3',
+      what:'탑승 승객과 위탁 수하물의 일치(Reconciliation) 절차에 대한 보안 통제 의무화. GRH 섹션으로 이관하여 지상조업 통합 관리 체계 구축',
+      why:'탑승 조율과 수하물 보안 검증 주체가 지상조업이므로 GRH에 통합',
+      actions:['수하물 조화(Reconciliation) 보안 절차 GRH Manual 반영','지상조업 인원 수하물 보안 교육 현행화','SEC·GRH 절차 중복 여부 검토 및 통합'],
+    },
+    {
+      code:'GRH 3.7.14', sect:'GRH',
+      title:'지상조업 운항 보안 — 화물·우편물 통제',
+      from:'SEC 3.4.7',
+      what:'지상 조업 단계에서 화물 및 우편물에 대한 보안 통제 절차 의무화. 기존 SEC에서 GRH로 이관',
+      why:'화물 탑재·하역 단계의 보안 책임이 지상조업에 있으므로 GRH 통합 관리',
+      actions:['GRH 화물 보안 절차 수립 (탑재·하역·이송 포함)','화물 담당 지상조업 인원 보안 교육 실시','SEC·GRH 화물 보안 중복 조항 정리'],
+    },
+    {
+      code:'CGO 3.8.1', sect:'CGO',
+      title:'화물 구역 휴대 전자기기(PEDC) 통제',
+      from:null,
+      what:'화물 구역(Cargo Compartment) 내 휴대 전자기기(PEDC: Portable Electronic Devices in Cargo Compartment) 사용·반입에 대한 통제 및 승인 절차 신규 의무화',
+      why:'배터리 화재 등 화물 구역 안전 위협 대응. IATA DGR 신규 요건과의 연계',
+      actions:['PEDC 허가 기기 목록 및 통제 절차 수립','화물 구역 반입 금지 기기 목록 현행화','화물 담당 직원 PEDC 정책 교육 실시','CGO Manual CGO 3.8 신규 섹션 반영'],
+    },
+    {
+      code:'SEC 1.10.1A', sect:'SEC',
+      title:'SeMS 품질 통제(QC) 프로그램',
+      from:null,
+      what:'보안 관리 시스템(SeMS)의 품질 통제(Quality Control) 프로그램 신규 의무화. 보안 통제 활동의 적합성을 주기적으로 검증·모니터링하는 체계 수립 필요',
+      why:'기존 QA(품질 보증)에 더해 QC(품질 통제) 프로그램 도입 — 사전·예방적 보안 관리 강화',
+      actions:['SeMS QC 프로그램 수립 (검사 기준·주기·방법 포함)','QC 수행 결과 기록·보고 체계 마련','QA와 QC 역할 분리 및 절차 수립','SeMS Manual 1.10.1A 섹션 신규 반영'],
+    },
   ];
 
   // ③ 신규 RP 추가 (0건)
   const NEW_RP = [];
 
-  // ④ 삭제된 Standards (13건 — 참고용)
+  // ④ 삭제된 Standards (9건)
   const DELETED = [
-    { code:'ORG 1.7.8~1.7.12', desc:'ERP 관련 5개 조항 삭제 — ORG 1.7.1~1.7.7로 내용 통합 재편' },
-    { code:'FLT 2.2.25',       desc:'비행승무원·정비사 외 항공기 외부검사 교육 요건 — 더 이상 불필요' },
-    { code:'FLT 3.8.6B',       desc:'삭제' },
-    { code:'DSP 4.5.2',        desc:'DSP 4.5.1로 내용 통합 후 삭제' },
-    { code:'SEC 3.1.3',        desc:'GRH 3.7.12로 이관 후 삭제' },
-    { code:'SEC 3.3.3',        desc:'GRH 3.7.13으로 이관 후 삭제' },
-    { code:'SEC 3.4.5',        desc:'SEC 3.4.2로 통합 후 삭제' },
-    { code:'SEC 3.4.7',        desc:'GRH 3.7.14로 이관 후 삭제' },
-    { code:'SEC 3.6.6',        desc:'SEC 3.6.1로 통합 후 삭제' },
+    { code:'ORG 1.7.8~1.7.12', dest:'ORG 1.7.1~1.7.7', type:'통합', desc:'ERP 관련 5개 조항 — 신규 ORG 1.7.1~1.7.7로 내용 전면 통합 재편 (ICAO 신규 요건 반영)' },
+    { code:'FLT 2.2.25',       dest:null,               type:'폐지', desc:'비행승무원·면허 정비사 외 인원의 항공기 외부검사 교육 요건 — 더 이상 불필요하여 삭제' },
+    { code:'FLT 3.8.6B',       dest:'FLT 3.8.6A',       type:'통합', desc:'Walk-around 검사 위임 관련 조항 — FLT 3.8.6A로 내용 통합' },
+    { code:'DSP 4.5.2',        dest:'DSP 4.5.1',         type:'통합', desc:'ETOPS/EDTO 관리 요건 — DSP 4.5.1에 3개 sub-item으로 재편 통합' },
+    { code:'SEC 3.1.3',        dest:'GRH 3.7.12',        type:'이관', desc:'항공기 접근 보안 통제 — GRH 3.7.12로 이관, 지상조업 섹션에서 통합 관리' },
+    { code:'SEC 3.3.3',        dest:'GRH 3.7.13',        type:'이관', desc:'승객·수하물 조화 보안 — GRH 3.7.13으로 이관' },
+    { code:'SEC 3.4.5',        dest:'SEC 3.4.2',          type:'통합', desc:'번호 재배치 — 내용 변경 없이 SEC 3.4.2로 번호 이동 (3.4.5 자리 삭제)' },
+    { code:'SEC 3.4.7',        dest:'GRH 3.7.14',        type:'이관', desc:'화물·우편물 보안 통제 — GRH 3.7.14로 이관' },
+    { code:'SEC 3.6.6',        dest:'SEC 3.6.1',          type:'통합', desc:'환승 수하물 보안 — SEC 3.6.1의 신규 sub-items(iii)(iv)(v)로 통합 흡수' },
   ];
 
   // ⑤ 주요 기술적 변경사항 (섹션별 — ISM Ed.19 Revision Highlights 상세)
@@ -3778,145 +3827,183 @@ function renderISMAnalysis() {
   </div>
 </div>
 
-<!-- ① RP→ST — 개별 격상 공고 카드 -->
+<!-- ① RP→ST — 요건 내용 중심 격상 카드 -->
 <div id="ism-acc-rp2st" style="display:none;margin-bottom:12px;">
-  <div style="display:flex;flex-direction:column;gap:20px;">
-    ${RP_TO_ST.map(r=>{const sect=r.code.split(' ')[0];const sc=SECT_COLOR[sect]||'#d20015';const si=SECT_ICON[sect]||'fa-circle';return `
-    <div style="border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(210,0,21,.13);border:1.5px solid #fca5a5;">
-      <!-- ── 상단 배너 ── -->
-      <div style="background:linear-gradient(135deg,#d20015 0%,#991b1b 100%);padding:18px 24px;display:flex;align-items:center;justify-content:space-between;">
-        <div style="display:flex;align-items:center;gap:14px;">
-          <div style="width:44px;height:44px;background:rgba(255,255,255,.18);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <i class="fas fa-arrow-trend-up" style="color:white;font-size:1rem;"></i>
+  <div style="background:#fff5f5;border:1px solid #fca5a5;border-radius:10px;padding:11px 16px;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+    <i class="fas fa-triangle-exclamation" style="color:#d20015;"></i>
+    <span style="font-size:0.76rem;color:#7f1d1d;font-weight:600;">Ed.18 권고(should) → Ed.19 의무(shall) 격상 — 미이행 시 Finding 발행 / CAR 발생. 2027.01.01 발효 전 반드시 절차 수립 완료</span>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    ${RP_TO_ST.map(r=>{const sc=SECT_COLOR[r.sect]||'#d20015';const si=SECT_ICON[r.sect]||'fa-circle';return `
+    <div style="border-radius:12px;overflow:hidden;border:1.5px solid #e2e8f0;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06);">
+      <!-- 헤더 -->
+      <div style="background:#1e293b;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;background:${sc};border-radius:9px;display:flex;align-items:center;justify-content:center;">
+            <i class="fas ${si}" style="color:white;font-size:0.78rem;"></i>
           </div>
           <div>
-            <div style="color:rgba(255,255,255,.65);font-size:0.58rem;font-weight:700;letter-spacing:.12em;margin-bottom:3px;">ISARP UPGRADE · ED.18 → ED.19</div>
-            <div style="color:white;font-family:monospace;font-size:1.3rem;font-weight:900;letter-spacing:.03em;">${r.code}</div>
+            <div style="color:#94a3b8;font-size:0.58rem;font-weight:600;letter-spacing:.1em;">${r.sect} · ${SECT[r.sect]||r.sect}</div>
+            <div style="color:white;font-family:monospace;font-size:1.1rem;font-weight:900;">${r.code}</div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div style="width:34px;height:34px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;">
-            <i class="fas ${si}" style="color:white;font-size:0.8rem;"></i>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="background:#374151;color:#94a3b8;padding:3px 10px;border-radius:6px;font-size:0.62rem;font-weight:700;text-decoration:line-through;">RP · should</span>
+          <i class="fas fa-arrow-right" style="color:#d20015;font-size:0.7rem;"></i>
+          <span style="background:#d20015;color:white;padding:3px 10px;border-radius:6px;font-size:0.62rem;font-weight:700;">ST · shall</span>
+        </div>
+      </div>
+      <!-- 세 칼럼 본문 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid #f1f5f9;">
+        <!-- 요건 내용 -->
+        <div style="padding:16px 18px;border-right:1px solid #f1f5f9;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+            <div style="width:20px;height:20px;background:#e0f2fe;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fas fa-book-open" style="color:#0284c7;font-size:0.55rem;"></i>
+            </div>
+            <span style="font-size:0.67rem;font-weight:700;color:#0284c7;letter-spacing:.05em;">요건 내용</span>
           </div>
-          <div style="text-align:right;">
-            <div style="color:rgba(255,255,255,.7);font-size:0.62rem;">${sect}</div>
-            <div style="color:white;font-size:0.7rem;font-weight:700;">${SECT[sect]||sect}</div>
+          <div style="font-size:0.77rem;color:#1e293b;line-height:1.7;font-weight:500;">${r.what}</div>
+        </div>
+        <!-- 변경 내역 -->
+        <div style="padding:16px 18px;border-right:1px solid #f1f5f9;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+            <div style="width:20px;height:20px;background:#fef9c3;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fas fa-bolt" style="color:#ca8a04;font-size:0.55rem;"></i>
+            </div>
+            <span style="font-size:0.67rem;font-weight:700;color:#ca8a04;letter-spacing:.05em;">Ed.18→19 변경</span>
+          </div>
+          <div style="font-size:0.77rem;color:#374151;line-height:1.7;">${r.changed}</div>
+          <div style="margin-top:12px;display:flex;gap:6px;">
+            <div style="flex:1;background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:7px 10px;text-align:center;">
+              <div style="font-size:0.58rem;color:#94a3b8;font-weight:600;margin-bottom:3px;">ED.18</div>
+              <div style="font-size:0.72rem;font-weight:800;color:#6b7280;">RP</div>
+              <div style="font-size:0.58rem;color:#9ca3af;font-style:italic;">should</div>
+              <div style="margin-top:4px;font-size:0.58rem;color:#94a3b8;">→ Observation</div>
+            </div>
+            <div style="display:flex;align-items:center;padding:0 2px;">
+              <i class="fas fa-arrow-right" style="color:#d20015;font-size:0.6rem;"></i>
+            </div>
+            <div style="flex:1;background:#fff1f2;border:1.5px solid #d20015;border-radius:7px;padding:7px 10px;text-align:center;">
+              <div style="font-size:0.58rem;color:#d20015;font-weight:600;margin-bottom:3px;">ED.19</div>
+              <div style="font-size:0.72rem;font-weight:800;color:#d20015;">ST</div>
+              <div style="font-size:0.58rem;color:#d20015;font-style:italic;">shall</div>
+              <div style="margin-top:4px;font-size:0.58rem;color:#d20015;font-weight:600;">→ Finding·CAR</div>
+            </div>
+          </div>
+        </div>
+        <!-- 필요 조치 -->
+        <div style="padding:16px 18px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+            <div style="width:20px;height:20px;background:#dcfce7;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fas fa-list-check" style="color:#16a34a;font-size:0.55rem;"></i>
+            </div>
+            <span style="font-size:0.67rem;font-weight:700;color:#16a34a;letter-spacing:.05em;">필요 조치</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            ${r.actions.map(a=>`<div style="display:flex;align-items:flex-start;gap:6px;">
+              <i class="fas fa-circle-check" style="color:#16a34a;font-size:0.55rem;margin-top:3px;flex-shrink:0;"></i>
+              <span style="font-size:0.74rem;color:#374151;line-height:1.55;">${a}</span>
+            </div>`).join('')}
           </div>
         </div>
       </div>
-      <!-- ── 설명 ── -->
-      <div style="background:#fff;padding:16px 24px;font-size:0.82rem;color:#374151;line-height:1.7;border-bottom:1px solid #fee2e2;">
-        <i class="fas fa-info-circle me-2" style="color:#d20015;"></i>${r.desc}
-      </div>
-      <!-- ── Before / After 시각화 ── -->
-      <div style="background:#fff;padding:20px 24px;display:flex;align-items:stretch;gap:0;">
-        <!-- Before -->
-        <div style="flex:1;background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px 0 0 12px;padding:20px 16px;text-align:center;">
-          <div style="font-size:0.58rem;color:#94a3b8;font-weight:700;letter-spacing:.12em;margin-bottom:12px;">BEFORE · ED.18</div>
-          <div style="width:68px;height:68px;background:#e2e8f0;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 12px;">
-            <span style="font-size:1.05rem;font-weight:900;color:#6b7280;line-height:1;">RP</span>
-          </div>
-          <div style="font-size:0.75rem;font-weight:700;color:#6b7280;margin-bottom:6px;">Recommended Practice</div>
-          <div style="display:inline-block;background:#f1f5f9;color:#94a3b8;padding:3px 14px;border-radius:20px;font-size:0.65rem;font-style:italic;margin-bottom:10px;">should</div>
-          <div style="display:flex;flex-direction:column;gap:4px;">
-            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;font-size:0.62rem;color:#94a3b8;">준수 여부 선택 가능</div>
-            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;font-size:0.62rem;color:#94a3b8;">미준수 → Observation</div>
-          </div>
-        </div>
-        <!-- 화살표 -->
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 16px;gap:6px;flex-shrink:0;">
-          <div style="width:52px;height:52px;background:linear-gradient(135deg,#d20015,#991b1b);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(210,0,21,.35);">
-            <i class="fas fa-arrow-right" style="color:white;font-size:1.1rem;"></i>
-          </div>
-          <div style="font-size:0.6rem;font-weight:800;color:#d20015;letter-spacing:.05em;white-space:nowrap;">격상</div>
-        </div>
-        <!-- After -->
-        <div style="flex:1;background:#fff1f2;border:2.5px solid #d20015;border-radius:0 12px 12px 0;padding:20px 16px;text-align:center;">
-          <div style="font-size:0.58rem;color:#d20015;font-weight:700;letter-spacing:.12em;margin-bottom:12px;">AFTER · ED.19</div>
-          <div style="width:68px;height:68px;background:linear-gradient(135deg,#d20015,#991b1b);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 4px 14px rgba(210,0,21,.3);">
-            <span style="font-size:1.05rem;font-weight:900;color:white;line-height:1;">ST</span>
-          </div>
-          <div style="font-size:0.75rem;font-weight:700;color:#d20015;margin-bottom:6px;">Standard</div>
-          <div style="display:inline-block;background:#d20015;color:white;padding:3px 14px;border-radius:20px;font-size:0.65rem;font-style:italic;margin-bottom:10px;">shall</div>
-          <div style="display:flex;flex-direction:column;gap:4px;">
-            <div style="background:#fff5f5;border:1px solid #fecaca;border-radius:6px;padding:5px 8px;font-size:0.62rem;color:#991b1b;font-weight:600;">준수 의무화</div>
-            <div style="background:#d20015;border-radius:6px;padding:5px 8px;font-size:0.62rem;color:white;font-weight:700;">미준수 → Finding + CAR</div>
-          </div>
-        </div>
-      </div>
-      <!-- ── 경고 푸터 ── -->
-      <div style="background:#fff5f5;border-top:1.5px solid #fecaca;padding:11px 24px;display:flex;align-items:center;gap:10px;">
-        <i class="fas fa-triangle-exclamation" style="color:#d20015;font-size:0.9rem;flex-shrink:0;"></i>
-        <span style="font-size:0.73rem;color:#7f1d1d;font-weight:600;">2027.01.01 발효 — 절차 미수립 시 Finding 발행 및 CAR 발생. 즉각 대응 필요.</span>
+      <!-- 패널티 푸터 -->
+      <div style="background:#fff5f5;padding:9px 20px;display:flex;align-items:center;gap:8px;">
+        <i class="fas fa-shield-exclamation" style="color:#d20015;font-size:0.72rem;flex-shrink:0;"></i>
+        <span style="font-size:0.7rem;color:#7f1d1d;font-weight:600;">미준수 결과: ${r.penalty}</span>
       </div>
     </div>`; }).join('')}
   </div>
 </div>
 
-<!-- ② 신규 ST — 개별 Feature 카드 -->
+<!-- ② 신규 ST — 요건·배경·조치 카드 -->
 <div id="ism-acc-newst" style="display:none;margin-bottom:12px;">
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;">
-    ${NEW_ST.map(r=>{const sect=r.code.split(' ')[0]||'';const sc=SECT_COLOR[sect]||'#374151';const si=SECT_ICON[sect]||'fa-circle';const fromMatch=r.desc.match(/SEC\s[\d.]+|GRH\s[\d.]+|ORG\s[\d.]+/);const fromCode=fromMatch?fromMatch[0]:null;return `
-    <div style="border-radius:14px;overflow:hidden;box-shadow:0 3px 16px rgba(0,0,0,.09);border:1px solid ${sc}33;">
+  <div style="display:flex;flex-direction:column;gap:14px;">
+    ${NEW_ST.map(r=>{const sc=SECT_COLOR[r.sect]||'#374151';const si=SECT_ICON[r.sect]||'fa-circle';return `
+    <div style="border-radius:12px;overflow:hidden;border:1.5px solid #e2e8f0;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.05);">
       <!-- 헤더 -->
-      <div style="background:${sc};padding:16px 18px;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
-          <div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;">
-            <i class="fas ${si}" style="color:white;font-size:0.9rem;"></i>
+      <div style="background:#1e293b;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;background:${sc};border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <i class="fas ${si}" style="color:white;font-size:0.78rem;"></i>
           </div>
-          <div style="background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.4);color:white;padding:3px 10px;border-radius:20px;font-size:0.6rem;font-weight:800;letter-spacing:.05em;">✦ NEW STANDARD</div>
+          <div>
+            <div style="color:#94a3b8;font-size:0.58rem;font-weight:600;letter-spacing:.1em;">${r.sect} · ${SECT[r.sect]||r.sect}</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="color:white;font-family:monospace;font-size:1rem;font-weight:900;">${r.code}</span>
+              <span style="color:rgba(255,255,255,.85);font-size:0.7rem;font-weight:600;">· ${r.title}</span>
+            </div>
+          </div>
         </div>
-        <div style="font-family:monospace;color:white;font-size:1.15rem;font-weight:900;letter-spacing:.02em;">${r.code}</div>
-        <div style="color:rgba(255,255,255,.75);font-size:0.65rem;margin-top:3px;">${SECT[sect]||sect}</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          ${r.from?`<span style="background:#374151;color:#94a3b8;padding:3px 9px;border-radius:6px;font-size:0.6rem;font-family:monospace;"><i class="fas fa-arrow-right me-1"></i>${r.from} 이관</span>`:''}
+          <span style="background:#d20015;color:white;padding:3px 10px;border-radius:6px;font-size:0.62rem;font-weight:700;">신규 ST</span>
+        </div>
       </div>
-      <!-- 이관 출처 (해당 시) -->
-      ${fromCode?`<div style="background:${sc}12;border-bottom:1px solid ${sc}22;padding:8px 18px;display:flex;align-items:center;gap:6px;">
-        <span style="font-size:0.62rem;color:${sc};font-weight:600;">이관 출처</span>
-        <i class="fas fa-arrow-right" style="color:${sc};font-size:0.55rem;"></i>
-        <span style="font-family:monospace;font-size:0.68rem;font-weight:700;color:${sc};background:${sc}18;padding:1px 7px;border-radius:6px;">${fromCode}</span>
-      </div>`:''}
-      <!-- 설명 -->
-      <div style="padding:14px 18px;background:#fff;flex:1;">
-        <div style="font-size:0.78rem;color:#374151;line-height:1.7;">${r.desc}</div>
+      <!-- 본문 3칼럼 -->
+      <div style="display:grid;grid-template-columns:2fr 1fr 1.3fr;">
+        <!-- 요건 내용 -->
+        <div style="padding:15px 18px;border-right:1px solid #f1f5f9;">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:8px;">
+            <i class="fas fa-book-open" style="color:#0284c7;font-size:0.62rem;"></i>
+            <span style="font-size:0.65rem;font-weight:700;color:#0284c7;">요건 내용 (shall)</span>
+          </div>
+          <div style="font-size:0.77rem;color:#1e293b;line-height:1.7;">${r.what}</div>
+        </div>
+        <!-- 도입 배경 -->
+        <div style="padding:15px 16px;border-right:1px solid #f1f5f9;background:#fafafa;">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:8px;">
+            <i class="fas fa-lightbulb" style="color:#ca8a04;font-size:0.62rem;"></i>
+            <span style="font-size:0.65rem;font-weight:700;color:#ca8a04;">도입 배경</span>
+          </div>
+          <div style="font-size:0.75rem;color:#374151;line-height:1.65;">${r.why}</div>
+        </div>
+        <!-- 필요 조치 -->
+        <div style="padding:15px 16px;">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:8px;">
+            <i class="fas fa-list-check" style="color:#16a34a;font-size:0.62rem;"></i>
+            <span style="font-size:0.65rem;font-weight:700;color:#16a34a;">필요 조치</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            ${r.actions.map(a=>`<div style="display:flex;align-items:flex-start;gap:5px;">
+              <i class="fas fa-circle-check" style="color:#16a34a;font-size:0.52rem;margin-top:3px;flex-shrink:0;"></i>
+              <span style="font-size:0.72rem;color:#374151;line-height:1.5;">${a}</span>
+            </div>`).join('')}
+          </div>
+        </div>
       </div>
-      <!-- 발효 푸터 -->
-      <div style="background:${sc}08;border-top:1px solid ${sc}1a;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;">
+      <!-- 푸터 -->
+      <div style="background:${sc}0a;border-top:1px solid ${sc}20;padding:8px 20px;display:flex;align-items:center;justify-content:space-between;">
         <div style="display:flex;align-items:center;gap:5px;">
-          <i class="fas fa-calendar-check" style="color:${sc};font-size:0.7rem;"></i>
+          <i class="fas fa-calendar-check" style="color:${sc};font-size:0.65rem;"></i>
           <span style="font-size:0.65rem;color:${sc};font-weight:700;">2027.01.01 발효</span>
         </div>
-        <span style="background:${sc};color:white;padding:2px 10px;border-radius:20px;font-size:0.6rem;font-weight:700;">Finding 대상</span>
+        <span style="font-size:0.62rem;color:#6b7280;">미이행 시 Finding 발행 · CAR 발생</span>
       </div>
     </div>`; }).join('')}
   </div>
 </div>
 
-<!-- ③ 삭제 조항 — 개별 Deprecated 카드 -->
+<!-- ③ 삭제 조항 — 유형별(이관/통합/폐지) 카드 -->
 <div id="ism-acc-deleted" style="display:none;margin-bottom:12px;">
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">
-    ${DELETED.map(r=>{const dest=r.desc.match(/(GRH|ORG|SEC|FLT|DSP|MNT|CAB|CGO)\s[\d.~]+/);const destCode=dest?dest[0]:null;const action=r.desc.includes('이관')?'이관':'통합';return `
-    <div style="border-radius:12px;overflow:hidden;border:1.5px solid #e5e7eb;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.06);">
-      <!-- 헤더 -->
-      <div style="background:#f3f4f6;padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #e5e7eb;">
-        <div style="width:34px;height:34px;background:#e5e7eb;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <i class="fas fa-trash-can" style="color:#9ca3af;font-size:0.78rem;"></i>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;">
+    ${DELETED.map(r=>{const typeColor={이관:'#0284c7',통합:'#7c3aed',폐지:'#6b7280'}[r.type]||'#6b7280';const typeIcon={이관:'fa-arrow-right-arrow-left',통합:'fa-object-group',폐지:'fa-ban'}[r.type]||'fa-ban';return `
+    <div style="border-radius:10px;overflow:hidden;border:1px solid #e5e7eb;background:#fff;box-shadow:0 1px 5px rgba(0,0,0,.05);">
+      <div style="background:#f8fafc;padding:11px 15px;display:flex;align-items:center;gap:9px;border-bottom:1px solid #f1f5f9;">
+        <div style="width:30px;height:30px;background:${typeColor}18;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fas ${typeIcon}" style="color:${typeColor};font-size:0.65rem;"></i>
         </div>
-        <div>
-          <div style="font-size:0.58rem;color:#9ca3af;font-weight:700;letter-spacing:.1em;margin-bottom:2px;">DELETED · ED.19</div>
-          <div style="font-family:monospace;font-weight:900;color:#9ca3af;font-size:0.92rem;text-decoration:line-through;">${r.code}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:0.58rem;color:${typeColor};font-weight:700;letter-spacing:.08em;margin-bottom:1px;">${r.type.toUpperCase()} · ED.19</div>
+          <div style="font-family:monospace;font-weight:900;color:#9ca3af;font-size:0.88rem;text-decoration:line-through;">${r.code}</div>
         </div>
+        ${r.dest?`<div style="display:flex;align-items:center;gap:4px;background:${typeColor}12;padding:3px 8px;border-radius:6px;border:1px solid ${typeColor}30;flex-shrink:0;">
+          <i class="fas fa-arrow-right" style="color:${typeColor};font-size:0.5rem;"></i>
+          <span style="font-family:monospace;font-size:0.65rem;font-weight:800;color:${typeColor};">${r.dest}</span>
+        </div>`:''}
       </div>
-      <!-- 내용 -->
-      <div style="padding:12px 16px;font-size:0.75rem;color:#6b7280;line-height:1.6;">${r.desc}</div>
-      <!-- 목적지 -->
-      ${destCode?`<div style="background:#f9fafb;border-top:1px solid #f3f4f6;padding:9px 16px;display:flex;align-items:center;gap:6px;">
-        <span style="font-size:0.6rem;color:#9ca3af;font-weight:600;">${action}</span>
-        <i class="fas fa-arrow-right" style="color:#6b7280;font-size:0.55rem;"></i>
-        <span style="font-family:monospace;font-size:0.7rem;font-weight:800;color:#374151;background:#e5e7eb;padding:1px 8px;border-radius:6px;">${destCode}</span>
-      </div>`:`<div style="background:#f9fafb;border-top:1px solid #f3f4f6;padding:9px 16px;display:flex;align-items:center;gap:5px;">
-        <i class="fas fa-check" style="color:#9ca3af;font-size:0.6rem;"></i>
-        <span style="font-size:0.62rem;color:#9ca3af;">타 조항으로 통합 완료</span>
-      </div>`}
+      <div style="padding:11px 15px;font-size:0.74rem;color:#4b5563;line-height:1.6;">${r.desc}</div>
     </div>`; }).join('')}
   </div>
 </div>
