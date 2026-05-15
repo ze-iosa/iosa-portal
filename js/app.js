@@ -3774,7 +3774,7 @@ function renderISMAnalysis() {
 
   const tagStyle = { '기술변경':'background:#f8fafc;color:#374151;border:1px solid #e2e8f0;', '내용추가':'background:#f1f5f9;color:#374151;border:1px solid #cbd5e1;', '삭제':'background:#f8fafc;color:#6b7280;border:1px solid #e2e8f0;', '신규요건':'background:#fff1f2;color:#991b1b;border:1px solid #fecaca;' };
   const SECT_COLOR = {ORG:'#1d4ed8',FLT:'#0369a1',DSP:'#7c3aed',MNT:'#b45309',CAB:'#db2777',GRH:'#059669',CGO:'#d97706',SEC:'#dc2626'};
-  const SECT_ICON  = {ORG:'fa-building',FLT:'fa-plane',DSP:'fa-satellite-dish',MNT:'fa-wrench',CAB:'fa-couch',GRH:'fa-truck-ramp-box',CGO:'fa-box-open',SEC:'fa-shield-halved'};
+  const SECT_ICON  = {ORG:'fa-sitemap',FLT:'fa-plane',DSP:'fa-display',MNT:'fa-tools',CAB:'fa-user-tie',GRH:'fa-dolly',CGO:'fa-boxes-stacked',SEC:'fa-shield-halved'};
   const TAG_STYLE  = {'기술변경':'background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;','내용추가':'background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;','신규요건':'background:#fff1f2;color:#d20015;border:1px solid #fca5a5;','삭제':'background:#f9fafb;color:#9ca3af;border:1px solid #e5e7eb;'};
   const TAG_BORDER = {'기술변경':'#94a3b8','내용추가':'#3b82f6','신규요건':'#d20015','삭제':'#d1d5db'};
 
