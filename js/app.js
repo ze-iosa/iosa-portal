@@ -3606,11 +3606,65 @@ async function exportCRExcel() {
 function renderISMAnalysis() {
   const SECT = {ORG:'조직 및 안전관리',FLT:'비행운항',DSP:'종합통제',MNT:'정비',CAB:'객실',GRH:'지상조업',CGO:'화물',SEC:'항공보안'};
 
-  // ── 공식 ISM ED 19 Revision Highlights 기반 데이터 (2027.01.01 발효) ──
-  // ① RP → Standard 격상 (2건)
-  const RP_TO_ST = [
+  // ── ISM Ed.17 → Ed.19 전체 변경사항 (Ed.18 + Ed.19 통합) ──
+  // ① RP → Standard 격상
+
+  // Ed.17 → Ed.18 격상 (6건)
+  const RP_TO_ST_18 = [
     {
-      code:'ORG 3.6.1', sect:'ORG',
+      code:'ORG 2.4.2', sect:'ORG', ed:'18',
+      title:'외부 모니터링 프로그램',
+      what:'외부 모니터링(External Monitoring) 프로그램 수립 및 유지 의무화 — 운항사는 외부 심사·모니터링 결과를 SMS에 통합하여 안전·보안 리스크 관리에 활용해야 함',
+      changed:'Ed.17에서는 권고(should) 수준이었으나, Ed.18부터 의무(shall)로 격상 — 미구비 시 Finding 발행',
+      actions:['외부 모니터링 결과 수집·분석 절차 수립','OM-A에 외부 모니터링 섹션 공식 반영','SMS와의 연계 방식(피드백 루프) 문서화','관련 훈련 자료 업데이트'],
+      penalty:'Finding 발행 → CAR 발행 → 시정조치 의무',
+    },
+    {
+      code:'ORG 3.4.1', sect:'ORG', ed:'18',
+      title:'안전 관리 시스템 촉진 활동',
+      what:'SMS 촉진 및 지속적 개선을 위한 공식 활동 의무화 — 안전문화 증진, SMS 성과 검토, SMS 실행 가이드라인 준수',
+      changed:'Ed.17에서는 권고(should) 수준이었으나, Ed.18부터 의무(shall)로 격상',
+      actions:['SMS 촉진 활동 절차 수립 및 문서화','정기적 SMS 성과 검토 기록 유지','OM-A SMS 챕터 업데이트','관리자 대상 SMS 리더십 교육 실시'],
+      penalty:'Finding 발행 → CAR 발행 → 시정조치 의무',
+    },
+    {
+      code:'DSP 3.2.8C', sect:'DSP', ed:'18',
+      title:'운항 통제 — 특수 절차',
+      what:'운항 통제 특수 절차(Special Procedures) 수립 의무화 — ETOPS/EDTO 등 특수 운항 상황에서 Dispatcher의 판단 기준 및 절차 명시',
+      changed:'Ed.17에서는 권고(should) 수준이었으나, Ed.18부터 의무(shall)로 격상',
+      actions:['DSP 절차서(Operations Control Manual) 내 특수 절차 섹션 수립','ETOPS/특수 운항 Dispatcher 판단 기준 문서화','관련 Dispatcher 교육 교재 업데이트'],
+      penalty:'Finding 발행 → CAR 발행 → 시정조치 의무',
+    },
+    {
+      code:'GRH 3.4.16', sect:'GRH', ed:'18',
+      title:'항공기 지상 이동 — 안전 절차',
+      what:'항공기 지상 이동(Aircraft Ground Movement) 시 안전 절차 의무화 — 푸시백, 토잉 등 지상 이동 작업 시 표준화된 통신·안전 절차 수립',
+      changed:'Ed.17에서는 권고(should) 수준이었으나, Ed.18부터 의무(shall)로 격상',
+      actions:['지상 이동 안전 절차 GOM(Ground Operations Manual)에 반영','지상 이동 관련 인원 교육 실시','이동 전 Safety Check 절차 공식화'],
+      penalty:'Finding 발행 → CAR 발행 → 시정조치 의무',
+    },
+    {
+      code:'GRH 3.4.17', sect:'GRH', ed:'18',
+      title:'항공기 지상 이동 — 통신 절차',
+      what:'항공기 지상 이동 중 지상 인원 간 표준화된 통신(Communication) 절차 의무화 — 헤드셋 착용, 표준 신호 사용, 통신 두절 시 절차 포함',
+      changed:'Ed.17에서는 권고(should) 수준이었으나, Ed.18부터 의무(shall)로 격상',
+      actions:['지상 이동 통신 절차 GOM 반영','표준 신호 및 통신 코드 교육','통신 두절(Lost Communication) 절차 수립'],
+      penalty:'Finding 발행 → CAR 발행 → 시정조치 의무',
+    },
+    {
+      code:'GRH 3.6.6', sect:'GRH', ed:'18',
+      title:'위험물 지상 사고 보고',
+      what:'화물 운송 운항사의 위험물(DG) 지상 사고 보고 의무화 — CGO 3.2.18과 연계하여, 지상 조업 중 발생한 DG 관련 사고·사건을 당국 및 이해 관계자에 보고하는 절차 수립',
+      changed:'Ed.17에는 없던 신규 Standard — Ed.18에서 CGO 3.2.18과 정렬하여 신설',
+      actions:['DG 지상 사고 보고 절차 GOM 반영','보고 대상 기관(당국, IATA 등) 목록 수립','지상조업 인원 DG 사고 보고 교육 실시','CGO 3.2.18과 절차 일관성 확인'],
+      penalty:'Finding 발행 → CAR 발행 → 시정조치 의무',
+    },
+  ];
+
+  // Ed.18 → Ed.19 격상 (2건)
+  const RP_TO_ST_19 = [
+    {
+      code:'ORG 3.6.1', sect:'ORG', ed:'19',
       title:'안전 보고 시스템',
       what:'운항 중 발생하는 위험(Hazard)·사건(Incident)·사고(Accident)를 조직 내 모든 개인이 자유롭게 보고할 수 있도록 독려하는 공식 안전 보고 시스템 구비',
       changed:'Ed.18에서는 권고(should) 수준이었으나, Ed.19부터 의무(shall)로 격상 — 시스템 미구비 시 Finding 발행',
@@ -3618,19 +3672,34 @@ function renderISMAnalysis() {
       penalty:'Finding 발행 → CAR 발행 → 시정조치 미이행 시 IOSA 등록 취소',
     },
     {
-      code:'FLT 3.12.6', sect:'FLT',
+      code:'FLT 3.12.6', sect:'FLT', ed:'19',
       title:'런웨이 이탈 방지 지침',
-      what:'비행승무원이 활주로 이탈(Runway Excursion) 위험을 인식·예방할 수 있도록 구체적인 지침 및 절차 수립 의무화 (ICAO Doc 9870 및 최신 참조 문서 반영)',
+      what:'비행승무원이 활주로 이탈(Runway Excursion) 위험을 인식·예방할 수 있도록 구체적인 지침 및 절차 수립 의무화 (ICAO Doc 9870 기반)',
       changed:'Ed.18에서는 권고 수준 절차였으나 Ed.19부터 의무 Standard로 격상 — 절차 미수립 시 Finding 발행',
       actions:['OM-B/SOP에 Runway Excursion 방지 절차 공식 반영','Briefing card / QRH에 활주로 이탈 체크리스트 포함','비행승무원 훈련 교과 내 Runway Excursion 시나리오 추가','FCOM/FCTM 최신 참조 문서(Ed.19 기준) 업데이트'],
       penalty:'Finding 발행 → CAR 발행 → 절차서 개정·승인 완료 후 종결',
     },
   ];
 
-  // ② 신규 Standard 추가 / 이관 (5건)
-  const NEW_ST = [
+  const RP_TO_ST = [...RP_TO_ST_18, ...RP_TO_ST_19];
+
+  // ② 신규 Standard 추가 / 이관
+  // Ed.17→Ed.18 신규 ST (1건 — GRH 3.4.14A)
+  const NEW_ST_18 = [
     {
-      code:'GRH 3.7.12', sect:'GRH',
+      code:'GRH 3.4.14A', sect:'GRH', ed:'18',
+      title:'항공기 지상 이동 — 안전 감독',
+      from:null,
+      what:'지상 조업 중 항공기 이동 작업에 대한 안전 감독 요건 신설 — 지상 이동 감독자(Supervisor) 지정 및 책임 범위 명확화 (기존 GRH 3.4.14 재번호 부여)',
+      why:'지상 이동 사고 예방을 위한 감독 강화 — 기존 GRH 3.4.14를 세분화하여 감독 책임 명확화',
+      actions:['GOM에 지상 이동 안전 감독자 지정 절차 반영','감독자 자격 기준 및 교육 요건 수립','지상 이동 안전 감독 기록 유지 절차 마련'],
+    },
+  ];
+
+  // Ed.18→Ed.19 신규 ST (5건)
+  const NEW_ST_19 = [
+    {
+      code:'GRH 3.7.12', sect:'GRH', ed:'19',
       title:'지상조업 운항 보안 — 항공기 접근 통제',
       from:'SEC 3.1.3',
       what:'배타적 제한구역 및 지상 조업 중 항공기 접근에 대한 보안 통제 절차 의무화. 기존 보안(SEC) 섹션에서 지상조업(GRH) 섹션으로 이관하여 일원화 관리',
@@ -3671,25 +3740,42 @@ function renderISMAnalysis() {
     },
   ];
 
-  // ③ 신규 RP 추가 (0건)
-  const NEW_RP = [];
+  const NEW_ST = [...NEW_ST_18, ...NEW_ST_19];
 
-  // ④ 삭제된 Standards (9건)
+  // ③ 신규 RP 추가
+  // Ed.17→Ed.18 신규 RP (2건)
+  const NEW_RP_18 = [
+    { code:'GRH 3.4.14C', sect:'GRH', ed:'18', desc:'항공기 지상 이동 — 추가 안전 권고 절차 (3.4.14A/B와 연계)' },
+    { code:'CGO 3.6.2',   sect:'CGO', ed:'18', desc:'화물 구역 휴대 전자기기(PED) 관련 권고 사항 — Ed.19에서 CGO 3.8.1 의무 Standard로 격상' },
+  ];
+  const NEW_RP = [...NEW_RP_18];
+
+  // ④ 삭제된 Standards
   const DELETED = [
-    { code:'ORG 1.7.8~1.7.12', dest:'ORG 1.7.1~1.7.7', type:'통합', desc:'ERP 관련 5개 조항 — 신규 ORG 1.7.1~1.7.7로 내용 전면 통합 재편 (ICAO 신규 요건 반영)' },
-    { code:'FLT 2.2.25',       dest:null,               type:'폐지', desc:'비행승무원·면허 정비사 외 인원의 항공기 외부검사 교육 요건 — 더 이상 불필요하여 삭제' },
-    { code:'FLT 3.8.6B',       dest:'FLT 3.8.6A',       type:'통합', desc:'Walk-around 검사 위임 관련 조항 — FLT 3.8.6A로 내용 통합' },
-    { code:'DSP 4.5.2',        dest:'DSP 4.5.1',         type:'통합', desc:'ETOPS/EDTO 관리 요건 — DSP 4.5.1에 3개 sub-item으로 재편 통합' },
-    { code:'SEC 3.1.3',        dest:'GRH 3.7.12',        type:'이관', desc:'항공기 접근 보안 통제 — GRH 3.7.12로 이관, 지상조업 섹션에서 통합 관리' },
-    { code:'SEC 3.3.3',        dest:'GRH 3.7.13',        type:'이관', desc:'승객·수하물 조화 보안 — GRH 3.7.13으로 이관' },
-    { code:'SEC 3.4.5',        dest:'SEC 3.4.2',          type:'통합', desc:'번호 재배치 — 내용 변경 없이 SEC 3.4.2로 번호 이동 (3.4.5 자리 삭제)' },
-    { code:'SEC 3.4.7',        dest:'GRH 3.7.14',        type:'이관', desc:'화물·우편물 보안 통제 — GRH 3.7.14로 이관' },
-    { code:'SEC 3.6.6',        dest:'SEC 3.6.1',          type:'통합', desc:'환승 수하물 보안 — SEC 3.6.1의 신규 sub-items(iii)(iv)(v)로 통합 흡수' },
+    // Ed.17→Ed.18 삭제
+    { code:'CGO 3.4.2',         dest:null,               type:'폐지', ed:'18', desc:'Ed.17에서 이미 삭제된 항목 — Ed.18에서 공식 정리' },
+    { code:'MNT Table 4.14(viii)',dest:'MNT Table 4.11(xxxi)',type:'이관',ed:'18',desc:'ROASS 관련 — MNT Table 4.11(xxxi)로 이관 (신규 ROASS 요건과 통합)' },
+    // Ed.18→Ed.19 삭제
+    { code:'ORG 1.7.8~1.7.12', dest:'ORG 1.7.1~1.7.7', type:'통합', ed:'19', desc:'ERP 관련 5개 조항 — 신규 ORG 1.7.1~1.7.7로 내용 전면 통합 재편 (ICAO 신규 요건 반영)' },
+    { code:'FLT 2.2.25',       dest:null,               type:'폐지', ed:'19', desc:'비행승무원·면허 정비사 외 인원의 항공기 외부검사 교육 요건 — 더 이상 불필요하여 삭제' },
+    { code:'FLT 3.8.6B',       dest:'FLT 3.8.6A',       type:'통합', ed:'19', desc:'Walk-around 검사 위임 관련 조항 — FLT 3.8.6A로 내용 통합' },
+    { code:'DSP 4.5.2',        dest:'DSP 4.5.1',         type:'통합', ed:'19', desc:'ETOPS/EDTO 관리 요건 — DSP 4.5.1에 3개 sub-item으로 재편 통합' },
+    { code:'SEC 3.1.3',        dest:'GRH 3.7.12',        type:'이관', ed:'19', desc:'항공기 접근 보안 통제 — GRH 3.7.12로 이관, 지상조업 섹션에서 통합 관리' },
+    { code:'SEC 3.3.3',        dest:'GRH 3.7.13',        type:'이관', ed:'19', desc:'승객·수하물 조화 보안 — GRH 3.7.13으로 이관' },
+    { code:'SEC 3.4.5',        dest:'SEC 3.4.2',          type:'통합', ed:'19', desc:'번호 재배치 — 내용 변경 없이 SEC 3.4.2로 번호 이동 (3.4.5 자리 삭제)' },
+    { code:'SEC 3.4.7',        dest:'GRH 3.7.14',        type:'이관', ed:'19', desc:'화물·우편물 보안 통제 — GRH 3.7.14로 이관' },
+    { code:'SEC 3.6.6',        dest:'SEC 3.6.1',          type:'통합', ed:'19', desc:'환승 수하물 보안 — SEC 3.6.1의 신규 sub-items(iii)(iv)(v)로 통합 흡수' },
   ];
 
-  // ⑤ 주요 기술적 변경사항 (섹션별 — ISM Ed.19 Revision Highlights 상세)
+  // ⑤ 주요 기술적 변경사항 (Ed.17→Ed.18 + Ed.18→Ed.19 통합)
   const TECH_CHANGES = [
     { sect:'ORG', items:[
+      // Ed.17→Ed.18
+      { code:'ORG 1.6.1 GM',    tag:'기술변경', ed:'18', desc:'임대(Leasing) 관련 문구 명확화' },
+      { code:'ORG 2.1.4',       tag:'기술변경', ed:'18', desc:'외부 심사 주기 Note — 6개월로 개정; AA No.4 재개정 및 최종 AA 추가하여 심사원 행동 기준 검증 강화' },
+      { code:'ORG 3.3.2',       tag:'기술변경', ed:'18', desc:'FDA(Flight Data Analysis) 요건 — ICAO 신규 항공기 중량 기준(15,000kg 초과)으로 개정; AA 및 Guidance도 동일하게 업데이트' },
+      { code:'ORG 3.4.1',       tag:'기술변경', ed:'18', desc:'(RP→ST 격상) 안전 관리 시스템 촉진 활동 의무화; Guidance도 명확성 향상을 위해 개정' },
+      // Ed.18→Ed.19
       { code:'ORG 1.1.3 GM',    tag:'기술변경', desc:'Postholder(책임자) 역할 — 안전·보안 리스크 관리 책임 문구 명확화 추가' },
       { code:'ORG 1.1.4',       tag:'기술변경', desc:'SMS 일상 운영 관리자는 반드시 적절한 자격(appropriate qualifications) 보유 요건 명시' },
       { code:'ORG 1.7.1',       tag:'기술변경', desc:'ERP에 5개 신규 sub-item 의무화 — 역할 정의·훈련 개시·계획 발동 및 해제 절차 포함. Guidance도 함께 개정' },
@@ -3703,7 +3789,13 @@ function renderISMAnalysis() {
       { code:'ORG 4.3.1',       tag:'기술변경', desc:'SMS 교육 — 초도 교육(initial)에 더해 반복 교육(recurrent)도 의무화; Guidance에 반복 교육 주기 기준 추가' },
     ]},
     { sect:'FLT', items:[
-      { code:'FLT 2.1.19',      tag:'기술변경', desc:'훈련 도구 주기적 검토 — ISM 전체 섹션과 일관된 문구로 개정; (GM) 심볼 추가 및 신규 Guidance 신설' },
+      // Ed.17→Ed.18
+      { code:'FLT 2.3.1 GM',    tag:'기술변경', ed:'18', desc:'각 운항 구역(area of operation)별 비행승무원 능숙도(proficiency) 관련 문구 정확성 개선' },
+      { code:'FLT 2.4.1',       tag:'기술변경', ed:'18', desc:'특수 공항 및/또는 구역(special airports/areas) 교육 요건 명시; Guidance도 동일하게 개정' },
+      { code:'FLT 3.3.5',       tag:'기술변경', ed:'18', desc:'비행승무원 최대 연령 제한 — 국가별 다른 연령 제한 적용 가능하도록 개정; AA No.2 추가 (국가 규정 연령 제한 확인)' },
+      { code:'FLT 3.3.10',      tag:'기술변경', ed:'18', desc:'특수 공항 자격 요건 — 규제 당국 기준과 일치하도록 개정; Guidance도 함께 업데이트' },
+      { code:'FLT 3.6.5',       tag:'기술변경', ed:'18', desc:'(RP) RVR/CMV 한계값 — 규제 당국 지정 RVR 기준 수용; AA No.2 추가 (당국 지정 RVR 확인)' },
+      // Ed.18→Ed.19      tag:'기술변경', desc:'훈련 도구 주기적 검토 — ISM 전체 섹션과 일관된 문구로 개정; (GM) 심볼 추가 및 신규 Guidance 신설' },
       { code:'FLT 2.2.20',      tag:'기술변경', desc:'ELP(영어 능력) — ICAO Level 6(Expert) 명시; 국가 면허 요건으로 대체 가능 Note 신설; 심사 용이성을 위한 조건부 적용 추가' },
       { code:'FLT 2.2.22',      tag:'기술변경', desc:'ELP Expert 수준 주기적 평가 — 조건부 적용으로 변경; AA1에 ICAO Level 6 참조 추가; Guidance에 ICAO 훈련·시험 자료 참조 업데이트' },
       { code:'FLT 3.8.6A',      tag:'기술변경', desc:'Walk-around 검사 위임 — 비행승무원이 면허 정비사에 위임 가능한 경우 명확화; AA2 및 Guidance도 일관성 있게 개정' },
@@ -3715,7 +3807,11 @@ function renderISMAnalysis() {
       { code:'FLT 3.12.7 GM',   tag:'기술변경', desc:'런웨이 침입(Runway Incursion) 방지 조치 예시 확대 및 명확화' },
     ]},
     { sect:'DSP', items:[
-      { code:'DSP 1.8.4',       tag:'기술변경', desc:'운항 통제 기록(operational control records) 프로세스·절차 관련 명확성 향상' },
+      // Ed.17→Ed.18
+      { code:'DSP 3.2.8C',      tag:'기술변경', ed:'18', desc:'(RP→ST 격상) 운항 통제 특수 절차 의무화' },
+      { code:'DSP 3.5.2',       tag:'기술변경', ed:'18', desc:'and/or 추가 — 편집 개정' },
+      { code:'DSP 4.2.3',       tag:'기술변경', ed:'18', desc:'Note 추가: item ii)는 item i)에 대한 PCO(Parallel Conformity Option) — 2026년 12월 31일까지 유효' },
+      // Ed.18→Ed.19       tag:'기술변경', desc:'운항 통제 기록(operational control records) 프로세스·절차 관련 명확성 향상' },
       { code:'DSP 1.8.6',       tag:'내용추가',  desc:'4개 신규 sub-item 추가 — ① 재자격 훈련(Requalification) ② 운항 덱 익숙화(OFD) ③ SMS 훈련 ④ 해당 시 면허 사본 관리; Guidance에 상세 설명 추가' },
       { code:'DSP 4.2.3',       tag:'기술변경', desc:'PCO(Parallel Conformity Option) 중복 삭제 — "or"로 이미 선택지가 명확하여 PCO 불필요 판단' },
       { code:'DSP 4.3.13',      tag:'기술변경', desc:'심사 용이성을 위한 조건부(conditional) 표현 추가' },
@@ -3723,7 +3819,14 @@ function renderISMAnalysis() {
       { code:'DSP Table 3.4(xvi)',tag:'내용추가',desc:'비행 정보 기록 유지 목록에 "서명된 OFP(Operational Flight Plan) 사본" 추가' },
     ]},
     { sect:'MNT', items:[
-      { code:'MNT 1.11.5(ii)',  tag:'기술변경', desc:'외부 서비스 제공업체·벤더 시스템 등록 요건 강화 — SUP(Suspected Unapproved Parts) 관련 공급망 견고성 향상' },
+      // Ed.17→Ed.18
+      { code:'MNT 1.7.6(ii)(iii)',tag:'기술변경',ed:'18', desc:'편집 개정 — 문구 명확화' },
+      { code:'MNT Table 4.11(xiv)',tag:'기술변경',ed:'18', desc:'Active Implementation 기한 개정' },
+      { code:'MNT Table 4.11(xxx)',tag:'기술변경',ed:'18', desc:'Active Implementation 기한 개정' },
+      { code:'MNT Table 4.11(xxxi)',tag:'신규요건',ed:'18', desc:'ROASS(Runway Overrun Awareness and Alerting System) 신규 요건 추가' },
+      { code:'MNT Table 4.11(xv)', tag:'기술변경',ed:'18', desc:'DLR(Digital Line Recorder) 관련 문구 개정' },
+      { code:'MNT Table 4.14(vi)', tag:'기술변경',ed:'18', desc:'DLR 관련 문구 개정' },
+      // Ed.18→Ed.19  tag:'기술변경', desc:'외부 서비스 제공업체·벤더 시스템 등록 요건 강화 — SUP(Suspected Unapproved Parts) 관련 공급망 견고성 향상' },
       { code:'MNT 1.12.2 GM',  tag:'기술변경', desc:'정비 운영 위험(hazard) 목록 확대 — 피로(fatigue) 및 정보 보안(information security) 신규 추가' },
       { code:'MNT 2.5.1(i)',    tag:'기술변경', desc:'항공기 설계 기관(ADO) 또는 당국으로부터 정보 취득 프로세스 명확화; Guidance에 비승인 부품 관련 감항 지속성 정보 추가' },
       { code:'MNT 4.6.5(iii)', tag:'내용추가',  desc:'신규 sub-item(iii) — 의심 비승인 부품(SUP) 식별 및 보고 프로세스 의무화' },
@@ -3733,11 +3836,21 @@ function renderISMAnalysis() {
       { code:'MNT Table 4.3',   tag:'기술변경', desc:'MMM(Maintenance Management Manual) 내용 명세 개정' },
     ]},
     { sect:'CAB', items:[
-      { code:'CAB 1.5.3 GM',    tag:'기술변경', desc:'문서 통제 프로세스 적용 대상 객실 특정 문서 예시 추가' },
+      // Ed.17→Ed.18
+      { code:'CAB 1.6.7 GM',    tag:'기술변경', ed:'18', desc:'"실용 매뉴얼(practical manual)" 사용에 대한 추가 설명 반영' },
+      { code:'CAB 1.10.1A',     tag:'기술변경', ed:'18', desc:'Sub-item(i) — 서비스 제공업체(SP) 선정 기준에 보안(security) 요소 추가' },
+      { code:'CAB 2.2.2',       tag:'기술변경', ed:'18', desc:'Conformance Applicability 표 개정 — AQP만 명시 (ATQP 및 EBT 삭제, 해당 없음)' },
+      // Ed.18→Ed.19    tag:'기술변경', desc:'문서 통제 프로세스 적용 대상 객실 특정 문서 예시 추가' },
       { code:'CAB 2.2.5',       tag:'기술변경', desc:'다양한 객실 도어 유형 수용 — Type III·IV 도어처럼 객실승무원이 통상 작동하지 않는 비상구 유형과의 차이 강조; 적용 가능성 명확화' },
     ]},
     { sect:'GRH', items:[
-      { code:'GRH 1.11.2 GM',   tag:'기술변경', desc:'지상조업 위험 목록 용어 통일 — "special cargo" 및 "ULD operations"로 ISM 전체와 일관성 유지' },
+      // Ed.17→Ed.18
+      { code:'GRH 3.4.14A',     tag:'신규요건', ed:'18', desc:'항공기 지상 이동 안전 감독 요건 신설 (기존 GRH 3.4.14 재번호)' },
+      { code:'GRH 3.4.16',      tag:'기술변경', ed:'18', desc:'(RP→ST 격상) 항공기 지상 이동 안전 절차 의무화' },
+      { code:'GRH 3.4.17',      tag:'기술변경', ed:'18', desc:'(RP→ST 격상) 항공기 지상 이동 통신 절차 의무화' },
+      { code:'GRH 3.6.6',       tag:'신규요건', ed:'18', desc:'위험물(DG) 지상 사고 보고 신규 Standard — CGO 3.2.18과 정렬하여 화물 운송 운항사 DG 사고 보고 의무화' },
+      { code:'GRH 3.7.10',      tag:'기술변경', ed:'18', desc:'항공 보안 "적절한 검색(appropriate screening)" 개념 포함' },
+      // Ed.18→Ed.19   tag:'기술변경', desc:'지상조업 위험 목록 용어 통일 — "special cargo" 및 "ULD operations"로 ISM 전체와 일관성 유지' },
       { code:'GRH 3.3.1(iii)',  tag:'기술변경', desc:'"special cargo" 용어로 통일 — ISM 전체 일관성 반영' },
       { code:'GRH 3.3.4(vi)',   tag:'기술변경', desc:'IATA DGR 정확한 문구 및 구문으로 정렬 (편집적 변경)' },
       { code:'GRH 3.6.5 GM',    tag:'기술변경', desc:'명확성 향상을 위한 문구 개정' },
@@ -3747,7 +3860,13 @@ function renderISMAnalysis() {
       { code:'GRH 3.7.14',      tag:'신규요건',  desc:'(SEC 3.4.7에서 이관) 운항 보안 요건 — GRH 섹션으로 통합 관리' },
     ]},
     { sect:'CGO', items:[
-      { code:'CGO Applicability',tag:'기술변경', desc:'비수익 화물(non-revenue cargo)을 수익 화물과 동일하게 수락·취급·고정 처리 — 적용성 박스 개정' },
+      // Ed.17→Ed.18
+      { code:'CGO Applicability',tag:'기술변경', ed:'18', desc:'비수익 화물(non-revenue cargo)을 수익 화물과 동일하게 수락·취급·고정 처리 — 적용성 박스 첫 개정' },
+      { code:'CGO 1.1.2 AA',    tag:'기술변경', ed:'18', desc:'서비스 제공업체 포함; sub-item(ii) 명확화' },
+      { code:'CGO 1.5.3',       tag:'기술변경', ed:'18', desc:'"revenue" 단어 삭제 — 비수익 화물 동등 처리 정책 반영' },
+      { code:'CGO 3.1.1',       tag:'기술변경', ed:'18', desc:'sub-item(i) 조건부 요건 삭제; revenue cargo 참조 삭제로 명확화' },
+      { code:'CGO 3.6.2',       tag:'신규요건', ed:'18', desc:'(신규 RP) 화물 구역 휴대 전자기기(PED) 권고 사항 — Ed.19에서 CGO 3.8.1 의무 Standard로 격상' },
+      // Ed.18→Ed.19tag:'기술변경', desc:'비수익 화물(non-revenue cargo)을 수익 화물과 동일하게 수락·취급·고정 처리 — 적용성 박스 개정' },
       { code:'CGO 2.1.1(ii)',    tag:'기술변경', desc:'화물 운영 인원 반복 교육(recurrent training) 구현 관련 참조 문서 목록 업데이트' },
       { code:'CGO 2.2.4 AA5',   tag:'기술변경', desc:'심사원 행동: 24개월 초과 반복 교육 기간의 경우 위험 평가 기록 집중 감사' },
       { code:'CGO 3.2.14(vi)',  tag:'기술변경', desc:'IATA DGR 정확한 구두점·문구와 정렬 (편집적 변경)' },
@@ -3755,7 +3874,13 @@ function renderISMAnalysis() {
       { code:'CGO 3.8 / 3.8.1', tag:'신규요건',  desc:'신규 섹션 — 화물 구역 휴대 전자기기(PEDC: Portable Electronic Devices in Cargo Compartment) 요건 신설; 기존 CGO 3.6.2 내용 이관 및 정확한 PEDC 참조 적용' },
     ]},
     { sect:'SEC', items:[
-      { code:'SEC 1.1.1(iii)(v)',tag:'기술변경', desc:'보안 관리 시스템 범위 확대 — (iii) 위험 평가(risk assessments) 포함; (v) QA(품질 보증) 및 QC(품질 통제) 추가' },
+      // Ed.17→Ed.18
+      { code:'SEC 1.2.1',       tag:'기술변경', ed:'18', desc:'공식 보안 프로그램(formal Security Program) 구성 요건 포함; sub-item(i)(ii) 명확화' },
+      { code:'SEC 1.5.2',       tag:'기술변경', ed:'18', desc:'외부 서비스 제공업체(ESP) 및 역량(competencies) 포함' },
+      { code:'SEC 1.5.3(iii)',  tag:'기술변경', ed:'18', desc:'보안 검색 관련 문구 개정' },
+      { code:'SEC 1.12.2',      tag:'기술변경', ed:'18', desc:'불법 간섭(unlawful interference) 기술적 요건 개정; Guidance — SeMSManual 참조 추가, 구식 링크 삭제' },
+      { code:'SEC 3.3.3(iii)',  tag:'기술변경', ed:'18', desc:'문구 정확성 개정' },
+      // Ed.18→Ed.19tag:'기술변경', desc:'보안 관리 시스템 범위 확대 — (iii) 위험 평가(risk assessments) 포함; (v) QA(품질 보증) 및 QC(품질 통제) 추가' },
       { code:'SEC 1.5.3(iv)',    tag:'내용추가',  desc:'신규 sub-item(iv) — 검색 완료 항공기에 대한 비에스코트 접근(unescorted access) 통제 요건; Guidance에 보안 허가(clearance) 명확화 추가' },
       { code:'SEC 1.10',         tag:'기술변경', desc:'섹션 제목 개정 — 기존 "Quality Assurance"에서 "Quality Assurance and Quality Control"로 확대' },
       { code:'SEC 1.10.1',       tag:'기술변경', desc:'SeMS(보안 관리 시스템) 품질 보증 포함; 신규 소제목 "Quality Assurance" 설정' },
@@ -3790,12 +3915,14 @@ function renderISMAnalysis() {
 <div class="sect-header">
   <div>
     <h2 class="sect-title">ISM 개정 분석</h2>
-    <p class="sect-sub">ISM Ed.18 → Ed.19 공식 Revision Highlights 기반 — IOSA Standards Manual Ed.19 (2027.01.01 발효)</p>
+    <p class="sect-sub">ISM Ed.17 → Ed.19 전체 변경사항 — Ed.18 (2026.01.01 발효) + Ed.19 (2027.01.01 발효) 통합</p>
   </div>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-    <span style="background:#f9fafb;border:1px solid #e2e8f0;color:#6b7280;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;">Ed.18 기준</span>
+    <span style="background:#f9fafb;border:1px solid #e2e8f0;color:#6b7280;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;">Ed.17 기준 (현재 보유)</span>
     <i class="fas fa-arrow-right" style="color:#94a3b8;font-size:0.7rem;"></i>
-    <span style="background:#fff1f2;border:1px solid #fca5a5;color:#d20015;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;">Ed.19 · 2027.01.01 발효</span>
+    <span style="background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;">Ed.18 · 2026.01.01</span>
+    <i class="fas fa-arrow-right" style="color:#94a3b8;font-size:0.7rem;"></i>
+    <span style="background:#fff1f2;border:1px solid #fca5a5;color:#d20015;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;">Ed.19 · 2027.01.01</span>
   </div>
 </div>
 
@@ -3834,8 +3961,8 @@ function renderISMAnalysis() {
     <span style="font-size:0.76rem;color:#7f1d1d;font-weight:600;">Ed.18 권고(should) → Ed.19 의무(shall) 격상 — 미이행 시 Finding 발행 / CAR 발생. 2027.01.01 발효 전 반드시 절차 수립 완료</span>
   </div>
   <div style="display:flex;flex-direction:column;gap:16px;">
-    ${RP_TO_ST.map(r=>{const sc=SECT_COLOR[r.sect]||'#d20015';const si=SECT_ICON[r.sect]||'fa-circle';return `
-    <div style="border-radius:12px;overflow:hidden;border:1.5px solid #e2e8f0;border-top:3px solid #d20015;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.05);">
+    ${RP_TO_ST.map(r=>{const sc=SECT_COLOR[r.sect]||'#d20015';const si=SECT_ICON[r.sect]||'fa-circle';const edBefore=r.ed==='18'?'Ed.17':'Ed.18';const edAfter=r.ed==='18'?'Ed.18':'Ed.19';const edColor=r.ed==='18'?'#1d4ed8':'#d20015';const edBg=r.ed==='18'?'#eff6ff':'#fff1f2';const edBorder=r.ed==='18'?'#bfdbfe':'#fca5a5';return `
+    <div style="border-radius:12px;overflow:hidden;border:1.5px solid #e2e8f0;border-top:3px solid ${edColor};background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.05);">
       <!-- 헤더 -->
       <div style="background:#f8fafc;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e2e8f0;">
         <div style="display:flex;align-items:center;gap:10px;">
@@ -3844,13 +3971,14 @@ function renderISMAnalysis() {
           </div>
           <div>
             <div style="font-size:0.58rem;font-weight:700;color:#94a3b8;letter-spacing:.1em;margin-bottom:1px;">${r.sect} · ${SECT[r.sect]||r.sect}</div>
-            <div style="font-family:monospace;font-size:1.05rem;font-weight:900;color:#d20015;">${r.code}</div>
+            <div style="font-family:monospace;font-size:1.05rem;font-weight:900;color:${edColor};">${r.code}</div>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:7px;">
+          <span style="background:${edBg};color:${edColor};padding:3px 9px;border-radius:6px;font-size:0.6rem;font-weight:700;border:1px solid ${edBorder};">${edBefore}→${edAfter} 격상</span>
           <span style="background:#f1f5f9;color:#6b7280;padding:4px 11px;border-radius:6px;font-size:0.62rem;font-weight:700;text-decoration:line-through;border:1px solid #e2e8f0;">RP · should</span>
-          <i class="fas fa-arrow-right" style="color:#d20015;font-size:0.68rem;"></i>
-          <span style="background:#d20015;color:white;padding:4px 11px;border-radius:6px;font-size:0.62rem;font-weight:700;">ST · shall</span>
+          <i class="fas fa-arrow-right" style="color:${edColor};font-size:0.68rem;"></i>
+          <span style="background:${edColor};color:white;padding:4px 11px;border-radius:6px;font-size:0.62rem;font-weight:700;">ST · shall</span>
         </div>
       </div>
       <!-- 세 칼럼 본문 -->
