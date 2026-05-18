@@ -3753,7 +3753,7 @@ function renderISMAnalysis() {
   // ④ 삭제된 Standards
   const DELETED = [
     // Ed.17→Ed.18 삭제
-    { code:'CGO 3.4.2',         dest:null,               type:'폐지', ed:'18', desc:'Ed.17에서 이미 삭제된 항목 — Ed.18에서 공식 정리' },
+    // (CGO 3.4.2는 Ed.17에서 이미 삭제 완료 — Ed.17 기준선에 포함, 별도 대응 불필요)
     { code:'MNT Table 4.14(viii)',dest:'MNT Table 4.11(xxxi)',type:'이관',ed:'18',desc:'ROASS 관련 — MNT Table 4.11(xxxi)로 이관 (신규 ROASS 요건과 통합)' },
     // Ed.18→Ed.19 삭제
     { code:'ORG 1.7.8~1.7.12', dest:'ORG 1.7.1~1.7.7', type:'통합', ed:'19', desc:'ERP 관련 5개 조항 — 신규 ORG 1.7.1~1.7.7로 내용 전면 통합 재편 (ICAO 신규 요건 반영)' },
@@ -3795,7 +3795,8 @@ function renderISMAnalysis() {
       { code:'FLT 3.3.5',       tag:'기술변경', ed:'18', desc:'비행승무원 최대 연령 제한 — 국가별 다른 연령 제한 적용 가능하도록 개정; AA No.2 추가 (국가 규정 연령 제한 확인)' },
       { code:'FLT 3.3.10',      tag:'기술변경', ed:'18', desc:'특수 공항 자격 요건 — 규제 당국 기준과 일치하도록 개정; Guidance도 함께 업데이트' },
       { code:'FLT 3.6.5',       tag:'기술변경', ed:'18', desc:'(RP) RVR/CMV 한계값 — 규제 당국 지정 RVR 기준 수용; AA No.2 추가 (당국 지정 RVR 확인)' },
-      // Ed.18→Ed.19      tag:'기술변경', desc:'훈련 도구 주기적 검토 — ISM 전체 섹션과 일관된 문구로 개정; (GM) 심볼 추가 및 신규 Guidance 신설' },
+      // Ed.18→Ed.19
+      { code:'FLT 2.1.1 GM',    tag:'기술변경', desc:'훈련 도구 주기적 검토 — ISM 전체 섹션과 일관된 문구로 개정; (GM) 심볼 추가 및 신규 Guidance 신설' },
       { code:'FLT 2.2.20',      tag:'기술변경', desc:'ELP(영어 능력) — ICAO Level 6(Expert) 명시; 국가 면허 요건으로 대체 가능 Note 신설; 심사 용이성을 위한 조건부 적용 추가' },
       { code:'FLT 2.2.22',      tag:'기술변경', desc:'ELP Expert 수준 주기적 평가 — 조건부 적용으로 변경; AA1에 ICAO Level 6 참조 추가; Guidance에 ICAO 훈련·시험 자료 참조 업데이트' },
       { code:'FLT 3.8.6A',      tag:'기술변경', desc:'Walk-around 검사 위임 — 비행승무원이 면허 정비사에 위임 가능한 경우 명확화; AA2 및 Guidance도 일관성 있게 개정' },
@@ -3811,7 +3812,8 @@ function renderISMAnalysis() {
       { code:'DSP 3.2.8C',      tag:'기술변경', ed:'18', desc:'(RP→ST 격상) 운항 통제 특수 절차 의무화' },
       { code:'DSP 3.5.2',       tag:'기술변경', ed:'18', desc:'and/or 추가 — 편집 개정' },
       { code:'DSP 4.2.3',       tag:'기술변경', ed:'18', desc:'Note 추가: item ii)는 item i)에 대한 PCO(Parallel Conformity Option) — 2026년 12월 31일까지 유효' },
-      // Ed.18→Ed.19       tag:'기술변경', desc:'운항 통제 기록(operational control records) 프로세스·절차 관련 명확성 향상' },
+      // Ed.18→Ed.19
+      { code:'DSP 4.1.1',       tag:'기술변경', desc:'운항 통제 기록(operational control records) 프로세스·절차 관련 명확성 향상' },
       { code:'DSP 1.8.6',       tag:'내용추가',  desc:'4개 신규 sub-item 추가 — ① 재자격 훈련(Requalification) ② 운항 덱 익숙화(OFD) ③ SMS 훈련 ④ 해당 시 면허 사본 관리; Guidance에 상세 설명 추가' },
       { code:'DSP 4.2.3',       tag:'기술변경', desc:'PCO(Parallel Conformity Option) 중복 삭제 — "or"로 이미 선택지가 명확하여 PCO 불필요 판단' },
       { code:'DSP 4.3.13',      tag:'기술변경', desc:'심사 용이성을 위한 조건부(conditional) 표현 추가' },
@@ -3826,7 +3828,8 @@ function renderISMAnalysis() {
       { code:'MNT Table 4.11(xxxi)',tag:'신규요건',ed:'18', desc:'ROASS(Runway Overrun Awareness and Alerting System) 신규 요건 추가' },
       { code:'MNT Table 4.11(xv)', tag:'기술변경',ed:'18', desc:'DLR(Digital Line Recorder) 관련 문구 개정' },
       { code:'MNT Table 4.14(vi)', tag:'기술변경',ed:'18', desc:'DLR 관련 문구 개정' },
-      // Ed.18→Ed.19  tag:'기술변경', desc:'외부 서비스 제공업체·벤더 시스템 등록 요건 강화 — SUP(Suspected Unapproved Parts) 관련 공급망 견고성 향상' },
+      // Ed.18→Ed.19
+      { code:'MNT 1.8.1',       tag:'기술변경', desc:'외부 서비스 제공업체·벤더 시스템 등록 요건 강화 — SUP(Suspected Unapproved Parts) 관련 공급망 견고성 향상' },
       { code:'MNT 1.12.2 GM',  tag:'기술변경', desc:'정비 운영 위험(hazard) 목록 확대 — 피로(fatigue) 및 정보 보안(information security) 신규 추가' },
       { code:'MNT 2.5.1(i)',    tag:'기술변경', desc:'항공기 설계 기관(ADO) 또는 당국으로부터 정보 취득 프로세스 명확화; Guidance에 비승인 부품 관련 감항 지속성 정보 추가' },
       { code:'MNT 4.6.5(iii)', tag:'내용추가',  desc:'신규 sub-item(iii) — 의심 비승인 부품(SUP) 식별 및 보고 프로세스 의무화' },
@@ -3840,7 +3843,8 @@ function renderISMAnalysis() {
       { code:'CAB 1.6.7 GM',    tag:'기술변경', ed:'18', desc:'"실용 매뉴얼(practical manual)" 사용에 대한 추가 설명 반영' },
       { code:'CAB 1.10.1A',     tag:'기술변경', ed:'18', desc:'Sub-item(i) — 서비스 제공업체(SP) 선정 기준에 보안(security) 요소 추가' },
       { code:'CAB 2.2.2',       tag:'기술변경', ed:'18', desc:'Conformance Applicability 표 개정 — AQP만 명시 (ATQP 및 EBT 삭제, 해당 없음)' },
-      // Ed.18→Ed.19    tag:'기술변경', desc:'문서 통제 프로세스 적용 대상 객실 특정 문서 예시 추가' },
+      // Ed.18→Ed.19
+      { code:'CAB 1.3.1 GM',    tag:'기술변경', desc:'문서 통제 프로세스 적용 대상 객실 특정 문서 예시 추가' },
       { code:'CAB 2.2.5',       tag:'기술변경', desc:'다양한 객실 도어 유형 수용 — Type III·IV 도어처럼 객실승무원이 통상 작동하지 않는 비상구 유형과의 차이 강조; 적용 가능성 명확화' },
     ]},
     { sect:'GRH', items:[
@@ -3850,7 +3854,8 @@ function renderISMAnalysis() {
       { code:'GRH 3.4.17',      tag:'기술변경', ed:'18', desc:'(RP→ST 격상) 항공기 지상 이동 통신 절차 의무화' },
       { code:'GRH 3.6.6',       tag:'신규요건', ed:'18', desc:'위험물(DG) 지상 사고 보고 신규 Standard — CGO 3.2.18과 정렬하여 화물 운송 운항사 DG 사고 보고 의무화' },
       { code:'GRH 3.7.10',      tag:'기술변경', ed:'18', desc:'항공 보안 "적절한 검색(appropriate screening)" 개념 포함' },
-      // Ed.18→Ed.19   tag:'기술변경', desc:'지상조업 위험 목록 용어 통일 — "special cargo" 및 "ULD operations"로 ISM 전체와 일관성 유지' },
+      // Ed.18→Ed.19
+      { code:'GRH 1.7.1 GM',    tag:'기술변경', desc:'지상조업 위험 목록 용어 통일 — "special cargo" 및 "ULD operations"로 ISM 전체와 일관성 유지' },
       { code:'GRH 3.3.1(iii)',  tag:'기술변경', desc:'"special cargo" 용어로 통일 — ISM 전체 일관성 반영' },
       { code:'GRH 3.3.4(vi)',   tag:'기술변경', desc:'IATA DGR 정확한 문구 및 구문으로 정렬 (편집적 변경)' },
       { code:'GRH 3.6.5 GM',    tag:'기술변경', desc:'명확성 향상을 위한 문구 개정' },
@@ -3866,7 +3871,8 @@ function renderISMAnalysis() {
       { code:'CGO 1.5.3',       tag:'기술변경', ed:'18', desc:'"revenue" 단어 삭제 — 비수익 화물 동등 처리 정책 반영' },
       { code:'CGO 3.1.1',       tag:'기술변경', ed:'18', desc:'sub-item(i) 조건부 요건 삭제; revenue cargo 참조 삭제로 명확화' },
       { code:'CGO 3.6.2',       tag:'신규요건', ed:'18', desc:'(신규 RP) 화물 구역 휴대 전자기기(PED) 권고 사항 — Ed.19에서 CGO 3.8.1 의무 Standard로 격상' },
-      // Ed.18→Ed.19tag:'기술변경', desc:'비수익 화물(non-revenue cargo)을 수익 화물과 동일하게 수락·취급·고정 처리 — 적용성 박스 개정' },
+      // Ed.18→Ed.19
+      { code:'CGO Applicability',tag:'기술변경', desc:'비수익 화물(non-revenue cargo)을 수익 화물과 동일하게 수락·취급·고정 처리 — 적용성 박스 최종 개정' },
       { code:'CGO 2.1.1(ii)',    tag:'기술변경', desc:'화물 운영 인원 반복 교육(recurrent training) 구현 관련 참조 문서 목록 업데이트' },
       { code:'CGO 2.2.4 AA5',   tag:'기술변경', desc:'심사원 행동: 24개월 초과 반복 교육 기간의 경우 위험 평가 기록 집중 감사' },
       { code:'CGO 3.2.14(vi)',  tag:'기술변경', desc:'IATA DGR 정확한 구두점·문구와 정렬 (편집적 변경)' },
@@ -3880,7 +3886,8 @@ function renderISMAnalysis() {
       { code:'SEC 1.5.3(iii)',  tag:'기술변경', ed:'18', desc:'보안 검색 관련 문구 개정' },
       { code:'SEC 1.12.2',      tag:'기술변경', ed:'18', desc:'불법 간섭(unlawful interference) 기술적 요건 개정; Guidance — SeMSManual 참조 추가, 구식 링크 삭제' },
       { code:'SEC 3.3.3(iii)',  tag:'기술변경', ed:'18', desc:'문구 정확성 개정' },
-      // Ed.18→Ed.19tag:'기술변경', desc:'보안 관리 시스템 범위 확대 — (iii) 위험 평가(risk assessments) 포함; (v) QA(품질 보증) 및 QC(품질 통제) 추가' },
+      // Ed.18→Ed.19
+      { code:'SEC 1.1.1',       tag:'기술변경', desc:'보안 관리 시스템 범위 확대 — (iii) 위험 평가(risk assessments) 포함; (v) QA(품질 보증) 및 QC(품질 통제) 추가' },
       { code:'SEC 1.5.3(iv)',    tag:'내용추가',  desc:'신규 sub-item(iv) — 검색 완료 항공기에 대한 비에스코트 접근(unescorted access) 통제 요건; Guidance에 보안 허가(clearance) 명확화 추가' },
       { code:'SEC 1.10',         tag:'기술변경', desc:'섹션 제목 개정 — 기존 "Quality Assurance"에서 "Quality Assurance and Quality Control"로 확대' },
       { code:'SEC 1.10.1',       tag:'기술변경', desc:'SeMS(보안 관리 시스템) 품질 보증 포함; 신규 소제목 "Quality Assurance" 설정' },
