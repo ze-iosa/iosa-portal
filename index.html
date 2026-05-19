@@ -822,16 +822,16 @@ function renderDashboardNew() {
       const nextAuditDate   = '2027-03-15';
       const daysToNextAudit = Math.max(0, DateUtil.daysUntil(nextAuditDate));
       return `
-      <div style="flex-shrink:0;text-align:center;position:relative;padding:0 8px;">
-        <!-- 워터마크 -->
+      <div style="flex-shrink:0;text-align:center;position:relative;padding:16px 16px 0 16px;min-width:200px;">
+        <!-- IATA 로고: 우측 상단 모서리 -->
         <img src="assets/iosa_stamp.png"
-             style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:180px;height:180px;opacity:0.06;pointer-events:none;">
+             style="position:absolute;top:0;right:0;width:64px;height:64px;object-fit:contain;opacity:0.9;z-index:2;">
         <!-- 레이블 -->
-        <div style="position:relative;font-size:0.58rem;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:6px;">Renewal IOSA</div>
+        <div style="font-size:0.58rem;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:6px;margin-top:48px;">Renewal IOSA</div>
         <!-- D-day 숫자 -->
-        <div style="position:relative;font-size:4.4rem;font-weight:900;color:#b91c1c;line-height:1;letter-spacing:-3px;">D-${daysToNextAudit}</div>
-        <!-- 날짜: 크고 진하게 -->
-        <div style="position:relative;font-size:0.88rem;font-weight:800;color:#555;margin-top:10px;letter-spacing:0.3px;">2027.03.15 ~ 03.18</div>
+        <div style="font-size:4.4rem;font-weight:900;color:#b91c1c;line-height:1;letter-spacing:-3px;">D-${daysToNextAudit}</div>
+        <!-- 날짜 -->
+        <div style="font-size:0.88rem;font-weight:800;color:#555;margin-top:10px;letter-spacing:0.3px;">2027.03.15 ~ 03.18</div>
       </div>`;
     })()}
 
