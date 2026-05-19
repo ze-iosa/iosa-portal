@@ -418,7 +418,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/data.js"></script>
 <script src="js/ism18_isarps.js"></script>
-<script src="js/app.js?v=20250519g"></script>
+<script src="js/app.js?v=20250519h"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════
    EXTENDED APP — Dashboard, History, Schedule, Manuals, Board
@@ -834,22 +834,18 @@ function renderDashboardNew() {
         return `
         <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;">
           <!-- Twin D-day block -->
-          <div style="display:flex;gap:18px;align-items:stretch;">
+          <div style="display:flex;gap:14px;align-items:stretch;">
             <!-- 인증 만료 -->
-            <div style="text-align:right;">
-              <div style="font-size:0.48rem;font-weight:800;letter-spacing:2px;color:#bbb;text-transform:uppercase;margin-bottom:2px;">인증 만료까지</div>
-              <div style="font-size:3rem;font-weight:900;color:var(--eastar-red);line-height:1;letter-spacing:-2px;">D-${daysToExpiry}</div>
-              <div style="width:100%;height:2px;background:var(--eastar-red);border-radius:2px;margin:5px 0 4px;"></div>
-              <div style="font-size:0.58rem;color:#999;font-weight:600;">Valid until 1 Aug 2027</div>
+            <div style="text-align:center;background:#fff5f5;border:1px solid #fecdcd;border-radius:8px;padding:10px 16px;min-width:110px;">
+              <div style="font-size:0.62rem;font-weight:800;color:var(--eastar-red);letter-spacing:0.5px;margin-bottom:4px;">🔴 인증 만료까지</div>
+              <div style="font-size:2.6rem;font-weight:900;color:var(--eastar-red);line-height:1;letter-spacing:-2px;">D-${daysToExpiry}</div>
+              <div style="font-size:0.58rem;color:#999;font-weight:600;margin-top:5px;">2027. 8. 1</div>
             </div>
-            <!-- 구분선 -->
-            <div style="width:1px;background:#e5e5e5;align-self:stretch;margin:2px 0;"></div>
             <!-- 다음 심사 -->
-            <div style="text-align:right;">
-              <div style="font-size:0.48rem;font-weight:800;letter-spacing:2px;color:#bbb;text-transform:uppercase;margin-bottom:2px;">다음 심사까지</div>
-              <div style="font-size:3rem;font-weight:900;color:${auditColor};line-height:1;letter-spacing:-2px;">D-${daysToNextAudit}</div>
-              <div style="width:100%;height:2px;background:${auditColor};border-radius:2px;margin:5px 0 4px;"></div>
-              <div style="font-size:0.58rem;color:#999;font-weight:600;">RBI Renewal · 2027.03.15</div>
+            <div style="text-align:center;background:${daysToNextAudit<180?'#fff5f5':daysToNextAudit<365?'#fffbeb':'#f0f6ff'};border:1px solid ${daysToNextAudit<180?'#fecdcd':daysToNextAudit<365?'#fde68a':'#bfdbfe'};border-radius:8px;padding:10px 16px;min-width:110px;">
+              <div style="font-size:0.62rem;font-weight:800;color:${auditColor};letter-spacing:0.5px;margin-bottom:4px;">✈️ 다음 심사까지</div>
+              <div style="font-size:2.6rem;font-weight:900;color:${auditColor};line-height:1;letter-spacing:-2px;">D-${daysToNextAudit}</div>
+              <div style="font-size:0.58rem;color:#999;font-weight:600;margin-top:5px;">2027. 3. 15</div>
             </div>
           </div>
         </div>`;
