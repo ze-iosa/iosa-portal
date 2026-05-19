@@ -418,7 +418,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/data.js"></script>
 <script src="js/ism18_isarps.js"></script>
-<script src="js/app.js?v=20250519h"></script>
+<script src="js/app.js?v=20250519i"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════
    EXTENDED APP — Dashboard, History, Schedule, Manuals, Board
@@ -837,14 +837,14 @@ function renderDashboardNew() {
           <div style="display:flex;gap:14px;align-items:stretch;">
             <!-- 인증 만료 -->
             <div style="text-align:center;background:#fff5f5;border:1px solid #fecdcd;border-radius:8px;padding:10px 16px;min-width:110px;">
-              <div style="font-size:0.62rem;font-weight:800;color:var(--eastar-red);letter-spacing:0.5px;margin-bottom:4px;">🔴 인증 만료까지</div>
+              <div style="font-size:0.62rem;font-weight:800;color:var(--eastar-red);letter-spacing:0.5px;margin-bottom:4px;">Initial IOSA 만료일</div>
               <div style="font-size:2.6rem;font-weight:900;color:var(--eastar-red);line-height:1;letter-spacing:-2px;">D-${daysToExpiry}</div>
               <div style="font-size:0.58rem;color:#999;font-weight:600;margin-top:5px;">2027. 8. 1</div>
             </div>
             <!-- 다음 심사 -->
-            <div style="text-align:center;background:${daysToNextAudit<180?'#fff5f5':daysToNextAudit<365?'#fffbeb':'#f0f6ff'};border:1px solid ${daysToNextAudit<180?'#fecdcd':daysToNextAudit<365?'#fde68a':'#bfdbfe'};border-radius:8px;padding:10px 16px;min-width:110px;">
-              <div style="font-size:0.62rem;font-weight:800;color:${auditColor};letter-spacing:0.5px;margin-bottom:4px;">✈️ 다음 심사까지</div>
-              <div style="font-size:2.6rem;font-weight:900;color:${auditColor};line-height:1;letter-spacing:-2px;">D-${daysToNextAudit}</div>
+            <div style="text-align:center;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 16px;min-width:110px;">
+              <div style="font-size:0.62rem;font-weight:800;color:#1d4ed8;letter-spacing:0.5px;margin-bottom:4px;">Renewal IOSA 점검일</div>
+              <div style="font-size:2.6rem;font-weight:900;color:#1d4ed8;line-height:1;letter-spacing:-2px;">D-${daysToNextAudit}</div>
               <div style="font-size:0.58rem;color:#999;font-weight:600;margin-top:5px;">2027. 3. 15</div>
             </div>
           </div>
