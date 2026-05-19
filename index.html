@@ -418,7 +418,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/data.js"></script>
 <script src="js/ism18_isarps.js"></script>
-<script src="js/app.js?v=20250518b"></script>
+<script src="js/app.js?v=20250518c"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════
    EXTENDED APP — Dashboard, History, Schedule, Manuals, Board
@@ -981,12 +981,220 @@ const AUDIT_HISTORY = {
     ],
     totalF: 21, totalO: 7, totalNA: 83,
     keyCARs: [
-      {id:'93285', isarp:'ORG 1.5.3',  desc:'안전관리 목표 및 성과지표 문서화 미흡'},
-      {id:'93286', isarp:'ORG 2.1.2',  desc:'품질보증 프로그램 운영 절차 부적합'},
-      {id:'93288', isarp:'ORG 2.4.3',  desc:'내부심사 계획 수립 및 실시 방법 미흡'},
-      {id:'93289', isarp:'ORG 2.4.4',  desc:'내부심사 Follow-up 절차 및 기록 미흡'},
-      {id:'93291', isarp:'MNT 3.1.1',  desc:'정비프로그램 문서 개정 관리 절차 미흡'},
-      {id:'93292', isarp:'FLT 2.1.1A', desc:'비행승무원 자격 관리 절차 적합성'},
+      // ── ORG 부문 (7건) ──────────────────────────────────────
+      { id:'93285', isarp:'ORG 1.5.3',  sect:'ORG',
+        desc:'안전관리 목표 및 성과지표 문서화 미흡',
+        findingText:'운항증명 소지자는 안전관리 목표(Safety Objectives) 및 측정 가능한 성과지표(Safety Performance Indicators)를 수립하여 전 운영 부문에 배포·문서화하지 않았음. 부문별 안전목표 수립 근거 및 측정 기준 부재.',
+        rootCause:'SMS 체계 내 안전목표 수립 프로세스 미정립. 부문별 안전성과 지표(KPI) 수립 절차 및 검토 주기 미정의.',
+        linkedSections:['FLT','MNT','GRH','DSP','CAB'],
+        capPlan:'① OM-A SMS 챕터 내 안전목표 수립 절차 신설\n② 부문별 안전목표(Safety KPI) 문서화\n③ 안전목표 달성도 반기 검토 절차 수립\n④ Safety Review Board(SRB)에서 목표 달성 현황 보고 체계 구축',
+        fatContent:'OM-A Rev.01 개정 완료(2025-09-20). 부문별 Safety KPI 설정 문서 완성(ORG/FLT/MNT/GRH). SRB 정기 검토 절차 시행. IATA QC 승인 완료.',
+        evidence:['OM-A Rev.01 개정본 (2025-09-20)', '부문별 Safety Objectives & KPI 문서', '안전심의위원회(SRB) 회의록 (2025-09-15)', 'IATA QC 승인 이메일'],
+        capDue:'2025-10-15', fatStatus:'closed', status:'closed' },
+
+      { id:'93286', isarp:'ORG 2.1.2',  sect:'ORG',
+        desc:'품질보증 프로그램 운영 절차 부적합',
+        findingText:'품질보증(QA) 프로그램이 전 운영 부문(FLT·MNT·GRH·DSP)에 걸쳐 일관되게 적용되지 않았으며, QA 활동 계획·실행·기록이 불충분함. 부문 간 QA 조율 절차 부재.',
+        rootCause:'부문별 QA 활동 계획 및 실행 절차 미수립. 부문 간 QA 결과 공유 및 후속조치 체계 부재.',
+        linkedSections:['FLT','MNT','GRH','DSP'],
+        capPlan:'① QA 프로그램 운영 절차서(QAP) 전면 개정\n② 부문별 QA 책임자(Quality Manager) 지정\n③ 연간 QA 활동 계획(QA Program) 수립\n④ QA 결과 보고 및 피드백 체계 마련',
+        fatContent:'QA 프로그램 절차서(QAP-001) 개정 완료(2025-09-30). 부문별 QA 책임자 지정 공문 발행. 2025-2026 연간 QA 계획서 승인 완료.',
+        evidence:['QA 프로그램 절차서(QAP-001) 개정본', 'QA 책임자 지정 공문 (2025-09-01)', '2025-2026 연간 QA 활동 계획서'],
+        capDue:'2025-10-15', fatStatus:'closed', status:'closed' },
+
+      { id:'93288', isarp:'ORG 2.4.3',  sect:'ORG',
+        desc:'내부심사 계획 수립 및 실시 방법 미흡',
+        findingText:'운항증명 소지자의 내부심사 프로그램이 모든 IOSA 적용 부문(ORG·FLT·MNT·DSP·CAB·GRH·CGO·SEC)을 포괄하는 연간 계획을 수립하지 않았으며, 심사 방법론 및 심사원 자격 요건이 문서화되지 않음.',
+        rootCause:'내부심사 프로그램 수립 절차 부재. 심사 계획 수립 책임 및 권한 미정의.',
+        linkedSections:['FLT','MNT','GRH','DSP','CAB','CGO','SEC'],
+        capPlan:'① 내부심사 프로그램(IAP) 절차서 신설\n② 부문별 내부심사 연간 계획 수립\n③ 내부심사원 자격 기준 및 교육 요건 정의\n④ 심사 결과 보고 양식 및 기록 체계 마련',
+        fatContent:'IAP-001 내부심사 프로그램 절차서 신설 완료(2025-09-25). 2025-2026 전 부문 내부심사 연간계획 수립. 내부심사원 12명 자격 인정 완료.',
+        evidence:['IAP-001 내부심사 프로그램 절차서', '2025-2026 연간 내부심사 계획서', '내부심사원 자격 인정서 (12명)'],
+        capDue:'2025-10-15', fatStatus:'closed', status:'closed' },
+
+      { id:'93289', isarp:'ORG 2.4.4',  sect:'ORG',
+        desc:'내부심사 Follow-up 절차 및 기록 미흡',
+        findingText:'내부심사 결과 발견된 불합치(NC) 및 관찰 사항(OBS)에 대한 Follow-up 절차가 문서화되지 않았으며, 시정조치 이행 확인 기록이 불충분함.',
+        rootCause:'내부심사 후속조치 관리 절차 미정립. 시정조치 이행 현황 추적 시스템 부재.',
+        linkedSections:['FLT','MNT','GRH','DSP','CAB'],
+        capPlan:'① 내부심사 Follow-up 절차 신설(IAP-001 개정)\n② 시정조치 이행 추적 대장(CAR Register) 도입\n③ Follow-up 기한 설정 및 준수 모니터링\n④ 미해결 CAR 에스컬레이션 절차 수립',
+        fatContent:'IAP-001 Rev.01에 Follow-up 절차 포함 완료(2025-09-25). CAR Register 양식 도입 및 기 발행 CAR 데이터 입력 완료. 안전보안실 주 1회 Follow-up 현황 점검 시행.',
+        evidence:['IAP-001 Rev.01 (Follow-up 절차 포함)', 'CAR Register 양식 및 기록', '안전보안실 Follow-up 주간 점검 기록'],
+        capDue:'2025-10-15', fatStatus:'closed', status:'closed' },
+
+      { id:'93287', isarp:'ORG 3.1.1',  sect:'ORG',
+        desc:'위험요소(Hazard) 보고 시스템 운영 미흡',
+        findingText:'자발적 안전 보고 시스템(Voluntary Safety Reporting System)이 전 부문 직원이 접근 가능하도록 구성되어 있지 않으며, 보고된 위험요소의 분석·피드백 절차가 미흡함.',
+        rootCause:'VSRS 운영 절차 미정립. 부문별 보고 채널 다양성 부족 및 피드백 루프 부재.',
+        linkedSections:['FLT','MNT'],
+        capPlan:'① VSRS 운영 절차 신설 및 OM-A SMS 챕터 반영\n② 익명 보고 채널(디지털 플랫폼) 도입\n③ 위험요소 분석 및 피드백 절차 마련\n④ VSRS 활성화 캠페인 실시',
+        fatContent:'VSRS 절차서 신설 완료(2025-09-10). 디지털 보고 시스템 도입(안전보고앱). 전 직원 보고 방법 안내 교육 실시. Q3 보고 현황 피드백 발행.',
+        evidence:['VSRS 운영 절차서', '안전보고 시스템 도입 공문', '전 직원 교육 기록 (2025-09-01)'],
+        capDue:'2025-09-30', fatStatus:'closed', status:'closed' },
+
+      { id:'93290', isarp:'ORG 3.3.2',  sect:'ORG',
+        desc:'비행자료분석(FDA) 프로그램 요건 미충족',
+        findingText:'비행자료분석(Flight Data Analysis/Monitoring) 프로그램이 수립되어 있으나, 분석 결과의 운항 안전 개선 연계 절차 및 결과 보고 주기가 문서화되지 않음.',
+        rootCause:'FDA 결과 활용 절차 미수립. FDA 결과의 SMS 연계 프로세스 부재.',
+        linkedSections:['FLT'],
+        capPlan:'① FDA 프로그램 절차서 개정 — 결과 활용 절차 포함\n② FDA 월간 보고 체계 수립\n③ FDA 결과의 SMS 위험요소 식별 연계 절차\n④ 비행승무원 FDA 결과 피드백 방법 수립',
+        fatContent:'FDA 프로그램 절차서 개정 완료(2025-09-15). 월간 FDA 보고서 양식 도입. SMS 연계 절차 OM-A에 반영.',
+        evidence:['FDA 절차서 개정본(FOM-012 Rev.02)', 'FDA 월간 보고 양식', 'OM-A SMS-FDA 연계 절차'],
+        capDue:'2025-09-30', fatStatus:'closed', status:'closed' },
+
+      { id:'93293', isarp:'ORG 3.4.2',  sect:'ORG',
+        desc:'비상대응계획(ERP) 내용 미흡',
+        findingText:'비상대응계획(Emergency Response Plan)이 수립되어 있으나 항공기 사고 발생 시 대응 역할 및 책임, 외부 기관(당국·병원·미디어)과의 협력 절차가 구체적으로 명시되지 않음.',
+        rootCause:'ERP 수립 시 관련 기관 협의 미흡. ERP 훈련 및 검토 절차 미문서화.',
+        linkedSections:['FLT','GRH','MNT'],
+        capPlan:'① ERP 전면 개정 — 역할·책임·외부기관 협력 절차 포함\n② ERP 훈련 계획 수립 및 실시\n③ 관계 기관(국토부, 공항공사, 의료기관) MOU 체결\n④ ERP 연간 검토 절차 마련',
+        fatContent:'ERP Rev.03 전면 개정 완료(2025-10-01). 관계 기관 MOU 체결(국토부·인천공항). ERP 도상 훈련 실시(2025-10-10).',
+        evidence:['ERP Rev.03 (2025-10-01)', '관계 기관 MOU 체결 공문', 'ERP 도상 훈련 결과 보고서'],
+        capDue:'2025-10-31', fatStatus:'closed', status:'closed' },
+
+      // ── FLT 부문 (7건) ──────────────────────────────────────
+      { id:'93292', isarp:'FLT 2.1.1A', sect:'FLT',
+        desc:'비행승무원 자격 관리 절차 적합성',
+        findingText:'비행승무원 자격 관리 절차에 외부 서비스 제공업체(Contracted Training Organization) 선정 기준이 명시되지 않았으며, 계약 훈련기관의 자격 검증 절차가 미흡함.',
+        rootCause:'ISM Ed.17 FLT 2.1.1A 신규 요건(외부 훈련기관 선정 기준)에 대한 절차 미반영.',
+        linkedSections:['ORG'],
+        capPlan:'① OM-A/OM-D 훈련기관 선정 기준 절차 신설\n② 기 계약 훈련기관(시뮬레이터센터 등) 자격 검증 실시\n③ 훈련기관 평가 기준표 마련\n④ 계약 훈련기관 정기 평가 절차 수립',
+        fatContent:'FOM-002 비행승무원 훈련 절차 개정 완료(2025-09-05). 계약 훈련기관 자격 검증 완료(CAE·FSI). 훈련기관 평가 기준표 수립.',
+        evidence:['FOM-002 Rev.03 (훈련기관 선정 기준 포함)', '훈련기관 자격 검증 결과서', 'CAE/FSI 계약서 갱신본'],
+        capDue:'2025-09-15', fatStatus:'closed', status:'closed' },
+
+      { id:'93294', isarp:'FLT 2.2.1',  sect:'FLT',
+        desc:'초도 훈련 프로그램 내용 미흡',
+        findingText:'비행승무원 초도 훈련 프로그램에 위험물(DG) 인식 교육 및 보안 인식(Security Awareness) 모듈이 포함되지 않음.',
+        rootCause:'초도 훈련 교과 개정 시 최신 ISM 요건(DG 인식·보안 인식) 반영 누락.',
+        linkedSections:[],
+        capPlan:'① 초도 훈련 교과 개정 — DG 인식 + 보안 인식 모듈 추가\n② 기 수료 조종사 보충 교육 실시\n③ 훈련 교재(CBT) 개정',
+        fatContent:'초도 훈련 교과 개정 완료(2025-08-20). DG·보안 인식 CBT 모듈 개발 및 배포. 기 수료 조종사 24명 보충 교육 완료.',
+        evidence:['초도 훈련 교과(개정본)', 'DG 인식 CBT 모듈 완성본', '보충 교육 이수 기록 (24명)'],
+        capDue:'2025-09-15', fatStatus:'closed', status:'closed' },
+
+      { id:'93295', isarp:'FLT 3.3.10', sect:'FLT',
+        desc:'특수 공항 자격 요건 절차 미흡',
+        findingText:'특수 공항(Special Airport) 자격 절차가 규제 당국 기준과 일치하지 않으며, 자격 취득 후 유지·검증 기준이 문서화되지 않음.',
+        rootCause:'FOM 특수 공항 자격 절차 미개정 (ISM Ed.17 요건 반영 지연).',
+        linkedSections:[],
+        capPlan:'① FOM 특수 공항 자격 절차 개정\n② 국내 특수 공항 목록 및 자격 기준 갱신\n③ 자격 만료 전 재자격 절차 수립',
+        fatContent:'FOM-015 특수 공항 자격 절차 개정 완료(2025-08-25). 국내 특수 공항 목록 갱신(대구, 여수, 포항 등). 재자격 알림 시스템 도입.',
+        evidence:['FOM-015 Rev.02 특수 공항 자격 절차', '특수 공항 목록 갱신본', '재자격 알림 기록'],
+        capDue:'2025-09-15', fatStatus:'closed', status:'closed' },
+
+      { id:'93296', isarp:'FLT 3.4.3A', sect:'FLT',
+        desc:'피로위험관리(FRMS) SMS 연계 절차 미흡',
+        findingText:'피로위험관리시스템(FRMS)이 운영되고 있으나 SMS 위험관리 프로세스와의 연계 절차가 문서화되지 않음. 피로 관련 사건 보고 및 분석이 SMS 위험요소 식별과 별도로 운영됨.',
+        rootCause:'FRMS-SMS 연계 절차 미수립. ISM Ed.17 FLT 3.4.3A 신규 요건 반영 누락.',
+        linkedSections:['ORG'],
+        capPlan:'① FRMS-SMS 연계 절차 수립(OM-A 반영)\n② 피로 관련 보고 채널 VSRS에 통합\n③ 피로 사건 분석 결과의 SMS 위험요소 등록 절차',
+        fatContent:'OM-A SMS 챕터 내 FRMS 연계 절차 추가 완료(2025-09-20). 피로 보고 VSRS 통합 완료.',
+        evidence:['OM-A Rev.01 FRMS-SMS 연계 절차', '피로 보고 통합 기록 (Q3 2025)'],
+        capDue:'2025-10-15', fatStatus:'closed', status:'closed' },
+
+      { id:'93297', isarp:'FLT 3.11.17',sect:'FLT',
+        desc:'전환 고도(Transition Level) 표준 콜아웃 절차 미흡',
+        findingText:'표준 콜아웃(Standard Callout) 절차 중 Transition Level/Altitude 관련 콜아웃이 현행 운항 지역별 실제 적용 값과 일치하지 않으며, Sterile Cockpit 절차와 연계가 미흡함.',
+        rootCause:'FCOM 콜아웃 절차 업데이트 누락 (ISM Ed.17 개정 요건 반영 지연).',
+        linkedSections:[],
+        capPlan:'① FCOM 콜아웃 절차 개정 — Transition Level 최신화\n② 운항 지역별 Transition Level 적용 기준 명확화\n③ 비행승무원 CBT/브리핑 교육',
+        fatContent:'FCOM Section 3.11 개정 완료(2025-08-20). 전 조종사 CBT 교육 완료(2025-08-31).',
+        evidence:['FCOM 3.11 개정본 (2025-08-20)', '조종사 CBT 이수 기록 (전원 완료)'],
+        capDue:'2025-09-15', fatStatus:'closed', status:'closed' },
+
+      { id:'93298', isarp:'FLT 3.11.59',sect:'FLT',
+        desc:'안정화 접근(Stabilized Approach) 기준 절차 미흡',
+        findingText:'안정화 접근(Stabilized Approach) 절차가 기상 조건별 최소 기준값을 명시하지 않으며, 기상 불안정 시 Go-Around 결정 기준이 명확히 문서화되지 않음.',
+        rootCause:'ISM Ed.17 FLT 3.11.59 개정(59A+59B 통합) 요건의 FCOM 반영 지연.',
+        linkedSections:[],
+        capPlan:'① FCOM Stabilized Approach 섹션 전면 개정\n② 기상 조건별 최소 기준값 표(Table) 신설\n③ Go-Around 결정 기준 명확화\n④ 비행승무원 Ground Training 실시',
+        fatContent:'FCOM 3.11 Stabilized Approach 절차 개정 완료(2025-08-25). Go-Around 기준표 신설. 비행승무원 Ground Training 실시(2025-08-30).',
+        evidence:['FCOM 3.11 개정본 (Stabilized Approach)', 'Go-Around 결정 기준표', 'Ground Training 이수 기록'],
+        capDue:'2025-09-15', fatStatus:'closed', status:'closed' },
+
+      { id:'93299', isarp:'FLT 3.8.6A', sect:'FLT',
+        desc:'항공기 Walk-around 검사 위임 절차 미흡',
+        findingText:'비행승무원이 Walk-around 검사를 면허 정비사에게 위임하는 조건 및 절차가 FCOM에 명확히 정의되지 않음.',
+        rootCause:'ISM Ed.17 FLT 3.8.6A 개정 요건(위임 조건 명확화) 반영 누락.',
+        linkedSections:['MNT'],
+        capPlan:'① FCOM Walk-around 위임 절차 개정\n② 위임 가능 조건 및 정비사 자격 기준 명확화\n③ 정비부문과의 협의 절차 수립',
+        fatContent:'FCOM 3.8 개정 완료(2025-08-25). 정비부 협의 완료 및 MNT 절차서 동일 반영.',
+        evidence:['FCOM 3.8 개정본 (Walk-around 위임)', 'FLT-MNT 협의 회의록'],
+        capDue:'2025-09-15', fatStatus:'closed', status:'closed' },
+
+      // ── MNT 부문 (5건) ──────────────────────────────────────
+      { id:'93291', isarp:'MNT 3.1.1',  sect:'MNT',
+        desc:'정비프로그램 문서 개정 관리 절차 미흡',
+        findingText:'정비프로그램(Maintenance Program) 개정 시 변경 사항 식별, 배포, 이전 개정본 폐기 절차가 문서화되지 않았으며, 개정 이력 기록이 불충분함.',
+        rootCause:'문서 통제 절차 미정립. 정비프로그램 개정 관리 책임자·권한 미정의.',
+        linkedSections:[],
+        capPlan:'① 정비프로그램 문서 통제 절차 신설\n② 개정 이력 기록 양식 도입\n③ 이전 개정본 폐기 절차 수립\n④ 문서 배포 수신 확인 체계 마련',
+        fatContent:'MOE(Maintenance Organization Exposition) 문서 통제 절차 신설 완료(2025-09-01). 개정 이력 관리 대장 도입.',
+        evidence:['MOE 문서 통제 절차 (신설)', '정비프로그램 개정 이력 관리 대장', '구 개정본 폐기 기록'],
+        capDue:'2025-09-30', fatStatus:'closed', status:'closed' },
+
+      { id:'93300', isarp:'MNT 1.7.7',  sect:'MNT',
+        desc:'최신 승인 정비 데이터 확인 절차 미흡',
+        findingText:'정비 작업 수행 시 승인된 최신 정비 데이터(AMM, SRM 등) 확인 절차가 문서화되지 않았으며, 개정판 관리 체계가 불충분함.',
+        rootCause:'정비 데이터 관리 절차 미정립. AMM/SRM 최신성 확인 책임 불명확.',
+        linkedSections:[],
+        capPlan:'① 승인 정비 데이터 확인 절차 신설\n② 제조사 데이터 개정 모니터링 절차 수립\n③ 정비사 데이터 최신성 확인 교육 실시',
+        fatContent:'MOE 정비 데이터 관리 절차 신설(2025-09-01). Lido AMM 개정 모니터링 구독 갱신. 정비사 교육 실시(2025-09-10).',
+        evidence:['MOE 정비 데이터 관리 절차', 'AMM 개정 모니터링 구독 갱신 확인서', '정비사 교육 이수 기록'],
+        capDue:'2025-09-30', fatStatus:'closed', status:'closed' },
+
+      { id:'93301', isarp:'MNT 4.6.4',  sect:'MNT',
+        desc:'정비 품질 감사 절차 및 기록 미흡',
+        findingText:'정비 품질 감사(Quality Audit) 프로그램의 연간 계획이 수립되어 있지 않으며, 감사 결과에 대한 시정조치 및 후속 확인 기록이 불충분함.',
+        rootCause:'정비 QA 감사 프로그램 절차 미정립. QA 감사 결과 관리 체계 부재.',
+        linkedSections:['ORG'],
+        capPlan:'① 정비 QA 감사 프로그램 절차 수립\n② 연간 감사 계획 수립 및 승인\n③ 감사 결과 시정조치 추적 체계 도입\n④ QA 감사 기록 보관 절차 마련',
+        fatContent:'정비 QA 감사 절차서 신설(2025-09-15). 2025-2026 연간 감사 계획 수립. CAR 추적 대장 도입.',
+        evidence:['정비 QA 감사 절차서', '2025-2026 감사 연간 계획', 'QA 감사 CAR 추적 대장'],
+        capDue:'2025-10-15', fatStatus:'closed', status:'closed' },
+
+      { id:'93302', isarp:'MNT 4.11.1', sect:'MNT',
+        desc:'신뢰성 프로그램(Reliability Program) 문서화 미흡',
+        findingText:'신뢰성 프로그램(Reliability Program)이 운영되고 있으나 분석 방법론, 경고 수준(Alert Level), 조사 기준이 문서화되지 않음.',
+        rootCause:'신뢰성 프로그램 절차서 미비. 경고 수준 설정 기준 및 개정 절차 부재.',
+        linkedSections:[],
+        capPlan:'① 신뢰성 프로그램 절차서 신설\n② Alert Level 설정 기준 문서화\n③ 신뢰성 보고서 주기 및 양식 확립\n④ 국토부 승인 절차 진행',
+        fatContent:'신뢰성 프로그램 절차서(REM-001) 신설 및 국토부 승인 완료(2025-10-05). Alert Level 설정 기준 정의.',
+        evidence:['REM-001 신뢰성 프로그램 절차서', '국토부 승인서 (2025-10-05)', 'Alert Level 기준 문서'],
+        capDue:'2025-10-31', fatStatus:'closed', status:'closed' },
+
+      { id:'93303', isarp:'MNT 2.5.1',  sect:'MNT',
+        desc:'감항성 유지 정보 획득 절차 미흡',
+        findingText:'감항성 유지(Continuing Airworthiness) 관련 규제 당국 및 항공기 설계 기관(ADO)으로부터의 정보 획득·처리 절차가 문서화되지 않음.',
+        rootCause:'감항성 정보 처리 절차 미수립. 정보 수신 후 정비 조치 연계 절차 부재.',
+        linkedSections:[],
+        capPlan:'① 감항성 정보 획득 및 처리 절차 신설\n② TC 홀더(Boeing) 정보 수신 채널 공식화\n③ AD/SB 처리 현황 추적 대장 도입',
+        fatContent:'감항성 정보 처리 절차(AWI-001) 신설 완료(2025-09-20). Boeing 정보 채널 공식 등록. AD/SB 추적 대장 도입.',
+        evidence:['AWI-001 감항성 정보 처리 절차', 'Boeing 정보 수신 채널 등록 확인서', 'AD/SB 추적 대장'],
+        capDue:'2025-09-30', fatStatus:'closed', status:'closed' },
+
+      // ── DSP 부문 (1건) ──────────────────────────────────────
+      { id:'93304', isarp:'DSP 3.2.8A', sect:'DSP',
+        desc:'운항 통제 절차 적용 범위 미흡',
+        findingText:'운항 통제(Operational Control) 절차가 ETOPS 운항 등 특수 운항 상황에서의 Dispatcher 역할 및 판단 기준을 명확히 정의하지 않음.',
+        rootCause:'운항 통제 절차서(OCM) 내 특수 운항 조항 미반영.',
+        linkedSections:[],
+        capPlan:'① OCM 특수 운항 조항 신설\n② ETOPS Dispatcher 역할 및 권한 명확화\n③ 관련 Dispatcher 교육 실시',
+        fatContent:'OCM 개정 완료(2025-09-01). ETOPS 특수 운항 절차 신설. Dispatcher 교육 실시(2025-09-05).',
+        evidence:['OCM Rev.02 (특수 운항 조항 포함)', 'Dispatcher 교육 이수 기록'],
+        capDue:'2025-09-30', fatStatus:'closed', status:'closed' },
+
+      // ── GRH 부문 (1건) ──────────────────────────────────────
+      { id:'93305', isarp:'GRH 3.2.6A', sect:'GRH',
+        desc:'항공기 탑승교 철수 절차 미흡',
+        findingText:'객실 도어 닫힘 후 탑승교(Loading Bridge) 철수 절차가 표준화되지 않았으며, 철수 기준 및 지상 조업 인원 간 통신 절차가 문서화되지 않음.',
+        rootCause:'GOM 탑승교 철수 절차 미개정 (ISM Ed.17 GRH 3.2.6A 개정 요건 반영 지연).',
+        linkedSections:[],
+        capPlan:'① GOM 탑승교 철수 절차 개정\n② 철수 통신 표준 절차 수립\n③ 지상 조업 인원 교육 실시',
+        fatContent:'GOM 탑승교 절차 개정 완료(2025-08-20). 지상 조업 인원 교육 실시(2025-08-25).',
+        evidence:['GOM Rev.05 탑승교 철수 절차', '지상 조업 인원 교육 기록 (2025-08-25)'],
+        capDue:'2025-09-15', fatStatus:'closed', status:'closed' },
     ],
     files: [
       {label:'IAR (Final)', path:'../../IOSA (7.28~8.1)/RESULT/IOSA-ESR-IA-2025_Final.pdf'},
@@ -1186,34 +1394,74 @@ ${a.placeholder ? `
   </div>
 </div>
 
-<!-- Key Findings -->
+<!-- Key Findings — Repeated ISARP Focus -->
+${(()=>{
+  const cars = a.keyCARs || [];
+  const repeated = cars.filter(c => c.linkedSections && c.linkedSections.length > 0);
+  const sectionOnly = cars.filter(c => !c.linkedSections || c.linkedSections.length === 0);
+  const SECT_COLOR_MAP = {ORG:'#1d4ed8',FLT:'#0369a1',DSP:'#7c3aed',MNT:'#b45309',CAB:'#db2777',GRH:'#059669',CGO:'#d97706',SEC:'#dc2626'};
+  const SECT_BG_MAP = {ORG:'#eff6ff',FLT:'#e0f2fe',DSP:'#f5f3ff',MNT:'#fef3c7',CAB:'#fce7f3',GRH:'#d1fae5',CGO:'#fef9c3',SEC:'#fee2e2'};
+
+  function sectionBadges(sects) {
+    return (sects||[]).map(s=>`<span style="background:${SECT_BG_MAP[s]||'#f1f5f9'};color:${SECT_COLOR_MAP[s]||'#555'};border:1px solid ${SECT_COLOR_MAP[s]||'#cbd5e1'}30;padding:1px 6px;border-radius:3px;font-size:0.57rem;font-weight:800;">${s}</span>`).join('');
+  }
+
+  function findingRow(car, isRepeated) {
+    const statusColor = car.status==='closed' ? '#1a7a4a' : '#d20015';
+    const statusBg    = car.status==='closed' ? '#f0faf4' : '#fff0f0';
+    const statusLabel = car.status==='closed' ? '종결' : '미결';
+    return `<div onclick="openFindingDetail('${car.id}')"
+      style="display:grid;grid-template-columns:auto 1fr auto;gap:0;align-items:start;padding:10px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background 150ms;"
+      onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
+      <div style="padding-top:1px;margin-right:10px;">
+        <span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:2px 7px;border-radius:3px;font-size:0.62rem;font-weight:900;white-space:nowrap;display:inline-block;">${car.isarp}</span>
+        ${isRepeated ? `<div style="margin-top:4px;display:flex;gap:3px;flex-wrap:wrap;">${sectionBadges(car.linkedSections)}</div>` : ''}
+      </div>
+      <div>
+        <div style="font-size:0.78rem;color:#222;font-weight:600;line-height:1.4;">${car.desc}</div>
+        ${isRepeated ? `<div style="font-size:0.68rem;color:#7c3aed;margin-top:3px;font-weight:700;"><i class="fas fa-link me-1"></i>다부문 연계 Finding</div>` : `<div style="font-size:0.68rem;color:#888;margin-top:2px;">${car.sect} 부문 단독</div>`}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-left:10px;padding-top:1px;">
+        <span style="background:${statusBg};color:${statusColor};border:1px solid ${statusColor}30;padding:2px 8px;border-radius:3px;font-size:0.62rem;font-weight:800;white-space:nowrap;">${statusLabel}</span>
+        <i class="fas fa-chevron-right" style="font-size:0.6rem;color:#ccc;"></i>
+      </div>
+    </div>`;
+  }
+
+  return `
+<div class="row g-3 mb-3">
+  <div class="col-12">
+    <div class="w-card">
+      <div class="w-card-header" style="border-bottom:2px solid var(--eastar-red);">
+        <div>
+          <span class="w-card-title"><i class="fas fa-link me-2" style="color:#7c3aed;"></i>다부문 연계 Findings (Repeated ISARPs)</span>
+          <div style="font-size:0.68rem;color:#888;margin-top:2px;">복수 부문에 공통 영향 — 가장 우선 조치 필요</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="background:#f5f3ff;color:#7c3aed;border:1px solid #c4b5fd;padding:3px 10px;border-radius:12px;font-size:0.65rem;font-weight:800;">${repeated.length}건</span>
+          <span style="font-size:0.65rem;color:#aaa;"><i class="fas fa-hand-pointer me-1"></i>클릭하면 상세보기</span>
+        </div>
+      </div>
+      <div>
+        ${repeated.length === 0
+          ? '<div style="padding:20px;text-align:center;color:#bbb;font-size:0.8rem;">다부문 연계 Finding 없음</div>'
+          : repeated.map(car => findingRow(car, true)).join('')}
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="row g-3">
   <div class="col-md-7">
     <div class="w-card h-100">
       <div class="w-card-header">
-        <span class="w-card-title">주요 FINDINGS</span>
-        <span class="pill pill-red">총 ${a.totalF}건</span>
+        <span class="w-card-title"><i class="fas fa-exclamation-triangle me-2" style="color:var(--eastar-red);"></i>부문별 단독 Findings</span>
+        <span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:3px 10px;border-radius:12px;font-size:0.65rem;font-weight:800;">${sectionOnly.length}건</span>
       </div>
       <div>
-        <table class="iata-table">
-          <thead><tr><th>ISARP</th><th>내용</th><th>상태</th></tr></thead>
-          <tbody>
-            ${(a.keyCARs||[]).map(car => {
-              const capF = (APP_DATA.cap.findings||[]).find(f=>f.id===car.id);
-              const status = capF ? capF.status : 'open';
-              const stMap = {open:'pill-red', submitted:'pill-gold', approved:'pill-red', closed:'pill-red'};
-              const stLabel = {open:'미결', submitted:'제출', approved:'승인', closed:'종결'};
-              return `<tr>
-                <td><span style="font-size:0.76rem;font-weight:700;color:var(--eastar-red);">${car.isarp}</span></td>
-                <td style="font-size:0.78rem;">${car.desc}</td>
-                <td>
-                  <span class="pill ${stMap[status]||'pill-red'}" style="cursor:pointer;" onclick="navigateToHistoryCAP(car.isarp.split(' ')[0])">${stLabel[status]||'미결'}</span>
-                </td>
-              </tr>`;
-            }).join('')}
-            ${(a.keyCARs||[]).length > 0 ? `<tr><td colspan="3" style="font-size:0.74rem;color:#bbb;text-align:center;padding:10px;">+ ${a.totalF - (a.keyCARs||[]).length}건 추가 → 아래 CAP/FAT 섹션 참조</td></tr>` : (a.totalF > 0 ? `<tr><td colspan="3" style="font-size:0.78rem;color:#94a3b8;text-align:center;padding:16px;"><i class="fas fa-info-circle me-1"></i>상세 지적 목록은 IATA Connect IAR에서 확인하세요</td></tr>` : `<tr><td colspan="3" style="font-size:0.78rem;color:#d20015;text-align:center;padding:16px;"><i class="fas fa-check-circle me-1"></i>지적사항 없음</td></tr>`)}
-          </tbody>
-        </table>
+        ${sectionOnly.length === 0
+          ? '<div style="padding:20px;text-align:center;color:#bbb;font-size:0.8rem;">단독 Finding 없음</div>'
+          : sectionOnly.map(car => findingRow(car, false)).join('')}
       </div>
     </div>
   </div>
@@ -1235,6 +1483,16 @@ ${a.placeholder ? `
             <td style="padding:8px 0;font-weight:600;border-bottom:1px solid var(--border-light);">${v}</td>
           </tr>`).join('')}
         </table>
+        <div style="margin-top:14px;padding:10px 12px;background:#f5f3ff;border-radius:6px;border-left:3px solid #7c3aed;">
+          <div style="font-size:0.62rem;font-weight:800;color:#7c3aed;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">부문별 Finding 분포</div>
+          ${(a.sections||[]).filter(s=>s.f>0).map(s=>`
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+              <span style="font-size:0.72rem;font-weight:700;color:#374151;">${s.code} ${s.name}</span>
+              <div style="display:flex;gap:4px;">
+                ${s.f>0?`<span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:1px 7px;border-radius:3px;font-size:0.62rem;font-weight:800;">F ${s.f}</span>`:''}
+              </div>
+            </div>`).join('')}
+        </div>
         ${isAdmin && (a.files||[]).length > 0 ? `
         <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
           ${(a.files||[]).map(f=>`<a href="${f.path}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:var(--eastar-red);color:#fff;border-radius:3px;font-size:0.72rem;font-weight:700;text-decoration:none;"><i class="fas fa-file-pdf"></i> ${f.label}</a>`).join('')}
@@ -1243,6 +1501,14 @@ ${a.placeholder ? `
     </div>
   </div>
 </div>
+
+<!-- Finding Detail Panel -->
+<div id="histFindingOverlay" onclick="closeFindingDetail()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1040;"></div>
+<div id="histFindingPanel" style="display:none;position:fixed;top:0;right:0;bottom:0;width:520px;background:#fff;z-index:1050;box-shadow:-4px 0 28px rgba(0,0,0,0.18);overflow-y:auto;">
+  <div id="histFindingContent"></div>
+</div>
+`;
+})()}
 
 <!-- AUDITOR LIST -->
 ${(()=>{
@@ -2295,6 +2561,121 @@ function showDetailTab(tab) {
 
 // ── CAP/FAT in History: filtered navigation ───────────────
 let historyCAPFilter = '';
+
+// ── Finding Detail Panel (심사 이력 → 주요 FINDINGS 클릭) ────
+function openFindingDetail(id) {
+  const a = AUDIT_HISTORY[historyTab];
+  const car = (a.keyCARs||[]).find(c => c.id === id);
+  if (!car) return;
+  const SECT_COLOR = {ORG:'#1d4ed8',FLT:'#0369a1',DSP:'#7c3aed',MNT:'#b45309',CAB:'#db2777',GRH:'#059669',CGO:'#d97706',SEC:'#dc2626'};
+  const SECT_BG    = {ORG:'#eff6ff',FLT:'#e0f2fe',DSP:'#f5f3ff',MNT:'#fef3c7',CAB:'#fce7f3',GRH:'#d1fae5',CGO:'#fef9c3',SEC:'#fee2e2'};
+  const isRepeated = car.linkedSections && car.linkedSections.length > 0;
+  const sectionBadges = (sects) => (sects||[]).map(s=>`<span style="background:${SECT_BG[s]||'#f1f5f9'};color:${SECT_COLOR[s]||'#555'};border:1px solid ${SECT_COLOR[s]||'#aaa'}40;padding:2px 8px;border-radius:3px;font-size:0.62rem;font-weight:800;">${s}</span>`).join('');
+
+  document.getElementById('histFindingContent').innerHTML = `
+    <div style="position:sticky;top:0;background:#fff;z-index:10;border-bottom:2px solid #f0f0f0;padding:16px 20px 14px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+        <div>
+          <div style="font-size:0.6rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:5px;">Finding 상세 — 2025 Initial Audit</div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.25);padding:4px 12px;border-radius:4px;font-size:0.82rem;font-weight:900;">${car.isarp}</span>
+            ${isRepeated ? `<span style="background:#f5f3ff;color:#7c3aed;border:1px solid #c4b5fd;padding:3px 9px;border-radius:3px;font-size:0.62rem;font-weight:800;"><i class="fas fa-link me-1"></i>다부문 연계</span>` : `<span style="background:#f8fafc;color:#64748b;border:1px solid #e2e8f0;padding:3px 9px;border-radius:3px;font-size:0.62rem;font-weight:700;">${car.sect} 단독</span>`}
+            <span style="background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;padding:3px 9px;border-radius:3px;font-size:0.62rem;font-weight:800;"><i class="fas fa-check-circle me-1"></i>종결 완료</span>
+          </div>
+        </div>
+        <button onclick="closeFindingDetail()" style="background:none;border:none;font-size:1.3rem;color:#888;cursor:pointer;padding:4px;flex-shrink:0;">&times;</button>
+      </div>
+    </div>
+
+    <div style="padding:20px;">
+      <!-- 연계 부문 -->
+      ${isRepeated ? `
+      <div style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:6px;padding:12px 14px;margin-bottom:16px;">
+        <div style="font-size:0.6rem;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;"><i class="fas fa-link me-1"></i>연계 부문 (이 Finding이 영향을 미치는 부문)</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">${sectionBadges([car.sect, ...(car.linkedSections||[])])}</div>
+        <div style="font-size:0.7rem;color:#6d28d9;margin-top:6px;">※ 해당 부문의 관련 절차·문서를 함께 확인하고 일관성 있게 개정해야 합니다</div>
+      </div>` : ''}
+
+      <!-- Finding 내용 -->
+      <div style="margin-bottom:16px;">
+        <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#374151;margin-bottom:6px;">지적 내용 요약</div>
+        <div style="background:#fff8f8;border:1px solid rgba(210,0,21,0.15);border-left:3px solid var(--eastar-red);border-radius:0 6px 6px 0;padding:12px 14px;font-size:0.82rem;line-height:1.6;color:#1a1a1a;font-weight:600;">${car.desc}</div>
+      </div>
+
+      <!-- Finding 원문 -->
+      ${car.findingText ? `
+      <div style="margin-bottom:16px;">
+        <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#374151;margin-bottom:6px;">Finding 내용 (IAR 기준)</div>
+        <div style="background:#fafafa;border:1px solid #e8e8e8;border-radius:6px;padding:12px 14px;font-size:0.78rem;line-height:1.7;color:#374151;">${car.findingText}</div>
+      </div>` : ''}
+
+      <!-- 근본 원인 -->
+      ${car.rootCause ? `
+      <div style="margin-bottom:16px;">
+        <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#374151;margin-bottom:6px;">근본 원인 (Root Cause)</div>
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-left:3px solid #f59e0b;border-radius:0 6px 6px 0;padding:12px 14px;font-size:0.8rem;line-height:1.6;color:#78350f;">${car.rootCause}</div>
+      </div>` : ''}
+
+      <!-- CAP 제출 내용 -->
+      ${car.capPlan ? `
+      <div style="margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#374151;">CAP 제출 내용</div>
+          <span style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;padding:2px 7px;border-radius:3px;font-size:0.58rem;font-weight:800;">IATA 제출 완료</span>
+        </div>
+        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-left:3px solid #0ea5e9;border-radius:0 6px 6px 0;padding:12px 14px;font-size:0.78rem;line-height:1.8;color:#0c4a6e;white-space:pre-line;">${car.capPlan}</div>
+      </div>` : ''}
+
+      <!-- FAT 내용 -->
+      ${car.fatContent ? `
+      <div style="margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#374151;">FAT 내용 (Final Action Taken)</div>
+          <span style="background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;padding:2px 7px;border-radius:3px;font-size:0.58rem;font-weight:800;"><i class="fas fa-check me-1"></i>IATA 승인</span>
+        </div>
+        <div style="background:#f0faf4;border:1px solid #a7f3d0;border-left:3px solid #10b981;border-radius:0 6px 6px 0;padding:12px 14px;font-size:0.78rem;line-height:1.7;color:#064e3b;">${car.fatContent}</div>
+      </div>` : ''}
+
+      <!-- 증빙 자료 -->
+      ${car.evidence && car.evidence.length > 0 ? `
+      <div style="margin-bottom:20px;">
+        <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#374151;margin-bottom:8px;">제출 증빙 자료</div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px 14px;">
+          ${car.evidence.map((ev,i)=>`
+          <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:${i<car.evidence.length-1?'1px solid #f0f0f0':'none'};">
+            <i class="fas fa-paperclip" style="color:#3b82f6;font-size:0.7rem;flex-shrink:0;"></i>
+            <span style="font-size:0.77rem;color:#374151;">${ev}</span>
+          </div>`).join('')}
+        </div>
+      </div>` : ''}
+
+      <!-- 완료 배너 -->
+      <div style="background:#d1fae5;border:1px solid #6ee7b7;border-radius:6px;padding:12px 14px;text-align:center;">
+        <div style="font-size:0.8rem;font-weight:800;color:#065f46;"><i class="fas fa-check-circle me-2"></i>Finding 완전 종결 — IATA QC 승인 완료</div>
+        ${car.capDue ? `<div style="font-size:0.7rem;color:#1a7a4a;margin-top:3px;">마감일: ${car.capDue} | FAT 상태: 최종 승인</div>` : ''}
+      </div>
+    </div>`;
+
+  const overlay = document.getElementById('histFindingOverlay');
+  const panel   = document.getElementById('histFindingPanel');
+  if (overlay) { overlay.style.display = 'block'; }
+  if (panel)   {
+    panel.style.display = 'block';
+    panel.style.transform = 'translateX(100%)';
+    panel.style.transition = 'transform 280ms cubic-bezier(0.32,0,0.67,0)';
+    requestAnimationFrame(() => { panel.style.transform = 'translateX(0)'; });
+  }
+}
+
+function closeFindingDetail() {
+  const overlay = document.getElementById('histFindingOverlay');
+  const panel   = document.getElementById('histFindingPanel');
+  if (panel) {
+    panel.style.transform = 'translateX(100%)';
+    setTimeout(() => { if (panel) panel.style.display = 'none'; }, 280);
+  }
+  if (overlay) overlay.style.display = 'none';
+}
 
 function navigateToHistoryCAP(code) {
   historyTab = '2025';

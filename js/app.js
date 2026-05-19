@@ -1701,6 +1701,19 @@ function saveCapDetail(idx) {
   renderCAP();
 }
 
+// CR 탭에서 Finding ISARP 클릭 → 심사이력 Finding 상세 패널 열기
+function openFindingDetailFromCR(isarpCode) {
+  if (typeof AUDIT_HISTORY === 'undefined') return;
+  const auditHistory = AUDIT_HISTORY['2025'];
+  if (!auditHistory) return;
+  const car = (auditHistory.keyCARs||[]).find(c => c.isarp === isarpCode);
+  if (!car) return;
+  // 임시로 historyTab 설정 후 openFindingDetail 호출 (index.html 함수)
+  if (typeof openFindingDetail === 'function') {
+    openFindingDetail(car.id);
+  }
+}
+
 // ─── RBI ──────────────────────────────────────────────────────
 function renderRBI() {
   const rbi = APP_DATA.rbiPrep;
@@ -3106,7 +3119,29 @@ function _renderCRContent(container, allEntries, crManuals) {
 .cr-ev-btn:hover { background:#dbeafe; }
 </style>`;
 
-  container.innerHTML = tableStyles + `
+  // Build Repeated ISARPs banner for CR section
+  const auditKeyCARs = (typeof AUDIT_HISTORY !== 'undefined' && AUDIT_HISTORY['2025'] && AUDIT_HISTORY['2025'].keyCARs) || [];
+  const sectionFindings = auditKeyCARs.filter(f => f.sect === crSection);
+  const repeatedInSection = sectionFindings.filter(f => f.linkedSections && f.linkedSections.length > 0);
+  const singleInSection   = sectionFindings.filter(f => !f.linkedSections || f.linkedSections.length === 0);
+  const SCBG = {ORG:'#eff6ff',FLT:'#e0f2fe',DSP:'#f5f3ff',MNT:'#fef3c7',CAB:'#fce7f3',GRH:'#d1fae5',CGO:'#fef9c3',SEC:'#fee2e2'};
+  const SCCO = {ORG:'#1d4ed8',FLT:'#0369a1',DSP:'#7c3aed',MNT:'#b45309',CAB:'#db2777',GRH:'#059669',CGO:'#d97706',SEC:'#dc2626'};
+
+  const repeatedBannerHtml = sectionFindings.length > 0 ? `
+<div style="background:#f5f3ff;border:1px solid #c4b5fd;border-left:4px solid #7c3aed;border-radius:4px;padding:12px 16px;margin-bottom:14px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+    <div>
+      <div style="font-size:0.65rem;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;"><i class="fas fa-link me-1"></i>2025 심사 지적 ISARP — ${crSection} 부문 (${sectionFindings.length}건)</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        ${repeatedInSection.map(f=>`<span onclick="openFindingDetailFromCR('${f.isarp}')" style="background:#f5f3ff;color:#7c3aed;border:1px solid #c4b5fd;padding:3px 10px;border-radius:4px;font-size:0.68rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" title="${f.desc}"><i class="fas fa-link" style="font-size:0.55rem;"></i>${f.isarp}<span style="font-size:0.55rem;opacity:0.75;">연계</span></span>`).join('')}
+        ${singleInSection.map(f=>`<span onclick="openFindingDetailFromCR('${f.isarp}')" style="background:#fff0f0;color:#d20015;border:1px solid rgba(210,0,21,0.25);padding:3px 10px;border-radius:4px;font-size:0.68rem;font-weight:800;cursor:pointer;" title="${f.desc}"><i class="fas fa-exclamation-triangle" style="font-size:0.55rem;"></i> ${f.isarp}</span>`).join('')}
+      </div>
+    </div>
+    <div style="font-size:0.68rem;color:#6d28d9;"><i class="fas fa-hand-pointer me-1"></i>클릭하면 CAP/FAT 상세 보기</div>
+  </div>
+</div>` : '';
+
+  container.innerHTML = tableStyles + repeatedBannerHtml + `
 <!-- Modal for adding ISARP -->
 <div id="cr-add-modal" style="display:none;" onclick="if(event.target===this)closeCRAddModal()">
   <div id="cr-add-modal-box">
@@ -3239,7 +3274,12 @@ ${sectionEntries.length === 0 ? `
     <div class="cr-header-cell">시정조치<br><span style="font-weight:500;opacity:0.7;">Corrective Action</span></div>
     <div class="cr-header-cell"></div>
   </div>
-  ${sectionEntries.map((e, idx) => {
+  ${(()=>{
+    // Build repeated ISARP lookup from audit history
+    const auditFindings = (typeof AUDIT_HISTORY !== 'undefined' && AUDIT_HISTORY['2025'] && AUDIT_HISTORY['2025'].keyCARs) || [];
+    const findingIsarps = new Set(auditFindings.map(f => f.isarp));
+    const repeatedIsarps = new Set(auditFindings.filter(f => f.linkedSections && f.linkedSections.length > 0).map(f => f.isarp));
+    return sectionEntries.map((e, idx) => {
     const st = CR_STATUS_STYLE[e.status] || CR_STATUS_STYLE[''];
     const req = e.requirementText || '';
     const shortReq = _esc(req.length > 140 ? req.slice(0,140)+'…' : req);
@@ -3249,7 +3289,10 @@ ${sectionEntries.length === 0 ? `
       `<option value="${_esc(v)}" ${e.status===v?'selected':''}>${v||'미입력'}</option>`
     ).join('');
     const finding = (APP_DATA && APP_DATA.cap && APP_DATA.cap.findings||[]).find(f=>f.isarp===e.isarpCode);
+    const isRepeated  = repeatedIsarps.has(e.isarpCode);
+    const hasFinding  = findingIsarps.has(e.isarpCode);
     const findingBadge = e.status==='NC' ? `<span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:1px 5px;border-radius:3px;font-size:0.55rem;font-weight:800;">NC</span>` : '';
+    const repeatedBadge = isRepeated ? `<span style="background:#f5f3ff;color:#7c3aed;border:1px solid #c4b5fd;padding:1px 5px;border-radius:3px;font-size:0.52rem;font-weight:800;cursor:pointer;" onclick="openFindingDetailFromCR('${e.isarpCode}')" title="다부문 연계 Finding — 클릭하면 상세 보기"><i class="fas fa-link" style="font-size:0.48rem;"></i> 연계</span>` : (hasFinding ? `<span style="background:#fff0f0;color:#d20015;border:1px solid rgba(210,0,21,0.25);padding:1px 5px;border-radius:3px;font-size:0.52rem;font-weight:800;cursor:pointer;" onclick="openFindingDetailFromCR('${e.isarpCode}')" title="이전 심사 Finding ISARP — 클릭하면 상세 보기"><i class="fas fa-exclamation-triangle" style="font-size:0.48rem;"></i> F</span>` : '');
     const evidenceItems = getEvidenceItems(e.isarpCode);
     const evBtnHtml = evidenceItems.length > 0
       ? `<button class="cr-ev-btn" onclick="toggleCREvidence('${_esc(e.id)}')" title="증빙자료 목록 보기 (내부심사용)">💼 증빙자료</button>`
@@ -3261,10 +3304,11 @@ ${sectionEntries.length === 0 ? `
   <textarea class="cr-ev-note" placeholder="추가 메모 (준비 현황, 파일명 등)..."
     onblur="debouncedCRSave('${_esc(e.id)}','evidenceNotes',this.value)">${_esc(e.evidenceNotes||'')}</textarea>
 </div>` : '';
+    const rowBorder = isRepeated ? 'border-left-color:#7c3aed;border-left-width:4px;' : hasFinding ? 'border-left-color:#d20015;border-left-width:3px;' : `border-left-color:${st.color};`;
     return `<div class="cr-row-wrap">
-<div class="cr-row" data-id="${_esc(e.id)}" style="border-left-color:${st.color};background:${rowBg};${rowOp}">
+<div class="cr-row" data-id="${_esc(e.id)}" style="${rowBorder}background:${rowBg};${rowOp}">
   <div class="cr-cell cr-num">${idx+1}</div>
-  <div class="cr-cell cr-isarp">${_esc(e.isarpCode)}${findingBadge?'<br>'+findingBadge:''}${evBtnHtml?'<br>'+evBtnHtml:''}</div>
+  <div class="cr-cell cr-isarp">${_esc(e.isarpCode)}${repeatedBadge?'<br>'+repeatedBadge:''}${findingBadge?'<br>'+findingBadge:''}${evBtnHtml?'<br>'+evBtnHtml:''}</div>
   <div class="cr-cell" style="padding:4px 6px;">
     <input type="date" value="${_esc(e.auditDate||'')}"
       style="width:100%;border:1px solid #eee;border-radius:3px;padding:4px 5px;font-size:0.7rem;font-family:inherit;background:transparent;color:#333;outline:none;"
@@ -3287,7 +3331,7 @@ ${sectionEntries.length === 0 ? `
   <div class="cr-cell cr-del-btn"><button onclick="deleteCREntry('${_esc(e.id)}')" title="삭제"><i class="fas fa-times"></i></button></div>
 </div>${evPanelHtml}
 </div>`;
-  }).join('')}
+  }).join('');})()}
   <!-- Add row button -->
   <div style="padding:10px 14px;border-top:2px dashed #eee;background:#f9fafb;display:flex;align-items:center;gap:8px;">
     <button onclick="showCRAddModal()" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;background:#fff;color:#555;border:1.5px solid #e0e0e0;border-radius:4px;font-size:0.73rem;font-weight:700;cursor:pointer;">
