@@ -1899,6 +1899,7 @@ function openModal(id) {
 // Init
 document.addEventListener('DOMContentLoaded', () => {
   navigate('dashboard');
+  initMeetingNotifications();
 });
 
 // ══════════════════════════════════════════════════════════
@@ -4456,6 +4457,8 @@ function saveMeeting() {
   closeMeetingForm();
   if (typeof showCRSavedToast === 'function') showCRSavedToast();
   renderMeetings();
+  // 알림 권한 요청 (처음 회의 등록 시)
+  requestNotificationPermission();
 }
 function editMeeting(id) {
   const stored = JSON.parse(localStorage.getItem('iosa_meetings') || '[]');
@@ -4467,4 +4470,70 @@ function deleteMeeting(id) {
   const stored = JSON.parse(localStorage.getItem('iosa_meetings') || '[]').filter(m=>m.id!==id);
   localStorage.setItem('iosa_meetings', JSON.stringify(stored));
   renderMeetings();
+}
+
+// ─── 회의 브라우저 알림 ─────────────────────────────────────
+function initMeetingNotifications() {
+  if (!('Notification' in window)) return;
+  checkMeetingNotifications();
+  // 30분마다 체크 (포털이 열려 있는 동안)
+  setInterval(checkMeetingNotifications, 30 * 60 * 1000);
+}
+
+function requestNotificationPermission(callback) {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'granted') {
+    if (callback) callback();
+  } else if (Notification.permission !== 'denied') {
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted' && callback) callback();
+    });
+  }
+}
+
+function checkMeetingNotifications() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+
+  const meetings = JSON.parse(localStorage.getItem('iosa_meetings') || '[]');
+  const sent     = JSON.parse(localStorage.getItem('iosa_notif_sent') || '[]');
+  const now      = new Date();
+  const todayStr = now.toISOString().slice(0, 10);
+  const tomorrowStr = new Date(now.getTime() + 86400000).toISOString().slice(0, 10);
+  const hour     = now.getHours();
+  let changed    = false;
+
+  meetings.forEach(m => {
+    if (!m.date) return;
+
+    // ① 하루 전 알림 (당일이 아닌 시점에 도달하면 바로 발송)
+    const d1key = `d1_${m.id}_${m.date}`;
+    if (m.date === tomorrowStr && !sent.includes(d1key)) {
+      const timeLabel = m.time ? ` ${m.time}` : '';
+      const locLabel  = m.location ? ` · ${m.location}` : '';
+      new Notification('📅 [IOSA] 내일 회의 알림', {
+        body: `${m.title}${timeLabel}${locLabel}`,
+        icon: 'assets/iosa_stamp.png',
+        tag:  d1key,
+      });
+      sent.push(d1key);
+      changed = true;
+    }
+
+    // ② 당일 오전 알림 (08:00~10:59 사이에 한 번만)
+    const d0key = `d0_${m.id}_${m.date}`;
+    if (m.date === todayStr && hour >= 8 && hour < 11 && !sent.includes(d0key)) {
+      const timeLabel = m.time ? ` ${m.time}` : '';
+      const locLabel  = m.location ? ` · ${m.location}` : '';
+      new Notification('🔔 [IOSA] 오늘 회의 알림', {
+        body: `${m.title}${timeLabel}${locLabel}`,
+        icon: 'assets/iosa_stamp.png',
+        tag:  d0key,
+      });
+      sent.push(d0key);
+      changed = true;
+    }
+  });
+
+  if (changed) localStorage.setItem('iosa_notif_sent', JSON.stringify(sent));
 }
