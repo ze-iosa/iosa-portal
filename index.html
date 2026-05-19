@@ -413,7 +413,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/data.js"></script>
 <script src="js/ism18_isarps.js"></script>
-<script src="js/app.js?v=20250519ae"></script>
+<script src="js/app.js?v=20250519af"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════
    EXTENDED APP — Dashboard, History, Schedule, Manuals, Board
@@ -1648,8 +1648,10 @@ ${historyTab === '2025' ? `
 // ══════════════════════════════════════════════════════════
 //  SCHEDULE
 // ══════════════════════════════════════════════════════════
-function renderSchedule() {
-  const SCHED = {
+const SCHED_KEY = 'iosa_schedule_v1';
+
+function getDefaultSchedule() {
+  return {
     '2025': {
       color: 'var(--text-dark)', status: '완료',
       items: [
@@ -1692,7 +1694,19 @@ function renderSchedule() {
       ]
     }
   };
+}
 
+function getScheduleData() {
+  try {
+    const s = localStorage.getItem(SCHED_KEY);
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return getDefaultSchedule();
+}
+function saveScheduleData(d) { localStorage.setItem(SCHED_KEY, JSON.stringify(d)); }
+
+function renderSchedule() {
+  const SCHED = getScheduleData();
   const years = ['2025','2026','2027'];
   let schedTab = window._schedTab || '2025';
 
@@ -1707,11 +1721,53 @@ function renderSchedule() {
 <div class="tab-nav">
   ${years.map(y => {
     const d = SCHED[y];
-    return `<button class="tab-btn ${schedTab===y?'active':''}" onclick="window._schedTab='${y}';renderSchedule();">
-      ${y} <span class="pill pill-${y==='2025'?'green':y==='2026'?'red':'gray'}" style="font-size:0.58rem;margin-left:4px;">${d.status}</span>
+    const pillColor = y==='2025'?'green':y==='2026'?'red':'gray';
+    return `<button class="tab-btn ${schedTab===y?'active':''}" onclick="window._schedTab='${y}';renderSchedule();" style="display:inline-flex;align-items:center;gap:6px;">
+      ${y}
+      <span class="pill pill-${pillColor}" style="font-size:0.58rem;">${d.status}</span>
+      ${isAdmin ? `<i class="fas fa-pen" style="font-size:0.55rem;color:#bbb;margin-left:2px;" onclick="openSchedStatusEdit('${y}');event.stopPropagation();" title="상태 변경"></i>` : ''}
     </button>`;
   }).join('')}
 </div>
+
+${isAdmin ? `
+<div id="sched-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.48);z-index:3000;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;padding:28px 32px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,0.22);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h6 id="se-modal-title" style="font-weight:800;margin:0;color:#111;">일정 항목 편집</h6>
+      <button onclick="closeSchedEdit()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#aaa;line-height:1;">×</button>
+    </div>
+    <div style="display:grid;gap:12px;">
+      <div><label class="form-label">기간</label>
+        <input class="iata-input" id="se-period" placeholder="예: 2026.06~07 또는 2026.08.01"></div>
+      <div><label class="form-label">제목</label>
+        <input class="iata-input" id="se-title" placeholder="항목 제목"></div>
+      <div><label class="form-label">설명 (줄바꿈 가능)</label>
+        <textarea class="iata-input" id="se-desc" rows="3" style="resize:vertical;" placeholder="상세 설명"></textarea></div>
+      <div><label class="form-label">태그 (쉼표로 구분)</label>
+        <input class="iata-input" id="se-chips" placeholder="예: 교육, 심사원, RBI"></div>
+      <div style="display:flex;gap:16px;margin-top:4px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;font-weight:600;cursor:pointer;">
+          <input type="checkbox" id="se-done" style="width:15px;height:15px;accent-color:#1a7a4a;">
+          <span style="color:#1a7a4a;">완료</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;font-weight:600;cursor:pointer;">
+          <input type="checkbox" id="se-active" style="width:15px;height:15px;accent-color:var(--eastar-red);">
+          <span style="color:var(--eastar-red);">진행중</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:0.8rem;font-weight:600;cursor:pointer;">
+          <input type="checkbox" id="se-warn" style="width:15px;height:15px;accent-color:#b45309;">
+          <span style="color:#b45309;">경고</span>
+        </label>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end;">
+      <button class="btn-outline btn-outline-sm" onclick="closeSchedEdit()">취소</button>
+      <button class="btn-primary btn-primary-sm" onclick="saveSchedEdit()"><i class="fas fa-save me-1"></i>저장</button>
+    </div>
+  </div>
+</div>
+` : ''}
 
 <div class="row g-3">
   <div class="col-md-7">
@@ -1719,18 +1775,28 @@ function renderSchedule() {
       <div class="w-card-header">
         <span class="w-card-title">${schedTab}년 주요 일정</span>
         <span class="pill pill-${schedTab==='2025'?'green':schedTab==='2026'?'red':'gray'}">${SCHED[schedTab].status}</span>
+        ${isAdmin ? `<button onclick="openSchedEdit('${schedTab}',-1)" style="margin-left:auto;padding:3px 10px;background:#fff0f0;border:1px solid rgba(210,0,21,0.25);border-radius:4px;font-size:0.68rem;font-weight:700;color:var(--eastar-red);cursor:pointer;display:inline-flex;align-items:center;gap:4px;"><i class="fas fa-plus"></i> 항목 추가</button>` : ''}
       </div>
       <div class="w-card-body">
         <div class="timeline">
-          ${SCHED[schedTab].items.map(i => `
-            <div class="tl-item">
+          ${SCHED[schedTab].items.map((i, idx) => `
+            <div class="tl-item" style="position:relative;${isAdmin?'padding-right:60px;':''}">
               <div class="tl-dot ${i.done?'done':i.active?'active':i.warn?'warn':'future'}"></div>
-              <div>
+              <div style="flex:1;">
                 <div class="tl-period">${i.period}</div>
                 <div class="tl-title" style="${i.done?'color:#aaa;':i.active?'color:var(--eastar-red);':i.warn?'color:var(--eastar-gold);':''}">${i.title}</div>
-                <div class="tl-desc">${i.desc}</div>
-                <div class="tl-chips">${i.chips.map(c=>`<span class="tl-chip">${c}</span>`).join('')}</div>
+                <div class="tl-desc" style="white-space:pre-line;">${i.desc}</div>
+                <div class="tl-chips">${(i.chips||[]).map(c=>`<span class="tl-chip">${c}</span>`).join('')}</div>
               </div>
+              ${isAdmin ? `
+              <div style="position:absolute;top:0;right:0;display:flex;gap:3px;">
+                <button onclick="openSchedEdit('${schedTab}',${idx})" title="편집"
+                  style="width:24px;height:24px;border-radius:4px;background:#f8fafc;border:1px solid #e2e8f0;cursor:pointer;color:#64748b;font-size:0.65rem;display:flex;align-items:center;justify-content:center;">
+                  <i class="fas fa-pen"></i></button>
+                <button onclick="deleteSchedItem('${schedTab}',${idx})" title="삭제"
+                  style="width:24px;height:24px;border-radius:4px;background:#fff0f0;border:1px solid rgba(210,0,21,0.2);cursor:pointer;color:var(--eastar-red);font-size:0.65rem;display:flex;align-items:center;justify-content:center;">
+                  <i class="fas fa-trash"></i></button>
+              </div>` : ''}
             </div>
           `).join('')}
         </div>
@@ -1781,6 +1847,76 @@ function renderSchedule() {
   </div>
 </div>
 `;
+}
+
+// ── Schedule Edit Functions ────────────────────────────────
+let _schedEditState = null;
+
+function openSchedEdit(year, idx) {
+  if (!isAdmin) return;
+  _schedEditState = { year, idx };
+  const sched = getScheduleData();
+  const item = idx >= 0 ? sched[year].items[idx]
+    : { period:'', title:'', desc:'', chips:[], done:false, active:false, warn:false };
+  const modal = document.getElementById('sched-edit-modal');
+  if (!modal) return;
+  document.getElementById('se-modal-title').textContent = idx >= 0 ? '일정 항목 편집' : '새 항목 추가';
+  document.getElementById('se-period').value  = item.period || '';
+  document.getElementById('se-title').value   = item.title  || '';
+  document.getElementById('se-desc').value    = (item.desc  || '').replace(/\\n/g, '\n');
+  document.getElementById('se-chips').value   = (item.chips || []).join(', ');
+  document.getElementById('se-done').checked  = !!item.done;
+  document.getElementById('se-active').checked= !!item.active;
+  document.getElementById('se-warn').checked  = !!item.warn;
+  modal.style.display = 'flex';
+}
+
+function closeSchedEdit() {
+  const modal = document.getElementById('sched-edit-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function saveSchedEdit() {
+  if (!_schedEditState) return;
+  const { year, idx } = _schedEditState;
+  const period = document.getElementById('se-period').value.trim();
+  const title  = document.getElementById('se-title').value.trim();
+  if (!period || !title) { alert('기간과 제목을 입력하세요.'); return; }
+  const item = {
+    period,
+    title,
+    desc:   document.getElementById('se-desc').value.trim(),
+    chips:  document.getElementById('se-chips').value.split(',').map(c=>c.trim()).filter(Boolean),
+    done:   document.getElementById('se-done').checked,
+    active: document.getElementById('se-active').checked,
+    warn:   document.getElementById('se-warn').checked,
+  };
+  const sched = getScheduleData();
+  if (idx >= 0) sched[year].items[idx] = item;
+  else sched[year].items.push(item);
+  saveScheduleData(sched);
+  closeSchedEdit();
+  renderSchedule();
+}
+
+function deleteSchedItem(year, idx) {
+  if (!isAdmin || !confirm('이 항목을 삭제하시겠습니까?')) return;
+  const sched = getScheduleData();
+  sched[year].items.splice(idx, 1);
+  saveScheduleData(sched);
+  renderSchedule();
+}
+
+function openSchedStatusEdit(year) {
+  if (!isAdmin) return;
+  const sched = getScheduleData();
+  const opts = ['완료','진행중','예정','보류'];
+  const cur = sched[year].status || '예정';
+  const sel = prompt(`${year}년 상태를 선택하세요 (현재: ${cur})\n완료 / 진행중 / 예정 / 보류`, cur);
+  if (!sel || !opts.includes(sel.trim())) return;
+  sched[year].status = sel.trim();
+  saveScheduleData(sched);
+  renderSchedule();
 }
 
 // ══════════════════════════════════════════════════════════
