@@ -418,7 +418,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/data.js"></script>
 <script src="js/ism18_isarps.js"></script>
-<script src="js/app.js?v=20250519s"></script>
+<script src="js/app.js?v=20250519t"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════
    EXTENDED APP — Dashboard, History, Schedule, Manuals, Board
@@ -778,69 +778,63 @@ function renderDashboardNew() {
 <!-- Hero banner -->
 <div style="position:relative;margin-top:24px;margin-bottom:28px;border-radius:8px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.12);">
 
-  <!-- Background: white with red left accent -->
-  <div style="background:#fff;padding:36px 48px;position:relative;overflow:hidden;border-left:5px solid var(--eastar-red);">
+  <!-- 좌: 흰 배경 / 우: 레드 패널 -->
+  <div style="display:grid;grid-template-columns:1fr 260px;">
 
-    <!-- IATA 로고: 우측 상단 고정 -->
-    <img src="assets/iosa_stamp.png" alt="IOSA Registered Operator"
-         style="position:absolute;top:20px;right:24px;width:72px;height:72px;object-fit:contain;opacity:0.85;z-index:2;">
-
-    <!-- Content -->
-    <div style="position:relative;z-index:1;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;">
-
-      <!-- Left: text info -->
-      <div>
-        <!-- Badge -->
-        <div style="display:inline-flex;align-items:center;gap:8px;background:var(--eastar-red);color:#fff;padding:5px 14px 5px 8px;border-radius:3px;margin-bottom:16px;">
-          <div style="background:rgba(255,255,255,0.25);border-radius:2px;padding:2px 6px;font-size:0.5rem;font-weight:900;letter-spacing:2px;">IOSA</div>
-          <span style="font-size:0.68rem;font-weight:800;letter-spacing:1.5px;">REGISTERED OPERATOR</span>
-        </div>
-        <div style="font-size:2.1rem;font-weight:900;color:#111;letter-spacing:-0.5px;line-height:1.1;margin-bottom:5px;">이스타항공 IOSA 포털</div>
-        <div style="font-size:0.85rem;color:#888;margin-bottom:24px;">EASTAR JET Co., Ltd. &nbsp;·&nbsp; ZE / ESR</div>
-
-        <!-- Stats row -->
-        <div style="display:flex;gap:32px;flex-wrap:wrap;margin-bottom:24px;">
-          ${[
-            ['Initial IOSA','2025년 8월 1일'],
-            ['인증 만료','2027년 8월 1일'],
-            ['적용 ISM','Ed.17'],
-            ['Lead Auditor','Perry Chou'],
-          ].map(([k,v])=>`
-            <div>
-              <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#aaa;margin-bottom:4px;">${k}</div>
-              <div style="font-size:0.88rem;font-weight:700;color:#111;">${v}</div>
-            </div>
-          `).join('')}
-        </div>
-
-        <!-- Buttons -->
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button onclick="openOrUploadFile('iosa_cert','IOSA 인증서')"
-             style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;background:var(--eastar-red);color:#fff;border-radius:4px;font-size:0.78rem;font-weight:800;border:none;cursor:pointer;">
-            <i class="fas fa-file-pdf"></i> 인증서 열기
-          </button>
-          <a href="https://www.iata.org/en/programs/safety/audit/iosa/registry/" target="_blank"
-             style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;background:#fff;color:#333;border:1px solid #ddd;border-radius:4px;font-size:0.78rem;font-weight:700;text-decoration:none;">
-            <i class="fas fa-external-link-alt"></i> IOSA Registry
-          </a>
-        </div>
+    <!-- Left: 흰 배경 -->
+    <div style="background:#fff;padding:36px 40px 36px 48px;border-left:5px solid var(--eastar-red);position:relative;overflow:hidden;">
+      <!-- Badge -->
+      <div style="display:inline-flex;align-items:center;gap:8px;background:var(--eastar-red);color:#fff;padding:5px 14px 5px 8px;border-radius:3px;margin-bottom:16px;">
+        <div style="background:rgba(255,255,255,0.25);border-radius:2px;padding:2px 6px;font-size:0.5rem;font-weight:900;letter-spacing:2px;">IOSA</div>
+        <span style="font-size:0.68rem;font-weight:800;letter-spacing:1.5px;">REGISTERED OPERATOR</span>
       </div>
-
-      <!-- Right: IOSA logo + D-day counters -->
-      ${(()=>{
-        const nextAuditDate   = '2027-03-15';
-        const daysToNextAudit = Math.max(0, DateUtil.daysUntil(nextAuditDate));
-        return `
-        <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding-left:40px;min-width:200px;">
-          <!-- 레이블 -->
-          <div style="font-size:0.65rem;font-weight:800;color:#999;text-transform:uppercase;letter-spacing:2.5px;margin-top:2px;">Renewal IOSA</div>
-          <!-- 숫자 -->
-          <div style="font-size:4.2rem;font-weight:900;color:var(--eastar-red);line-height:1;letter-spacing:-3px;margin:-2px 0;">D-${daysToNextAudit}</div>
-          <!-- 날짜 -->
-          <div style="font-size:0.62rem;color:#bbb;font-weight:600;letter-spacing:0.5px;">2027.03.15 ~ 03.18</div>
-        </div>`;
-      })()}
+      <div style="font-size:2.1rem;font-weight:900;color:#111;letter-spacing:-0.5px;line-height:1.1;margin-bottom:5px;">이스타항공 IOSA 포털</div>
+      <div style="font-size:0.85rem;color:#888;margin-bottom:24px;">EASTAR JET Co., Ltd. &nbsp;·&nbsp; ZE / ESR</div>
+      <!-- Stats row -->
+      <div style="display:flex;gap:32px;flex-wrap:wrap;margin-bottom:24px;">
+        ${[
+          ['Initial IOSA','2025년 8월 1일'],
+          ['인증 만료','2027년 8월 1일'],
+          ['적용 ISM','Ed.17'],
+          ['Lead Auditor','Perry Chou'],
+        ].map(([k,v])=>`
+          <div>
+            <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#aaa;margin-bottom:4px;">${k}</div>
+            <div style="font-size:0.88rem;font-weight:700;color:#111;">${v}</div>
+          </div>
+        `).join('')}
+      </div>
+      <!-- Buttons -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button onclick="openOrUploadFile('iosa_cert','IOSA 인증서')"
+           style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;background:var(--eastar-red);color:#fff;border-radius:4px;font-size:0.78rem;font-weight:800;border:none;cursor:pointer;">
+          <i class="fas fa-file-pdf"></i> 인증서 열기
+        </button>
+        <a href="https://www.iata.org/en/programs/safety/audit/iosa/registry/" target="_blank"
+           style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;background:#fff;color:#333;border:1px solid #ddd;border-radius:4px;font-size:0.78rem;font-weight:700;text-decoration:none;">
+          <i class="fas fa-external-link-alt"></i> IOSA Registry
+        </a>
+      </div>
     </div>
+
+    <!-- Right: 레드 패널 D-day -->
+    ${(()=>{
+      const nextAuditDate   = '2027-03-15';
+      const daysToNextAudit = Math.max(0, DateUtil.daysUntil(nextAuditDate));
+      return `
+      <div style="background:var(--eastar-red);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;">
+        <!-- 워터마크 로고 -->
+        <img src="assets/iosa_stamp.png"
+             style="position:absolute;width:200px;height:200px;opacity:0.08;pointer-events:none;">
+        <!-- 레이블 -->
+        <div style="position:relative;font-size:0.6rem;font-weight:800;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:3px;">Renewal IOSA</div>
+        <!-- 숫자 -->
+        <div style="position:relative;font-size:4.4rem;font-weight:900;color:#fff;line-height:1;letter-spacing:-3px;">D-${daysToNextAudit}</div>
+        <!-- 날짜 -->
+        <div style="position:relative;font-size:0.62rem;color:rgba(255,255,255,0.5);font-weight:600;letter-spacing:0.5px;">2027.03.15 ~ 03.18</div>
+      </div>`;
+    })()}
+
   </div>
 </div>
 
