@@ -418,7 +418,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/data.js"></script>
 <script src="js/ism18_isarps.js"></script>
-<script src="js/app.js?v=20250519c"></script>
+<script src="js/app.js?v=20250519d"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════
    EXTENDED APP — Dashboard, History, Schedule, Manuals, Board
@@ -828,10 +828,10 @@ function renderDashboardNew() {
         const daysToNextAudit = Math.max(0, DateUtil.daysUntil(nextAuditDate));
         const auditColor = daysToNextAudit < 180 ? '#dc2626' : daysToNextAudit < 365 ? '#d97706' : '#1d4ed8';
         return `
-        <div style="flex-shrink:0;display:flex;flex-direction:row;align-items:center;gap:22px;">
+        <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:14px;">
           <img src="assets/iosa_stamp.png" alt="IOSA Registered Operator"
                style="width:90px;height:90px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,100,0.18));">
-          <!-- Twin D-day block: 스탬프 오른쪽에 나란히 -->
+          <!-- Twin D-day block: 로고 아래에 나란히 -->
           <div style="display:flex;gap:18px;align-items:stretch;">
             <!-- 인증 만료 -->
             <div style="text-align:right;">
