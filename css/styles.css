@@ -904,9 +904,6 @@ i.fab, span.fab {
 }
 .w-card-title { font-weight: 800 !important; font-size: 0.82rem !important; color: #111 !important; }
 
-/* Stat boxes — replace any blue num with text-primary */
-.stat-box.blue .stat-box-num { color: var(--eastar-red) !important; }
-
 /* Badge background — no blue bg-primary */
 .badge.bg-primary { background-color: var(--eastar-red) !important; }
 .badge.bg-secondary { background-color: #888 !important; }
