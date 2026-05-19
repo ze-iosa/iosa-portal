@@ -781,6 +781,10 @@ function renderDashboardNew() {
   <!-- Background: white with red left accent -->
   <div style="background:#fff;padding:36px 48px;position:relative;overflow:hidden;border-left:5px solid var(--eastar-red);">
 
+    <!-- IATA 로고: 우측 상단 고정 -->
+    <img src="assets/iosa_stamp.png" alt="IOSA Registered Operator"
+         style="position:absolute;top:20px;right:24px;width:72px;height:72px;object-fit:contain;opacity:0.85;z-index:2;">
+
     <!-- Content -->
     <div style="position:relative;z-index:1;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;">
 
@@ -828,9 +832,6 @@ function renderDashboardNew() {
         const daysToNextAudit = Math.max(0, DateUtil.daysUntil(nextAuditDate));
         return `
         <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding-left:40px;min-width:200px;">
-          <!-- 로고 -->
-          <img src="assets/iosa_stamp.png" alt="IOSA Registered Operator"
-               style="width:72px;height:72px;object-fit:contain;opacity:0.85;">
           <!-- 레이블 -->
           <div style="font-size:0.65rem;font-weight:800;color:#999;text-transform:uppercase;letter-spacing:2.5px;margin-top:2px;">Renewal IOSA</div>
           <!-- 숫자 -->
