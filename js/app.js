@@ -3129,16 +3129,16 @@ function _renderCRContent(container, allEntries, crManuals) {
   const SCCO = {ORG:'#1d4ed8',FLT:'#0369a1',DSP:'#7c3aed',MNT:'#b45309',CAB:'#db2777',GRH:'#059669',CGO:'#d97706',SEC:'#dc2626'};
 
   const repeatedBannerHtml = sectionFindings.length > 0 ? `
-<div style="background:#f5f3ff;border:1px solid #c4b5fd;border-left:4px solid #7c3aed;border-radius:4px;padding:12px 16px;margin-bottom:14px;">
+<div style="background:#f8fafc;border:1px solid #cbd5e1;border-left:4px solid #94a3b8;border-radius:4px;padding:12px 16px;margin-bottom:14px;">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
     <div>
-      <div style="font-size:0.65rem;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;"><i class="fas fa-link me-1"></i>2025 심사 지적 ISARP — ${crSection} 부문 (${sectionFindings.length}건)</div>
+      <div style="font-size:0.65rem;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;"><i class="fas fa-link me-1"></i>2025 심사 지적 ISARP — ${crSection} 부문 (${sectionFindings.length}건)</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        ${repeatedInSection.map(f=>`<span onclick="openFindingDetailFromCR('${f.isarp}')" style="background:#f5f3ff;color:#7c3aed;border:1px solid #c4b5fd;padding:3px 10px;border-radius:4px;font-size:0.68rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" title="${f.desc}"><i class="fas fa-link" style="font-size:0.55rem;"></i>${f.isarp}<span style="font-size:0.55rem;opacity:0.75;">연계</span></span>`).join('')}
+        ${repeatedInSection.map(f=>`<span onclick="openFindingDetailFromCR('${f.isarp}')" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:3px 10px;border-radius:4px;font-size:0.68rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" title="${f.desc}"><i class="fas fa-link" style="font-size:0.55rem;"></i>${f.isarp}<span style="font-size:0.55rem;opacity:0.75;">연계</span></span>`).join('')}
         ${singleInSection.map(f=>`<span onclick="openFindingDetailFromCR('${f.isarp}')" style="background:#fff0f0;color:#d20015;border:1px solid rgba(210,0,21,0.25);padding:3px 10px;border-radius:4px;font-size:0.68rem;font-weight:800;cursor:pointer;" title="${f.desc}"><i class="fas fa-exclamation-triangle" style="font-size:0.55rem;"></i> ${f.isarp}</span>`).join('')}
       </div>
     </div>
-    <div style="font-size:0.68rem;color:#6d28d9;"><i class="fas fa-hand-pointer me-1"></i>클릭하면 CAP/FAT 상세 보기</div>
+    <div style="font-size:0.68rem;color:#94a3b8;"><i class="fas fa-hand-pointer me-1"></i>클릭하면 CAP/FAT 상세 보기</div>
   </div>
 </div>` : '';
 
@@ -3305,7 +3305,7 @@ ${sectionEntries.length === 0 ? `
   <textarea class="cr-ev-note" placeholder="추가 메모 (준비 현황, 파일명 등)..."
     onblur="debouncedCRSave('${_esc(e.id)}','evidenceNotes',this.value)">${_esc(e.evidenceNotes||'')}</textarea>
 </div>` : '';
-    const rowBorder = isRepeated ? 'border-left-color:#7c3aed;border-left-width:4px;' : hasFinding ? 'border-left-color:#d20015;border-left-width:3px;' : `border-left-color:${st.color};`;
+    const rowBorder = isRepeated ? 'border-left-color:#94a3b8;border-left-width:4px;' : hasFinding ? 'border-left-color:#d20015;border-left-width:3px;' : `border-left-color:${st.color};`;
     return `<div class="cr-row-wrap">
 <div class="cr-row" data-id="${_esc(e.id)}" style="${rowBorder}background:${rowBg};${rowOp}">
   <div class="cr-cell cr-num">${idx+1}</div>
