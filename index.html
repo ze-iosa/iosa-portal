@@ -418,7 +418,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/data.js"></script>
 <script src="js/ism18_isarps.js"></script>
-<script src="js/app.js?v=20250519e"></script>
+<script src="js/app.js?v=20250519f"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════
    EXTENDED APP — Dashboard, History, Schedule, Manuals, Board
@@ -803,7 +803,7 @@ function renderDashboardNew() {
           ${[
             ['심사 완료','2025년 8월 1일'],
             ['인증 만료','2027년 8월 1일'],
-            ['적용 ISM','Ed.17 (17.1)'],
+            ['적용 ISM','Ed.17'],
             ['Lead Auditor','Perry Chou'],
           ].map(([k,v])=>`
             <div>
@@ -983,7 +983,7 @@ function renderDashboardNew() {
 // ══════════════════════════════════════════════════════════
 const AUDIT_HISTORY = {
   '2025': {
-    year: 2025, type: 'INITIAL', ism: 'Ed.17 (17.1)',
+    year: 2025, type: 'INITIAL', ism: 'Ed.17',
     dates: '2025.07.28 ~ 2025.08.01', auditor: 'Perry Chou',
     iar: 'IOSA-ESR-IA-2025', status: 'REGISTERED',
     expiry: '2027.08.01',
