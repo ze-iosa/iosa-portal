@@ -3110,14 +3110,14 @@ function _renderCRContent(container, allEntries, crManuals) {
 #cr-add-modal-box { background:#fff; border-radius:10px; padding:28px 32px; width:480px; max-width:95vw; box-shadow:0 20px 60px rgba(0,0,0,0.2); }
 /* Evidence panel */
 .cr-row-wrap { position:relative; }
-.cr-ev-panel { background:linear-gradient(135deg,#eff6ff,#f0f9ff); border:1px solid #bfdbfe; border-top:none; border-radius:0 0 6px 6px; padding:10px 16px 12px; margin-bottom:2px; }
-.cr-ev-panel-title { font-size:0.6rem; font-weight:900; color:#1d4ed8; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:5px; }
+.cr-ev-panel { background:#fff8f8; border:1px solid rgba(210,0,21,0.15); border-top:none; border-radius:0 0 6px 6px; padding:10px 16px 12px; margin-bottom:2px; }
+.cr-ev-panel-title { font-size:0.6rem; font-weight:900; color:#d20015; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:5px; }
 .cr-ev-item { font-size:0.72rem; color:#374151; padding:3px 0 3px 14px; position:relative; line-height:1.45; }
-.cr-ev-item::before { content:'▸'; position:absolute; left:0; color:#3b82f6; font-size:0.65rem; }
-.cr-ev-note { width:100%; min-height:36px; border:1px solid #bfdbfe; border-radius:4px; padding:5px 8px; font-size:0.72rem; font-family:inherit; background:#fff; outline:none; resize:vertical; color:#333; margin-top:8px; line-height:1.5; }
-.cr-ev-note:focus { border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59,130,246,0.15); }
-.cr-ev-btn { display:inline-flex; align-items:center; gap:3px; padding:2px 7px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:3px; font-size:0.58rem; font-weight:800; color:#1d4ed8; cursor:pointer; white-space:nowrap; margin-top:2px; transition:background 140ms; }
-.cr-ev-btn:hover { background:#dbeafe; }
+.cr-ev-item::before { content:'▸'; position:absolute; left:0; color:#d20015; font-size:0.65rem; }
+.cr-ev-note { width:100%; min-height:36px; border:1px solid rgba(210,0,21,0.2); border-radius:4px; padding:5px 8px; font-size:0.72rem; font-family:inherit; background:#fff; outline:none; resize:vertical; color:#333; margin-top:8px; line-height:1.5; }
+.cr-ev-note:focus { border-color:#d20015; box-shadow:0 0 0 2px rgba(210,0,21,0.1); }
+.cr-ev-btn { display:inline-flex; align-items:center; gap:3px; padding:2px 7px; background:#fff0f0; border:1px solid rgba(210,0,21,0.25); border-radius:3px; font-size:0.58rem; font-weight:800; color:#d20015; cursor:pointer; white-space:nowrap; margin-top:2px; transition:background 140ms; }
+.cr-ev-btn:hover { background:#ffe4e4; }
 </style>`;
 
   // Build Repeated ISARPs banner for CR section
@@ -3293,7 +3293,7 @@ ${sectionEntries.length === 0 ? `
     const isRepeated  = repeatedIsarps.has(e.isarpCode);
     const hasFinding  = findingIsarps.has(e.isarpCode);
     const findingBadge = e.status==='NC' ? `<span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:1px 5px;border-radius:3px;font-size:0.55rem;font-weight:800;">NC</span>` : '';
-    const repeatedBadge = isRepeated ? `<span style="background:#f5f3ff;color:#7c3aed;border:1px solid #c4b5fd;padding:1px 5px;border-radius:3px;font-size:0.52rem;font-weight:800;cursor:pointer;" onclick="openFindingDetailFromCR('${e.isarpCode}')" title="다부문 연계 Finding — 클릭하면 상세 보기"><i class="fas fa-link" style="font-size:0.48rem;"></i> 연계</span>` : (hasFinding ? `<span style="background:#fff0f0;color:#d20015;border:1px solid rgba(210,0,21,0.25);padding:1px 5px;border-radius:3px;font-size:0.52rem;font-weight:800;cursor:pointer;" onclick="openFindingDetailFromCR('${e.isarpCode}')" title="이전 심사 Finding ISARP — 클릭하면 상세 보기"><i class="fas fa-exclamation-triangle" style="font-size:0.48rem;"></i> F</span>` : '');
+    const repeatedBadge = isRepeated ? `<span style="background:#fff0f0;color:#d20015;border:1px solid rgba(210,0,21,0.3);padding:1px 5px;border-radius:3px;font-size:0.52rem;font-weight:800;cursor:pointer;" onclick="openFindingDetailFromCR('${e.isarpCode}')" title="다부문 연계 Finding — 클릭하면 상세 보기"><i class="fas fa-link" style="font-size:0.48rem;"></i> 연계</span>` : (hasFinding ? `<span style="background:#fff0f0;color:#d20015;border:1px solid rgba(210,0,21,0.25);padding:1px 5px;border-radius:3px;font-size:0.52rem;font-weight:800;cursor:pointer;" onclick="openFindingDetailFromCR('${e.isarpCode}')" title="이전 심사 Finding ISARP — 클릭하면 상세 보기"><i class="fas fa-exclamation-triangle" style="font-size:0.48rem;"></i> F</span>` : '');
     const evidenceItems = getEvidenceItems(e.isarpCode);
     const evBtnHtml = evidenceItems.length > 0
       ? `<button class="cr-ev-btn" onclick="toggleCREvidence('${_esc(e.id)}')" title="증빙자료 목록 보기 (내부심사용)">💼 증빙자료</button>`
