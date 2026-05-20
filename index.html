@@ -2728,14 +2728,14 @@ function openFindingDetail(id) {
   const sectionBadges = (sects) => (sects||[]).map(s=>`<span style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:2px 8px;border-radius:3px;font-size:0.62rem;font-weight:700;">${s}</span>`).join('');
 
   document.getElementById('histFindingContent').innerHTML = `
-    <div style="position:sticky;top:0;background:#fff;z-index:10;border-bottom:2px solid #f0f0f0;padding:16px 20px 14px;">
+    <div style="position:sticky;top:0;background:#fff;z-index:10;border-bottom:1px solid #ebebeb;padding:16px 20px 14px;">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
         <div>
           <div style="font-size:0.6rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:5px;">Finding 상세 — 2025 Initial Audit</div>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.25);padding:4px 12px;border-radius:4px;font-size:0.82rem;font-weight:900;">${car.isarp}</span>
-            ${isRepeated ? `<span style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:3px 9px;border-radius:3px;font-size:0.62rem;font-weight:700;"><i class="fas fa-link me-1"></i>다부문 연계</span>` : `<span style="background:#f8fafc;color:#64748b;border:1px solid #e2e8f0;padding:3px 9px;border-radius:3px;font-size:0.62rem;font-weight:700;">${car.sect} 단독</span>`}
-            <span style="background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;padding:3px 9px;border-radius:3px;font-size:0.62rem;font-weight:800;"><i class="fas fa-check-circle me-1"></i>종결 완료</span>
+            ${isRepeated ? `<span style="background:#f5f5f5;color:#555;border:1px solid #e0e0e0;padding:3px 9px;border-radius:3px;font-size:0.62rem;font-weight:700;"><i class="fas fa-link me-1"></i>다부문 연계</span>` : `<span style="background:#f5f5f5;color:#555;border:1px solid #e0e0e0;padding:3px 9px;border-radius:3px;font-size:0.62rem;font-weight:700;">${car.sect} 단독</span>`}
+            <span style="background:#f5f5f5;color:#1a7a4a;border:1px solid #e0e0e0;padding:3px 9px;border-radius:3px;font-size:0.62rem;font-weight:800;"><i class="fas fa-check-circle me-1"></i>종결 완료</span>
           </div>
         </div>
         <button onclick="closeFindingDetail()" style="background:none;border:none;font-size:1.3rem;color:#888;cursor:pointer;padding:4px;flex-shrink:0;">&times;</button>
@@ -2745,69 +2745,69 @@ function openFindingDetail(id) {
     <div style="padding:20px;">
       <!-- 연계 부문 -->
       ${isRepeated ? `
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:12px 14px;margin-bottom:16px;">
-        <div style="font-size:0.6rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;"><i class="fas fa-link me-1"></i>연계 부문 (이 Finding이 영향을 미치는 부문)</div>
+      <div style="border:1px solid #e8e8e8;border-radius:6px;padding:12px 14px;margin-bottom:16px;">
+        <div style="font-size:0.6rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;"><i class="fas fa-link me-1"></i>연계 부문 (이 Finding이 영향을 미치는 부문)</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">${sectionBadges([car.sect, ...(car.linkedSections||[])])}</div>
-        <div style="font-size:0.7rem;color:#6d28d9;margin-top:6px;">※ 해당 부문의 관련 절차·문서를 함께 확인하고 일관성 있게 개정해야 합니다</div>
+        <div style="font-size:0.7rem;color:#888;margin-top:6px;">※ 해당 부문의 관련 절차·문서를 함께 확인하고 일관성 있게 개정해야 합니다</div>
       </div>` : ''}
 
-      <!-- Finding 내용 -->
+      <!-- Finding 내용 요약 -->
       <div style="margin-bottom:16px;">
-        <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#374151;margin-bottom:6px;">지적 내용 요약</div>
-        <div style="background:#fff8f8;border:1px solid rgba(210,0,21,0.15);border-left:3px solid var(--eastar-red);border-radius:0 6px 6px 0;padding:12px 14px;font-size:0.82rem;line-height:1.6;color:#1a1a1a;font-weight:600;">${car.desc}</div>
+        <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#888;margin-bottom:6px;">지적 내용 요약</div>
+        <div style="border-left:3px solid var(--eastar-red);padding:10px 14px;font-size:0.82rem;line-height:1.6;color:#1a1a1a;font-weight:600;">${car.desc}</div>
       </div>
 
       <!-- Finding 원문 -->
       ${car.findingText ? `
       <div style="margin-bottom:16px;">
-        <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#374151;margin-bottom:6px;">Finding 내용 (IAR 기준)</div>
-        <div style="background:#fafafa;border:1px solid #e8e8e8;border-radius:6px;padding:12px 14px;font-size:0.78rem;line-height:1.7;color:#374151;">${car.findingText}</div>
+        <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#888;margin-bottom:6px;">Finding 내용 (IAR 기준)</div>
+        <div style="border:1px solid #e8e8e8;border-radius:6px;padding:12px 14px;font-size:0.78rem;line-height:1.7;color:#374151;">${car.findingText}</div>
       </div>` : ''}
 
       <!-- 근본 원인 -->
       ${car.rootCause ? `
       <div style="margin-bottom:16px;">
-        <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#374151;margin-bottom:6px;">근본 원인 (Root Cause)</div>
-        <div style="background:#fef3c7;border:1px solid #fde68a;border-left:3px solid #f59e0b;border-radius:0 6px 6px 0;padding:12px 14px;font-size:0.8rem;line-height:1.6;color:#78350f;">${car.rootCause}</div>
+        <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#888;margin-bottom:6px;">근본 원인 (Root Cause)</div>
+        <div style="border:1px solid #e8e8e8;border-radius:6px;padding:12px 14px;font-size:0.8rem;line-height:1.6;color:#374151;">${car.rootCause}</div>
       </div>` : ''}
 
       <!-- CAP 제출 내용 -->
       ${car.capPlan ? `
       <div style="margin-bottom:16px;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#374151;">CAP 제출 내용</div>
-          <span style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;padding:2px 7px;border-radius:3px;font-size:0.58rem;font-weight:800;">IATA 제출 완료</span>
+          <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#888;">CAP 제출 내용</div>
+          <span style="background:#f5f5f5;color:#555;border:1px solid #e0e0e0;padding:2px 7px;border-radius:3px;font-size:0.58rem;font-weight:800;">IATA 제출 완료</span>
         </div>
-        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-left:3px solid #0ea5e9;border-radius:0 6px 6px 0;padding:12px 14px;font-size:0.78rem;line-height:1.8;color:#0c4a6e;white-space:pre-line;">${car.capPlan}</div>
+        <div style="border:1px solid #e8e8e8;border-radius:6px;padding:12px 14px;font-size:0.78rem;line-height:1.8;color:#374151;white-space:pre-line;">${car.capPlan}</div>
       </div>` : ''}
 
       <!-- FAT 내용 -->
       ${car.fatContent ? `
       <div style="margin-bottom:16px;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#374151;">FAT 내용 (Final Action Taken)</div>
-          <span style="background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;padding:2px 7px;border-radius:3px;font-size:0.58rem;font-weight:800;"><i class="fas fa-check me-1"></i>IATA 승인</span>
+          <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#888;">FAT 내용 (Final Action Taken)</div>
+          <span style="background:#f5f5f5;color:#1a7a4a;border:1px solid #e0e0e0;padding:2px 7px;border-radius:3px;font-size:0.58rem;font-weight:800;"><i class="fas fa-check me-1"></i>IATA 승인</span>
         </div>
-        <div style="background:#f0faf4;border:1px solid #a7f3d0;border-left:3px solid #10b981;border-radius:0 6px 6px 0;padding:12px 14px;font-size:0.78rem;line-height:1.7;color:#064e3b;">${car.fatContent}</div>
+        <div style="border:1px solid #e8e8e8;border-radius:6px;padding:12px 14px;font-size:0.78rem;line-height:1.7;color:#374151;">${car.fatContent}</div>
       </div>` : ''}
 
       <!-- 증빙 자료 -->
       ${car.evidence && car.evidence.length > 0 ? `
       <div style="margin-bottom:20px;">
-        <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#374151;margin-bottom:8px;">제출 증빙 자료</div>
-        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px 14px;">
+        <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#888;margin-bottom:8px;">제출 증빙 자료</div>
+        <div style="border:1px solid #e8e8e8;border-radius:6px;padding:4px 14px;">
           ${car.evidence.map((ev,i)=>`
-          <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:${i<car.evidence.length-1?'1px solid #f0f0f0':'none'};">
-            <i class="fas fa-paperclip" style="color:#3b82f6;font-size:0.7rem;flex-shrink:0;"></i>
+          <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:${i<car.evidence.length-1?'1px solid #f0f0f0':'none'};">
+            <i class="fas fa-paperclip" style="color:#aaa;font-size:0.7rem;flex-shrink:0;"></i>
             <span style="font-size:0.77rem;color:#374151;">${ev}</span>
           </div>`).join('')}
         </div>
       </div>` : ''}
 
       <!-- 완료 배너 -->
-      <div style="background:#d1fae5;border:1px solid #6ee7b7;border-radius:6px;padding:12px 14px;text-align:center;">
-        <div style="font-size:0.8rem;font-weight:800;color:#065f46;"><i class="fas fa-check-circle me-2"></i>Finding 완전 종결 — IATA QC 승인 완료</div>
-        ${car.capDue ? `<div style="font-size:0.7rem;color:#1a7a4a;margin-top:3px;">마감일: ${car.capDue} | FAT 상태: 최종 승인</div>` : ''}
+      <div style="border:1px solid #e8e8e8;border-radius:6px;padding:12px 14px;text-align:center;">
+        <div style="font-size:0.8rem;font-weight:800;color:#1a7a4a;"><i class="fas fa-check-circle me-2"></i>Finding 완전 종결 — IATA QC 승인 완료</div>
+        ${car.capDue ? `<div style="font-size:0.7rem;color:#888;margin-top:3px;">마감일: ${car.capDue} | FAT 상태: 최종 승인</div>` : ''}
       </div>
     </div>`;
 
