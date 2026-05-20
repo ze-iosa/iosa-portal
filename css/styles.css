@@ -102,14 +102,14 @@ button { font-family: var(--font); cursor: pointer; }
 
 .nav-brand-logo {
   width: 34px; height: 34px;
-  background: var(--eastar-red);
+  background: #fff;
+  border: 1.5px solid #e8e8e8;
   border-radius: var(--radius-xs);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 1px;
+  display: flex;
+  align-items: center; justify-content: center;
 }
-.nav-brand-logo .bl {
-  font-size: 9px; font-weight: 900; color: #fff;
-  letter-spacing: 1.5px; line-height: 1;
+.nav-brand-logo i {
+  font-size: 16px; color: var(--eastar-red);
 }
 .nav-brand-title { font-size: var(--size-sm); font-weight: 800; color: var(--text-primary); letter-spacing: -0.2px; }
 .nav-brand-sub   { font-size: var(--size-xs); font-weight: 500; color: var(--text-tertiary); }
