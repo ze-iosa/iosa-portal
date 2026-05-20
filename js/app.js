@@ -3116,29 +3116,43 @@ function _renderCRContent(container, allEntries, crManuals) {
 .cr-ev-item::before { content:'▸'; position:absolute; left:0; color:#d20015; font-size:0.65rem; }
 .cr-ev-note { width:100%; min-height:36px; border:1px solid rgba(210,0,21,0.2); border-radius:4px; padding:5px 8px; font-size:0.72rem; font-family:inherit; background:#fff; outline:none; resize:vertical; color:#333; margin-top:8px; line-height:1.5; }
 .cr-ev-note:focus { border-color:#d20015; box-shadow:0 0 0 2px rgba(210,0,21,0.1); }
-.cr-ev-btn { display:inline-flex; align-items:center; gap:3px; padding:2px 7px; background:#fff0f0; border:1px solid rgba(210,0,21,0.25); border-radius:3px; font-size:0.58rem; font-weight:800; color:#d20015; cursor:pointer; white-space:nowrap; margin-top:2px; transition:background 140ms; }
-.cr-ev-btn:hover { background:#ffe4e4; }
+.cr-ev-btn { display:inline-flex; align-items:center; gap:3px; padding:2px 7px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:3px; font-size:0.58rem; font-weight:800; color:#475569; cursor:pointer; white-space:nowrap; margin-top:2px; transition:background 140ms; }
+.cr-ev-btn:hover { background:#e2e8f0; }
 </style>`;
 
   // Build Repeated ISARPs banner for CR section
   const auditKeyCARs = (typeof AUDIT_HISTORY !== 'undefined' && AUDIT_HISTORY['2025'] && AUDIT_HISTORY['2025'].keyCARs) || [];
+  // Direct findings: this section's own ISARPs that were cited
   const sectionFindings = auditKeyCARs.filter(f => f.sect === crSection);
   const repeatedInSection = sectionFindings.filter(f => f.linkedSections && f.linkedSections.length > 0);
   const singleInSection   = sectionFindings.filter(f => !f.linkedSections || f.linkedSections.length === 0);
+  // Cross-section findings: other sections' ISARPs whose linkedSections include this section
+  const crossSectionFindings = auditKeyCARs.filter(f =>
+    f.sect !== crSection &&
+    Array.isArray(f.linkedSections) &&
+    f.linkedSections.includes(crSection)
+  );
   const SCBG = {ORG:'#eff6ff',FLT:'#e0f2fe',DSP:'#f5f3ff',MNT:'#fef3c7',CAB:'#fce7f3',GRH:'#d1fae5',CGO:'#fef9c3',SEC:'#fee2e2'};
   const SCCO = {ORG:'#1d4ed8',FLT:'#0369a1',DSP:'#7c3aed',MNT:'#b45309',CAB:'#db2777',GRH:'#059669',CGO:'#d97706',SEC:'#dc2626'};
 
-  const repeatedBannerHtml = sectionFindings.length > 0 ? `
+  const totalBannerCount = sectionFindings.length + crossSectionFindings.length;
+  const repeatedBannerHtml = totalBannerCount > 0 ? `
 <div style="background:#fff8f8;border:1px solid rgba(210,0,21,0.2);border-left:4px solid #d20015;border-radius:4px;padding:12px 16px;margin-bottom:14px;">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-    <div>
-      <div style="font-size:0.65rem;font-weight:800;color:#d20015;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;"><i class="fas fa-link me-1"></i>2025 심사 지적 ISARP — ${crSection} 부문 (${sectionFindings.length}건)</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        ${repeatedInSection.map(f=>`<span onclick="openFindingDetailFromCR('${f.isarp}')" style="background:#fff0f0;color:#d20015;border:1px solid rgba(210,0,21,0.3);padding:3px 10px;border-radius:4px;font-size:0.68rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" title="${f.desc}"><i class="fas fa-link" style="font-size:0.55rem;"></i>${f.isarp}<span style="font-size:0.55rem;opacity:0.75;">연계</span></span>`).join('')}
-        ${singleInSection.map(f=>`<span onclick="openFindingDetailFromCR('${f.isarp}')" style="background:#fff0f0;color:#d20015;border:1px solid rgba(210,0,21,0.25);padding:3px 10px;border-radius:4px;font-size:0.68rem;font-weight:800;cursor:pointer;" title="${f.desc}"><i class="fas fa-exclamation-triangle" style="font-size:0.55rem;"></i> ${f.isarp}</span>`).join('')}
-      </div>
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <div style="flex:1;min-width:0;">
+      ${sectionFindings.length > 0 ? `
+      <div style="font-size:0.65rem;font-weight:800;color:#d20015;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;"><i class="fas fa-exclamation-circle me-1"></i>${crSection} 부문 직접 지적 (${sectionFindings.length}건)</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:${crossSectionFindings.length>0?'10px':'0'};">
+        ${repeatedInSection.map(f=>`<span onclick="openFindingDetailFromCR('${f.isarp}')" style="background:#fff0f0;color:#d20015;border:1px solid rgba(210,0,21,0.35);padding:3px 10px;border-radius:4px;font-size:0.68rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" title="${f.desc||''}"><i class="fas fa-link" style="font-size:0.55rem;"></i>${f.isarp}<span style="font-size:0.55rem;opacity:0.75;margin-left:2px;">연계</span></span>`).join('')}
+        ${singleInSection.map(f=>`<span onclick="openFindingDetailFromCR('${f.isarp}')" style="background:#fff0f0;color:#d20015;border:1px solid rgba(210,0,21,0.25);padding:3px 10px;border-radius:4px;font-size:0.68rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" title="${f.desc||''}"><i class="fas fa-exclamation-triangle" style="font-size:0.55rem;"></i>${f.isarp}</span>`).join('')}
+      </div>` : ''}
+      ${crossSectionFindings.length > 0 ? `
+      <div style="font-size:0.65rem;font-weight:800;color:#4338ca;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;"><i class="fas fa-arrows-left-right me-1"></i>타 부문 연계 지적 — ${crSection} 부문 영향 (${crossSectionFindings.length}건)</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;">
+        ${crossSectionFindings.map(f=>`<span onclick="openFindingDetailFromCR('${f.isarp}')" style="background:#eef2ff;color:#4338ca;border:1px solid rgba(67,56,202,0.35);padding:3px 10px;border-radius:4px;font-size:0.68rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" title="${f.desc||''} (원 부문: ${f.sect})"><i class="fas fa-link" style="font-size:0.55rem;"></i>${f.isarp}<span style="background:rgba(67,56,202,0.12);color:#4338ca;font-size:0.52rem;padding:0 4px;border-radius:2px;margin-left:3px;">${f.sect}</span></span>`).join('')}
+      </div>` : ''}
     </div>
-    <div style="font-size:0.68rem;color:#94a3b8;"><i class="fas fa-hand-pointer me-1"></i>클릭하면 CAP/FAT 상세 보기</div>
+    <div style="font-size:0.65rem;color:#94a3b8;white-space:nowrap;padding-top:2px;"><i class="fas fa-hand-pointer me-1"></i>클릭하면 CAP/FAT 상세</div>
   </div>
 </div>` : '';
 
@@ -3293,7 +3307,11 @@ ${sectionEntries.length === 0 ? `
     const isRepeated  = repeatedIsarps.has(e.isarpCode);
     const hasFinding  = findingIsarps.has(e.isarpCode);
     const findingBadge = e.status==='NC' ? `<span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:1px 5px;border-radius:3px;font-size:0.55rem;font-weight:800;">NC</span>` : '';
-    const repeatedBadge = isRepeated ? `<span style="background:#fff0f0;color:#d20015;border:1px solid rgba(210,0,21,0.3);padding:1px 5px;border-radius:3px;font-size:0.52rem;font-weight:800;cursor:pointer;" onclick="openFindingDetailFromCR('${e.isarpCode}')" title="다부문 연계 Finding — 클릭하면 상세 보기"><i class="fas fa-link" style="font-size:0.48rem;"></i> 연계</span>` : (hasFinding ? `<span style="background:#fff0f0;color:#d20015;border:1px solid rgba(210,0,21,0.25);padding:1px 5px;border-radius:3px;font-size:0.52rem;font-weight:800;cursor:pointer;" onclick="openFindingDetailFromCR('${e.isarpCode}')" title="이전 심사 Finding ISARP — 클릭하면 상세 보기"><i class="fas fa-exclamation-triangle" style="font-size:0.48rem;"></i> F</span>` : '');
+    const repeatedBadge = isRepeated
+      ? `<span style="background:#fffbeb;color:#92400e;border:1px solid #fcd34d;padding:1px 6px;border-radius:3px;font-size:0.52rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:2px;" onclick="openFindingDetailFromCR('${e.isarpCode}')" title="다부문 연계 Finding — 클릭하면 상세 보기"><i class="fas fa-link" style="font-size:0.45rem;"></i> 연계</span>`
+      : (hasFinding
+        ? `<span style="background:#fff0f0;color:#d20015;border:1px solid rgba(210,0,21,0.3);padding:1px 6px;border-radius:3px;font-size:0.52rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:2px;" onclick="openFindingDetailFromCR('${e.isarpCode}')" title="2025 심사 Finding ISARP — 클릭하면 상세 보기"><i class="fas fa-exclamation-triangle" style="font-size:0.45rem;"></i> F</span>`
+        : '');
     const evidenceItems = getEvidenceItems(e.isarpCode);
     const evBtnHtml = evidenceItems.length > 0
       ? `<button class="cr-ev-btn" onclick="toggleCREvidence('${_esc(e.id)}')" title="증빙자료 목록 보기 (내부심사용)">💼 증빙자료</button>`
