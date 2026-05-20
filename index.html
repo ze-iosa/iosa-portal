@@ -2327,22 +2327,6 @@ function renderBoard() {
         </p>
       </div>
     </div>
-    <div class="sidebar-widget">
-      <div class="sidebar-widget-header">주요 데드라인</div>
-      <div class="sidebar-widget-body">
-        ${[
-          {label:'Finding 종결', date:'2026.07.17', warn:true},
-          {label:'IATA Connect 갱신', date:'2026.08.01', warn:false},
-          {label:'RBI 내부심사', date:'2026.11.01', warn:false},
-          {label:'인증 만료', date:'2027.08.01', warn:false},
-        ].map(d=>`
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border-light);font-size:0.78rem;">
-            <span style="font-weight:600;">${d.label}</span>
-            <span style="font-size:0.72rem;${d.warn?'color:var(--eastar-red);font-weight:700;':'color:var(--text-light);'}">${d.date}</span>
-          </div>
-        `).join('')}
-      </div>
-    </div>
   </div>
 </div>
 `;
