@@ -108,8 +108,8 @@ button { font-family: var(--font); cursor: pointer; }
   display: flex;
   align-items: center; justify-content: center;
 }
-.nav-brand-logo i {
-  font-size: 16px; color: var(--eastar-red);
+.nav-brand-logo .nav-star {
+  font-size: 20px; color: var(--eastar-red); line-height: 1;
 }
 .nav-brand-title { font-size: var(--size-sm); font-weight: 800; color: var(--text-primary); letter-spacing: -0.2px; }
 .nav-brand-sub   { font-size: var(--size-xs); font-weight: 500; color: var(--text-tertiary); }
