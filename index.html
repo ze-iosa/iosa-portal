@@ -1416,26 +1416,25 @@ ${(()=>{
   const cars = a.keyCARs || [];
   const repeated = cars.filter(c => c.linkedSections && c.linkedSections.length > 0);
   const sectionOnly = cars.filter(c => !c.linkedSections || c.linkedSections.length === 0);
-  function sectionBadges(sects) {
-    return (sects||[]).map(s=>`<span style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:1px 6px;border-radius:3px;font-size:0.57rem;font-weight:700;">${s}</span>`).join('');
-  }
-
   function findingRow(car, isRepeated) {
     const statusColor = car.status==='closed' ? '#1a7a4a' : '#d20015';
     const statusBg    = car.status==='closed' ? '#f0faf4' : '#fff0f0';
     const statusLabel = car.status==='closed' ? '종결' : '미결';
+    const sects = car.linkedSections || [];
+    const sectText = sects.length > 0
+      ? `<i class="fas fa-link" style="font-size:0.58rem;margin-right:3px;"></i>${sects.join(' · ')} <span style="opacity:0.6;">(${sects.length}개 부문)</span>`
+      : `${car.sect} 부문 단독`;
     return `<div onclick="openFindingDetail('${car.id}')"
-      style="display:grid;grid-template-columns:auto 1fr auto;gap:0;align-items:start;padding:10px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background 150ms;"
+      style="display:grid;grid-template-columns:auto 1fr auto;gap:0;align-items:center;padding:10px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background 150ms;"
       onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
-      <div style="padding-top:1px;margin-right:10px;">
-        <span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:2px 7px;border-radius:3px;font-size:0.62rem;font-weight:900;white-space:nowrap;display:inline-block;">${car.isarp}</span>
-        ${isRepeated ? `<div style="margin-top:4px;display:flex;gap:3px;flex-wrap:wrap;">${sectionBadges(car.linkedSections)}</div>` : ''}
+      <div style="margin-right:12px;flex-shrink:0;">
+        <span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:2px 8px;border-radius:3px;font-size:0.62rem;font-weight:900;white-space:nowrap;display:inline-block;">${car.isarp}</span>
       </div>
       <div>
         <div style="font-size:0.78rem;color:#222;font-weight:600;line-height:1.4;">${car.desc}</div>
-        ${isRepeated ? `<div style="font-size:0.68rem;color:#64748b;margin-top:3px;font-weight:600;"><i class="fas fa-link me-1"></i>다부문 연계 Finding</div>` : `<div style="font-size:0.68rem;color:#888;margin-top:2px;">${car.sect} 부문 단독</div>`}
+        <div style="font-size:0.66rem;color:#64748b;margin-top:2px;">${sectText}</div>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-left:10px;padding-top:1px;">
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-left:12px;">
         <span style="background:${statusBg};color:${statusColor};border:1px solid ${statusColor}30;padding:2px 8px;border-radius:3px;font-size:0.62rem;font-weight:800;white-space:nowrap;">${statusLabel}</span>
         <i class="fas fa-chevron-right" style="font-size:0.6rem;color:#ccc;"></i>
       </div>
