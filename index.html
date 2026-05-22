@@ -1389,68 +1389,8 @@ ${a.placeholder ? `
   ${isAdmin ? a.files.map(f=>`<a href="${f.path}" target="_blank" class="btn-outline btn-outline-sm"><i class="fas fa-file-pdf me-1"></i>${f.label}</a>`).join('') : ''}
 </div>
 
-<!-- AUDITOR LIST -->
-${(()=>{
-  const savedAu = JSON.parse(localStorage.getItem('iosa_auditors_'+a.year)||'null');
-  const auList = savedAu || a.auditors || [];
-  return `
-<div class="w-card mb-3">
-  <div class="w-card-header">
-    <span class="w-card-title"><i class="fas fa-users me-2" style="color:var(--eastar-red);"></i>AUDITOR LIST</span>
-    <div style="display:flex;align-items:center;gap:8px;">
-      <span style="font-size:0.75rem;color:var(--text-light);">ISM ${a.ism} 적용</span>
-      ${isAdmin ? `<button onclick="(function(){var p=document.getElementById('au-edit-${a.year}');p.style.display=p.style.display==='none'?'block':'none';})()" style="padding:2px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;font-size:0.7rem;font-weight:700;cursor:pointer;color:#374151;"><i class="fas fa-pen me-1" style="color:#6b7280;"></i>편집</button>` : ''}
-    </div>
-  </div>
-  <div class="w-card-body" style="padding:0;">
-    <table class="iata-table" style="margin:0;" id="au-table-${a.year}">
-      <thead>
-        <tr>
-          <th style="width:22%;">Name</th>
-          <th style="width:20%;">Role</th>
-          <th style="width:38%;">Assigned Sections</th>
-          <th style="width:20%;">Nationality</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${auList.length > 0 ? auList.map(au => `
-          <tr>
-            <td><strong>${au.name}</strong></td>
-            <td><span style="font-size:0.72rem;font-weight:700;color:var(--eastar-red);background:#fff1f2;padding:2px 8px;border-radius:3px;">${au.role}</span></td>
-            <td style="font-size:0.78rem;color:#555;">${au.sections}</td>
-            <td style="font-size:0.78rem;color:#888;">${au.nationality}</td>
-          </tr>
-        `).join('') : `<tr><td colspan="4" style="text-align:center;color:#bbb;padding:20px;">심사원 정보가 없습니다</td></tr>`}
-      </tbody>
-    </table>
-  </div>
-  ${isAdmin ? `
-  <!-- 편집 패널 -->
-  <div id="au-edit-${a.year}" style="display:none;border-top:1px solid #f1f5f9;padding:16px 20px;background:#fafafa;">
-    <div id="au-rows-${a.year}" style="display:grid;gap:8px;">
-      ${auList.map((au,i)=>`
-      <div id="au-row-${a.year}-${i}" style="display:grid;grid-template-columns:1fr 1fr 2fr 1fr auto;gap:6px;align-items:center;">
-        <input class="iata-input" placeholder="이름" value="${au.name}" style="font-size:0.78rem;">
-        <select class="iata-input" style="font-size:0.78rem;">
-          <option value="Lead Auditor" ${au.role==='Lead Auditor'?'selected':''}>Lead Auditor</option>
-          <option value="Auditor" ${au.role==='Auditor'?'selected':''}>Auditor</option>
-          <option value="Observer" ${au.role==='Observer'?'selected':''}>Observer</option>
-        </select>
-        <input class="iata-input" placeholder="예: ORG · FLT · DSP" value="${au.sections}" style="font-size:0.78rem;">
-        <input class="iata-input" placeholder="국적" value="${au.nationality==='—'?'':au.nationality}" style="font-size:0.78rem;">
-        <button onclick="document.getElementById('au-row-${a.year}-${i}').remove()" style="width:28px;height:28px;background:#fff1f2;border:1px solid #fecaca;border-radius:4px;color:#d20015;cursor:pointer;font-size:0.8rem;"><i class="fas fa-trash"></i></button>
-      </div>`).join('')}
-    </div>
-    <div style="display:flex;gap:8px;margin-top:12px;">
-      <button onclick="auditorAddRow('${a.year}')" style="padding:5px 12px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;color:#374151;"><i class="fas fa-plus me-1"></i>심사원 추가</button>
-      <button onclick="auditorSave('${a.year}')" style="padding:5px 14px;background:var(--eastar-red);border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;color:#fff;"><i class="fas fa-save me-1"></i>저장</button>
-    </div>
-  </div>` : ''}
-</div>`;
-})()}
-
-<!-- Totals -->
-<div class="stats-row mb-4">
+<!-- ① Stats (최상단) -->
+<div class="stats-row mb-3">
   <div class="stat-box red">
     <div class="stat-box-label">Total FINDINGS</div>
     <div class="stat-box-num">${a.totalF}</div>
@@ -1473,93 +1413,13 @@ ${(()=>{
   </div>
 </div>
 
-<!-- Key Findings — Repeated ISARP Focus -->
+<!-- ② 심사 세부 정보 + AUDITOR LIST (나란히) -->
 ${(()=>{
-  const cars = a.keyCARs || [];
-  const repeated = cars.filter(c => c.linkedSections && c.linkedSections.length > 0);
-  const sectionOnly = cars.filter(c => !c.linkedSections || c.linkedSections.length === 0);
-  function findingRow(car, isRepeated) {
-    const rid = 'fr-' + car.id;
-    const statusColor = car.status==='closed' ? '#1a7a4a' : '#d20015';
-    const statusBg    = car.status==='closed' ? '#f0faf4' : '#fff0f0';
-    const statusLabel = car.status==='closed' ? '종결' : '미결';
-    const sects = car.linkedSections || [];
-    const sectText = sects.length > 0
-      ? `<i class="fas fa-link" style="font-size:0.58rem;margin-right:3px;"></i>${sects.join(' · ')} <span style="opacity:0.6;">(${sects.length}개 부문)</span>`
-      : `${car.sect} 부문 단독`;
-    const deptMap = {ORG:'안전보안실',FLT:'운항본부',DSP:'종합통제실',MNT:'정비본부',CAB:'객실본부',GRH:'운송본부',CGO:'운송본부',SEC:'안전보안실'};
-    const dept = deptMap[car.sect] || car.sect;
-    const capLine = car.capPlan ? car.capPlan.split('\n')[0].replace(/^[①②③④⑤⑥⑦⑧]\s*/,'') : '';
-    const capShort = capLine.length > 60 ? capLine.substring(0,60)+'…' : capLine;
-    const fatShort = car.fatContent ? (car.fatContent.length > 70 ? car.fatContent.substring(0,70)+'…' : car.fatContent) : '';
-    const toggleFn = `(function(){var d=document.getElementById('${rid}');var ic=document.getElementById('${rid}-ic');var open=d.style.display!=='none';d.style.display=open?'none':'block';ic.className='fas '+(open?'fa-chevron-right':'fa-chevron-down');ic.style.color=open?'#ccc':'#475569';})()`;
-    return `
-    <div style="border-bottom:1px solid #f0f0f0;">
-      <!-- 헤더 행 (항상 표시) -->
-      <div onclick="${toggleFn}"
-        style="display:grid;grid-template-columns:88px 1fr auto;gap:0;align-items:center;padding:11px 14px;cursor:pointer;transition:background 150ms;"
-        onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
-        <div style="padding-right:12px;">
-          <span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:2px 8px;border-radius:3px;font-size:0.62rem;font-weight:900;white-space:nowrap;display:inline-block;">${car.isarp}</span>
-          <div style="margin-top:5px;"><span style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;padding:1px 6px;border-radius:3px;font-size:0.57rem;font-weight:700;white-space:nowrap;">${dept}</span></div>
-        </div>
-        <div>
-          <div style="font-size:0.78rem;color:#222;font-weight:600;line-height:1.4;">${car.desc}</div>
-          <div style="font-size:0.66rem;color:#64748b;margin-top:2px;">${sectText}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-left:12px;">
-          <span style="background:${statusBg};color:${statusColor};border:1px solid ${statusColor}30;padding:2px 8px;border-radius:3px;font-size:0.62rem;font-weight:800;white-space:nowrap;">${statusLabel}</span>
-          <i id="${rid}-ic" class="fas fa-chevron-right" style="font-size:0.6rem;color:#ccc;"></i>
-        </div>
-      </div>
-      <!-- 펼침 영역 (클릭 시 표시) -->
-      <div id="${rid}" style="display:none;padding:10px 14px 14px 102px;background:#f8fafc;border-top:1px solid #f0f4f8;">
-        ${capShort ? `<div style="font-size:0.72rem;margin-bottom:5px;line-height:1.55;color:#374151;"><span style="display:inline-block;font-weight:800;color:#94a3b8;font-size:0.6rem;margin-right:6px;text-transform:uppercase;letter-spacing:.5px;min-width:28px;">CAP</span>${capShort}</div>` : ''}
-        ${fatShort ? `<div style="font-size:0.72rem;margin-bottom:8px;line-height:1.55;color:#4b5563;"><span style="display:inline-block;font-weight:800;color:#94a3b8;font-size:0.6rem;margin-right:6px;text-transform:uppercase;letter-spacing:.5px;min-width:28px;">FAT</span>${fatShort}</div>` : ''}
-        <button onclick="event.stopPropagation();openFindingDetail('${car.id}')" style="font-size:0.65rem;padding:4px 12px;background:#fff;border:1px solid #e2e8f0;border-radius:4px;color:#374151;font-weight:700;cursor:pointer;margin-top:2px;">
-          <i class="fas fa-arrow-right me-1" style="color:#94a3b8;font-size:0.6rem;"></i>상세 보기
-        </button>
-      </div>
-    </div>`;
-  }
-
+  const savedAu = JSON.parse(localStorage.getItem('iosa_auditors_'+a.year)||'null');
+  const auList = savedAu || a.auditors || [];
   return `
 <div class="row g-3 mb-3">
-  <div class="col-12">
-    <div class="w-card">
-      <div class="w-card-header" style="border-bottom:2px solid var(--eastar-red);">
-        <div>
-          <span class="w-card-title"><i class="fas fa-link me-2" style="color:var(--eastar-red);"></i>다부문 연계 Findings (Repeated ISARPs)</span>
-          <div style="font-size:0.68rem;color:#888;margin-top:2px;">복수 부문에 공통 영향 — 가장 우선 조치 필요</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:3px 10px;border-radius:12px;font-size:0.65rem;font-weight:700;">${repeated.length}건</span>
-          <span style="font-size:0.65rem;color:#aaa;"><i class="fas fa-hand-pointer me-1"></i>클릭하면 상세보기</span>
-        </div>
-      </div>
-      <div>
-        ${repeated.length === 0
-          ? '<div style="padding:20px;text-align:center;color:#bbb;font-size:0.8rem;">다부문 연계 Finding 없음</div>'
-          : repeated.map(car => findingRow(car, true)).join('')}
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="row g-3">
-  <div class="col-md-7">
-    <div class="w-card h-100">
-      <div class="w-card-header">
-        <span class="w-card-title"><i class="fas fa-exclamation-triangle me-2" style="color:var(--eastar-red);"></i>부문별 단독 Findings</span>
-        <span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:3px 10px;border-radius:12px;font-size:0.65rem;font-weight:800;">${sectionOnly.length}건</span>
-      </div>
-      <div>
-        ${sectionOnly.length === 0
-          ? '<div style="padding:20px;text-align:center;color:#bbb;font-size:0.8rem;">단독 Finding 없음</div>'
-          : sectionOnly.map(car => findingRow(car, false)).join('')}
-      </div>
-    </div>
-  </div>
+  <!-- 심사 세부 정보 -->
   <div class="col-md-5">
     <div class="w-card h-100">
       <div class="w-card-header">
@@ -1583,9 +1443,7 @@ ${(()=>{
           ${(a.sections||[]).filter(s=>s.f>0).map(s=>`
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
               <span style="font-size:0.72rem;font-weight:700;color:#374151;">${s.code} ${s.name}</span>
-              <div style="display:flex;gap:4px;">
-                ${s.f>0?`<span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:1px 7px;border-radius:3px;font-size:0.62rem;font-weight:800;">F ${s.f}</span>`:''}
-              </div>
+              <span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:1px 7px;border-radius:3px;font-size:0.62rem;font-weight:800;">F ${s.f}</span>
             </div>`).join('')}
         </div>
         ${isAdmin && (a.files||[]).length > 0 ? `
@@ -1595,14 +1453,139 @@ ${(()=>{
       </div>
     </div>
   </div>
+  <!-- AUDITOR LIST -->
+  <div class="col-md-7">
+    <div class="w-card h-100">
+      <div class="w-card-header">
+        <span class="w-card-title"><i class="fas fa-users me-2" style="color:var(--eastar-red);"></i>AUDITOR LIST</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:0.75rem;color:var(--text-light);">ISM ${a.ism} 적용</span>
+          ${isAdmin ? `<button onclick="(function(){var p=document.getElementById('au-edit-${a.year}');p.style.display=p.style.display==='none'?'block':'none';})()" style="padding:2px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;font-size:0.7rem;font-weight:700;cursor:pointer;color:#374151;"><i class="fas fa-pen me-1" style="color:#6b7280;"></i>편집</button>` : ''}
+        </div>
+      </div>
+      <div style="padding:0;">
+        <table class="iata-table" style="margin:0;" id="au-table-${a.year}">
+          <thead><tr>
+            <th style="width:22%;">Name</th>
+            <th style="width:20%;">Role</th>
+            <th style="width:38%;">Assigned Sections</th>
+            <th style="width:20%;">Nationality</th>
+          </tr></thead>
+          <tbody>
+            ${auList.length > 0 ? auList.map(au => `
+              <tr>
+                <td><strong>${au.name}</strong></td>
+                <td><span style="font-size:0.72rem;font-weight:700;color:var(--eastar-red);background:#fff1f2;padding:2px 8px;border-radius:3px;">${au.role}</span></td>
+                <td style="font-size:0.78rem;color:#555;">${au.sections}</td>
+                <td style="font-size:0.78rem;color:#888;">${au.nationality}</td>
+              </tr>`).join('')
+            : `<tr><td colspan="4" style="text-align:center;color:#bbb;padding:20px;">심사원 정보가 없습니다</td></tr>`}
+          </tbody>
+        </table>
+      </div>
+      ${isAdmin ? `
+      <div id="au-edit-${a.year}" style="display:none;border-top:1px solid #f1f5f9;padding:16px 20px;background:#fafafa;">
+        <div id="au-rows-${a.year}" style="display:grid;gap:8px;">
+          ${auList.map((au,i)=>`
+          <div id="au-row-${a.year}-${i}" style="display:grid;grid-template-columns:1fr 1fr 2fr 1fr auto;gap:6px;align-items:center;">
+            <input class="iata-input" placeholder="이름" value="${au.name}" style="font-size:0.78rem;">
+            <select class="iata-input" style="font-size:0.78rem;">
+              <option value="Lead Auditor" ${au.role==='Lead Auditor'?'selected':''}>Lead Auditor</option>
+              <option value="Auditor" ${au.role==='Auditor'?'selected':''}>Auditor</option>
+              <option value="Observer" ${au.role==='Observer'?'selected':''}>Observer</option>
+            </select>
+            <input class="iata-input" placeholder="예: ORG · FLT · DSP" value="${au.sections}" style="font-size:0.78rem;">
+            <input class="iata-input" placeholder="국적" value="${au.nationality==='—'?'':au.nationality}" style="font-size:0.78rem;">
+            <button onclick="document.getElementById('au-row-${a.year}-${i}').remove()" style="width:28px;height:28px;background:#fff1f2;border:1px solid #fecaca;border-radius:4px;color:#d20015;cursor:pointer;font-size:0.8rem;"><i class="fas fa-trash"></i></button>
+          </div>`).join('')}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button onclick="auditorAddRow('${a.year}')" style="padding:5px 12px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;color:#374151;"><i class="fas fa-plus me-1"></i>심사원 추가</button>
+          <button onclick="auditorSave('${a.year}')" style="padding:5px 14px;background:var(--eastar-red);border:none;border-radius:4px;font-size:0.75rem;font-weight:700;cursor:pointer;color:#fff;"><i class="fas fa-save me-1"></i>저장</button>
+        </div>
+      </div>` : ''}
+    </div>
+  </div>
+</div>`;
+})()}
+
+<!-- ③ Finding 카드 (아코디언) -->
+${(()=>{
+  const cars = a.keyCARs || [];
+  const repeated   = cars.filter(c => c.linkedSections && c.linkedSections.length > 0);
+  const sectionOnly = cars.filter(c => !c.linkedSections || c.linkedSections.length === 0);
+  function findingRow(car) {
+    const statusColor = car.status==='closed' ? '#1a7a4a' : '#d20015';
+    const statusBg    = car.status==='closed' ? '#f0faf4' : '#fff0f0';
+    const statusLabel = car.status==='closed' ? '종결' : '미결';
+    const sects = car.linkedSections || [];
+    const sectText = sects.length > 0
+      ? `<i class="fas fa-link" style="font-size:0.58rem;margin-right:3px;"></i>${sects.join(' · ')} <span style="opacity:0.6;">(${sects.length}개 부문)</span>`
+      : `${car.sect} 부문 단독`;
+    const deptMap = {ORG:'안전보안실',FLT:'운항본부',DSP:'종합통제실',MNT:'정비본부',CAB:'객실본부',GRH:'운송본부',CGO:'운송본부',SEC:'안전보안실'};
+    const dept = deptMap[car.sect] || car.sect;
+    return `<div onclick="openFindingDetail('${car.id}')"
+      style="display:grid;grid-template-columns:88px 1fr auto;gap:0;align-items:center;padding:11px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background 150ms;"
+      onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
+      <div style="padding-right:12px;">
+        <span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:2px 8px;border-radius:3px;font-size:0.62rem;font-weight:900;white-space:nowrap;display:inline-block;">${car.isarp}</span>
+        <div style="margin-top:5px;"><span style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;padding:1px 6px;border-radius:3px;font-size:0.57rem;font-weight:700;white-space:nowrap;">${dept}</span></div>
+      </div>
+      <div>
+        <div style="font-size:0.78rem;color:#222;font-weight:600;line-height:1.4;">${car.desc}</div>
+        <div style="font-size:0.66rem;color:#64748b;margin-top:2px;">${sectText}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-left:12px;">
+        <span style="background:${statusBg};color:${statusColor};border:1px solid ${statusColor}30;padding:2px 8px;border-radius:3px;font-size:0.62rem;font-weight:800;white-space:nowrap;">${statusLabel}</span>
+        <i class="fas fa-chevron-right" style="font-size:0.6rem;color:#ccc;"></i>
+      </div>
+    </div>`;
+  }
+  const toggleFn = id => `(function(){var b=document.getElementById('${id}');var ic=document.getElementById('${id}-ic');var open=b.style.display!=='none';b.style.display=open?'none':'block';ic.className='fas fa-chevron-'+(open?'down':'up');})()`;
+  return `
+<!-- 다부문 연계 -->
+<div class="w-card mb-3">
+  <div class="w-card-header" style="cursor:pointer;border-bottom:2px solid var(--eastar-red);" onclick="${toggleFn('hist-repeated-body')}">
+    <div>
+      <span class="w-card-title"><i class="fas fa-link me-2" style="color:var(--eastar-red);"></i>다부문 연계 Findings (Repeated ISARPs)</span>
+      <div style="font-size:0.68rem;color:#888;margin-top:2px;">복수 부문에 공통 영향 — 가장 우선 조치 필요</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:3px 10px;border-radius:12px;font-size:0.65rem;font-weight:700;">${repeated.length}건</span>
+      <i id="hist-repeated-body-ic" class="fas fa-chevron-down" style="color:#94a3b8;font-size:0.8rem;"></i>
+    </div>
+  </div>
+  <div id="hist-repeated-body" style="display:none;">
+    ${repeated.length === 0
+      ? '<div style="padding:20px;text-align:center;color:#bbb;font-size:0.8rem;">다부문 연계 Finding 없음</div>'
+      : repeated.map(car => findingRow(car)).join('')}
+  </div>
+</div>
+
+<!-- 부문별 단독 -->
+<div class="w-card mb-3">
+  <div class="w-card-header" style="cursor:pointer;" onclick="${toggleFn('hist-single-body')}">
+    <div>
+      <span class="w-card-title"><i class="fas fa-exclamation-triangle me-2" style="color:var(--eastar-red);"></i>부문별 단독 Findings</span>
+      <div style="font-size:0.68rem;color:#888;margin-top:2px;">각 부문 단독 지적 — 해당 부문 담당자 조치</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:3px 10px;border-radius:12px;font-size:0.65rem;font-weight:800;">${sectionOnly.length}건</span>
+      <i id="hist-single-body-ic" class="fas fa-chevron-down" style="color:#94a3b8;font-size:0.8rem;"></i>
+    </div>
+  </div>
+  <div id="hist-single-body" style="display:none;">
+    ${sectionOnly.length === 0
+      ? '<div style="padding:20px;text-align:center;color:#bbb;font-size:0.8rem;">단독 Finding 없음</div>'
+      : sectionOnly.map(car => findingRow(car)).join('')}
+  </div>
 </div>
 
 <!-- Finding Detail Panel -->
 <div id="histFindingOverlay" onclick="closeFindingDetail()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1040;"></div>
 <div id="histFindingPanel" style="display:none;position:fixed;top:0;right:0;bottom:0;width:520px;background:#fff;z-index:1050;box-shadow:-4px 0 28px rgba(0,0,0,0.18);overflow-y:auto;">
   <div id="histFindingContent"></div>
-</div>
-`;
+</div>`;
 })()}
 
 ${isAdmin && a.savedAt ? `
