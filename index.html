@@ -1426,15 +1426,23 @@ ${(()=>{
     const sectText = sects.length > 0
       ? `<i class="fas fa-link" style="font-size:0.58rem;margin-right:3px;"></i>${sects.join(' · ')} <span style="opacity:0.6;">(${sects.length}개 부문)</span>`
       : `${car.sect} 부문 단독`;
+    const deptMap = {ORG:'안전보안실',FLT:'운항본부',DSP:'종합통제실',MNT:'정비본부',CAB:'객실본부',GRH:'운송본부',CGO:'운송본부',SEC:'안전보안실'};
+    const dept = deptMap[car.sect] || car.sect;
+    const capLine = car.capPlan ? car.capPlan.split('\n')[0].replace(/^[①②③④⑤⑥⑦⑧]\s*/,'') : '';
+    const capShort = capLine.length > 52 ? capLine.substring(0,52)+'…' : capLine;
+    const fatShort = car.fatContent ? (car.fatContent.length > 58 ? car.fatContent.substring(0,58)+'…' : car.fatContent) : '';
     return `<div onclick="openFindingDetail('${car.id}')"
-      style="display:grid;grid-template-columns:88px 1fr auto;gap:0;align-items:center;padding:10px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background 150ms;"
+      style="display:grid;grid-template-columns:88px 1fr auto;gap:0;align-items:start;padding:11px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background 150ms;"
       onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
-      <div style="padding-right:12px;">
+      <div style="padding-right:12px;padding-top:2px;">
         <span style="background:#fff0f0;color:var(--eastar-red);border:1px solid rgba(210,0,21,0.2);padding:2px 8px;border-radius:3px;font-size:0.62rem;font-weight:900;white-space:nowrap;display:inline-block;">${car.isarp}</span>
+        <div style="margin-top:5px;"><span style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;padding:1px 6px;border-radius:3px;font-size:0.57rem;font-weight:700;white-space:nowrap;">${dept}</span></div>
       </div>
       <div>
         <div style="font-size:0.78rem;color:#222;font-weight:600;line-height:1.4;">${car.desc}</div>
         <div style="font-size:0.66rem;color:#64748b;margin-top:2px;">${sectText}</div>
+        ${capShort ? `<div style="font-size:0.62rem;margin-top:6px;line-height:1.45;color:#4b5563;"><span style="font-weight:800;color:#94a3b8;font-size:0.58rem;margin-right:4px;text-transform:uppercase;letter-spacing:.4px;">CAP</span>${capShort}</div>` : ''}
+        ${fatShort ? `<div style="font-size:0.62rem;margin-top:3px;line-height:1.45;color:#6b7280;"><span style="font-weight:800;color:#94a3b8;font-size:0.58rem;margin-right:4px;text-transform:uppercase;letter-spacing:.4px;">FAT</span>${fatShort}</div>` : ''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-left:12px;">
         <span style="background:${statusBg};color:${statusColor};border:1px solid ${statusColor}30;padding:2px 8px;border-radius:3px;font-size:0.62rem;font-weight:800;white-space:nowrap;">${statusLabel}</span>
@@ -1614,36 +1622,8 @@ ${isAdmin && a.savedAt ? `
   </div>
 </div>` : ''}
 
-${historyTab === '2025' ? `
-<!-- CAP / FAT Section (2025 초도심사) -->
-<div class="w-card mt-3" id="history-capfat-section">
-  <div class="w-card-header">
-    <span class="w-card-title"><i class="fas fa-tasks me-2" style="color:var(--eastar-red);"></i>CAP / FAT 현황 <span style="font-size:0.7rem;font-weight:600;color:#aaa;margin-left:6px;">2025 Initial Audit</span></span>
-    <div style="display:flex;align-items:center;gap:8px;">
-      <select id="history-cap-filter" style="font-size:0.75rem;padding:5px 10px;border:1.5px solid #ddd;border-radius:4px;font-family:inherit;cursor:pointer;outline:none;background:#fff;"
-        onchange="setHistoryCAPFilter(this.value)">
-        <option value="">전체 부문</option>
-        <option value="ORG">ORG — 조직 및 안전</option>
-        <option value="FLT">FLT — 운항</option>
-        <option value="DSP">DSP — 종합통제</option>
-        <option value="MNT">MNT — 정비</option>
-        <option value="CAB">CAB — 객실</option>
-        <option value="GRH">GRH — 운송</option>
-        <option value="CGO">CGO — 화물</option>
-        <option value="SEC">SEC — 항공보안</option>
-      </select>
-    </div>
-  </div>
-  <div id="history-cap-content" style="padding:16px 20px;">
-    <div style="text-align:center;padding:20px;color:#bbb;font-size:0.8rem;">로딩 중...</div>
-  </div>
-</div>
-` : ''}
 `}
 `;
-  if (historyTab === '2025') {
-    setTimeout(() => renderHistoryCAPContent(historyCAPFilter || ''), 0);
-  }
 }
 
 // ══════════════════════════════════════════════════════════
