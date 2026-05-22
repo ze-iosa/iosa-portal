@@ -750,8 +750,8 @@ function renderPreparation() {
   document.getElementById('section-preparation').innerHTML = `
 <div class="sect-header">
   <div>
-    <h2 class="sect-title">심사 준비 관리</h2>
-    <p class="sect-sub">교육 이수 · 내부심사 · 신청 준비 현황</p>
+    <h2 class="sect-title">심사원 관리</h2>
+    <p class="sect-sub">심사원 발령 · 교육 이수 · 전파교육 현황</p>
   </div>
 </div>
 <div class="row g-3">
@@ -760,7 +760,7 @@ function renderPreparation() {
     <div class="status-card">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h6 class="fw-bold mb-0"><i class="fas fa-graduation-cap me-2" style="color:var(--eastar-red);"></i>IATA 외부교육 이수</h6>
-        <button class="btn btn-sm btn-iata" onclick="openModal('modal-training')"><i class="fas fa-plus me-1"></i>추가</button>
+        <button class="btn btn-sm btn-iata" onclick="_prepEdit.training=null;document.getElementById('modal-training-title').textContent='IATA 외부교육 추가';document.getElementById('modal-training').querySelectorAll('input').forEach(el=>el.value='');openModal('modal-training')"><i class="fas fa-plus me-1"></i>추가</button>
       </div>
       <div id="training-list">
         ${p.externalTrainings.length === 0
@@ -775,7 +775,8 @@ function renderPreparation() {
                 </div>
                 <div class="d-flex align-items-start gap-2">
                   <span class="badge-status badge-done">이수완료</span>
-                  <button class="btn btn-sm btn-outline-danger" onclick="deleteTraining(${i})"><i class="fas fa-trash"></i></button>
+                  <button class="btn btn-sm" style="color:#475569;border:1px solid #cbd5e1;background:#f8fafc;padding:3px 8px;" onclick="editTraining(${i})" title="수정"><i class="fas fa-pencil"></i></button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteTraining(${i})" title="삭제"><i class="fas fa-trash"></i></button>
                 </div>
               </div>
             </div>`).join('')
@@ -789,19 +790,23 @@ function renderPreparation() {
     <div class="status-card">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h6 class="fw-bold mb-0"><i class="fas fa-file-powerpoint me-2" style="color:#c0392b;"></i>전파교육 자료 작성</h6>
-        <button class="btn btn-sm btn-iata" onclick="openModal('modal-material')"><i class="fas fa-plus me-1"></i>추가</button>
+        <button class="btn btn-sm btn-iata" onclick="_prepEdit.material=null;document.getElementById('modal-material-title').textContent='교육자료 추가';document.getElementById('modal-material').querySelectorAll('input').forEach(el=>el.value='');openModal('modal-material')"><i class="fas fa-plus me-1"></i>추가</button>
       </div>
       <div id="material-list">
         ${p.trainingMaterials.length === 0
           ? '<div class="empty-state"><i class="fas fa-file-alt"></i><p>교육자료를 추가하세요</p></div>'
           : p.trainingMaterials.map((m,i) => `
             <div class="cap-item">
-              <div class="d-flex justify-content-between">
+              <div class="d-flex justify-content-between align-items-start">
                 <div>
                   <div class="fw-bold" style="font-size:0.875rem;">${m.title}</div>
                   <div style="font-size:0.78rem;color:#64748b;">${m.dept} · ${DateUtil.format(m.date)}</div>
                 </div>
-                <span class="badge-status ${m.status==='completed'?'badge-done':'badge-inprogress'}">${m.status==='completed'?'완료':'작성중'}</span>
+                <div class="d-flex align-items-start gap-2">
+                  <span class="badge-status ${m.status==='completed'?'badge-done':'badge-inprogress'}">${m.status==='completed'?'완료':'작성중'}</span>
+                  <button class="btn btn-sm" style="color:#475569;border:1px solid #cbd5e1;background:#f8fafc;padding:3px 8px;" onclick="editMaterial(${i})" title="수정"><i class="fas fa-pencil"></i></button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteMaterial(${i})" title="삭제"><i class="fas fa-trash"></i></button>
+                </div>
               </div>
             </div>`).join('')
         }
@@ -814,14 +819,14 @@ function renderPreparation() {
     <div class="status-card">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h6 class="fw-bold mb-0"><i class="fas fa-user-tie me-2" style="color:#d20015;"></i>부문별 심사원 & 담당자 TFT</h6>
-        <button class="btn btn-sm btn-iata" onclick="openModal('modal-appointment')"><i class="fas fa-plus me-1"></i>추가</button>
+        <button class="btn btn-sm btn-iata" onclick="_prepEdit.appointment=null;document.getElementById('modal-appointment-title').textContent='심사원/담당자 발령';document.getElementById('modal-appointment').querySelectorAll('input').forEach(el=>el.value='');openModal('modal-appointment')"><i class="fas fa-plus me-1"></i>추가</button>
       </div>
       <div class="table-responsive">
         <table class="table data-table">
-          <thead><tr><th>부문</th><th>심사원/담당자</th><th>직위</th><th>발령일</th><th>상태</th></tr></thead>
+          <thead><tr><th>부문</th><th>심사원/담당자</th><th>직위</th><th>발령일</th><th>상태</th><th style="width:80px;"></th></tr></thead>
           <tbody>
             ${p.auditorAppointments.length === 0
-              ? `<tr><td colspan="5" class="text-center text-muted py-3">발령 내역이 없습니다</td></tr>`
+              ? `<tr><td colspan="6" class="text-center text-muted py-3">발령 내역이 없습니다</td></tr>`
               : p.auditorAppointments.map((a,i) => `
                 <tr>
                   <td><span class="badge bg-primary">${a.dept}</span></td>
@@ -829,6 +834,12 @@ function renderPreparation() {
                   <td>${a.position}</td>
                   <td>${DateUtil.format(a.date)}</td>
                   <td><span class="badge-status badge-active">발령완료</span></td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <button class="btn btn-sm" style="color:#475569;border:1px solid #cbd5e1;background:#f8fafc;padding:2px 7px;" onclick="editAppointment(${i})" title="수정"><i class="fas fa-pencil"></i></button>
+                      <button class="btn btn-sm btn-outline-danger" style="padding:2px 7px;" onclick="deleteAppointment(${i})" title="삭제"><i class="fas fa-trash"></i></button>
+                    </div>
+                  </td>
                 </tr>`).join('')
             }
           </tbody>
@@ -842,19 +853,23 @@ function renderPreparation() {
     <div class="status-card">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h6 class="fw-bold mb-0"><i class="fas fa-chalkboard-teacher me-2" style="color:#d20015;"></i>전파교육 실시 현황</h6>
-        <button class="btn btn-sm btn-iata" onclick="openModal('modal-propagation')"><i class="fas fa-plus me-1"></i>추가</button>
+        <button class="btn btn-sm btn-iata" onclick="_prepEdit.propagation=null;document.getElementById('modal-propagation-title').textContent='전파교육 기록 추가';document.getElementById('modal-propagation').querySelectorAll('input').forEach(el=>el.value='');openModal('modal-propagation')"><i class="fas fa-plus me-1"></i>추가</button>
       </div>
       ${p.propagationTrainings.length === 0
         ? '<div class="empty-state"><i class="fas fa-chalkboard-teacher"></i><p>전파교육 실시 기록을 추가하세요</p></div>'
         : p.propagationTrainings.map((t,i) => `
           <div class="cap-item">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-start">
               <div>
                 <div class="fw-bold" style="font-size:0.875rem;">${t.dept} 부문</div>
                 <div style="font-size:0.78rem;color:#64748b;">${DateUtil.format(t.date)} · 참석: ${t.attendeeCount}명</div>
                 <div style="font-size:0.75rem;color:#64748b;">${t.instructor}</div>
               </div>
-              <span class="badge-status badge-done">완료</span>
+              <div class="d-flex align-items-start gap-2">
+                <span class="badge-status badge-done">완료</span>
+                <button class="btn btn-sm" style="color:#475569;border:1px solid #cbd5e1;background:#f8fafc;padding:3px 8px;" onclick="editPropagation(${i})" title="수정"><i class="fas fa-pencil"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deletePropagation(${i})" title="삭제"><i class="fas fa-trash"></i></button>
+              </div>
             </div>
           </div>`).join('')
       }
@@ -871,7 +886,7 @@ function buildPrepModals() {
 <!-- Training Modal -->
 <div class="modal fade" id="modal-training" tabindex="-1">
   <div class="modal-dialog"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title">IATA 외부교육 추가</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+    <div class="modal-header"><h5 class="modal-title" id="modal-training-title">IATA 외부교육 추가</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
     <div class="modal-body">
       <div class="mb-3"><label class="form-label">교육명</label><input type="text" class="form-control" id="t-courseName" placeholder="예: IOSA Standards Training"></div>
       <div class="mb-3"><label class="form-label">교육기관</label><input type="text" class="form-control" id="t-provider" placeholder="예: IATA"></div>
@@ -884,7 +899,7 @@ function buildPrepModals() {
 <!-- Material Modal -->
 <div class="modal fade" id="modal-material" tabindex="-1">
   <div class="modal-dialog"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title">교육자료 추가</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+    <div class="modal-header"><h5 class="modal-title" id="modal-material-title">교육자료 추가</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
     <div class="modal-body">
       <div class="mb-3"><label class="form-label">자료명</label><input type="text" class="form-control" id="m-title" placeholder="예: FLT 부문 ISM Ed.17 전파교육 자료"></div>
       <div class="mb-3"><label class="form-label">담당 부문</label><input type="text" class="form-control" id="m-dept" placeholder="예: FLT, MNT, CAB..."></div>
@@ -897,7 +912,7 @@ function buildPrepModals() {
 <!-- Appointment Modal -->
 <div class="modal fade" id="modal-appointment" tabindex="-1">
   <div class="modal-dialog"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title">심사원/담당자 발령</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+    <div class="modal-header"><h5 class="modal-title" id="modal-appointment-title">심사원/담당자 발령</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
     <div class="modal-body">
       <div class="mb-3"><label class="form-label">부문</label><select class="form-select" id="a-dept"><option>ORG</option><option>FLT</option><option>DSP</option><option>MNT</option><option>CAB</option><option>GRH</option><option>CGO</option><option>SEC</option></select></div>
       <div class="mb-3"><label class="form-label">성명</label><input type="text" class="form-control" id="a-name"></div>
@@ -910,7 +925,7 @@ function buildPrepModals() {
 <!-- Propagation Modal -->
 <div class="modal fade" id="modal-propagation" tabindex="-1">
   <div class="modal-dialog"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title">전파교육 기록 추가</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+    <div class="modal-header"><h5 class="modal-title" id="modal-propagation-title">전파교육 기록 추가</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
     <div class="modal-body">
       <div class="mb-3"><label class="form-label">부문</label><input type="text" class="form-control" id="p-dept"></div>
       <div class="mb-3"><label class="form-label">교육일</label><input type="date" class="form-control" id="p-date"></div>
@@ -922,55 +937,137 @@ function buildPrepModals() {
 </div>`;
 }
 
-// Preparation save functions
+// ─── Preparation edit-mode state ──────────────────────────────
+const _prepEdit = { training: null, material: null, appointment: null, propagation: null };
+
+// ─── TRAINING ─────────────────────────────────────────────────
 function saveTraining() {
   const t = {
     courseName: document.getElementById('t-courseName').value,
-    provider: document.getElementById('t-provider').value,
-    date: document.getElementById('t-date').value,
-    attendee: document.getElementById('t-attendee').value,
+    provider:   document.getElementById('t-provider').value,
+    date:       document.getElementById('t-date').value,
+    attendee:   document.getElementById('t-attendee').value,
   };
   if (!t.courseName) return alert('교육명을 입력하세요');
-  APP_DATA.preparation.externalTrainings.push(t);
+  const arr = APP_DATA.preparation.externalTrainings;
+  if (_prepEdit.training !== null) { arr[_prepEdit.training] = t; _prepEdit.training = null; }
+  else arr.push(t);
   DB.save(APP_DATA);
   bootstrap.Modal.getInstance(document.getElementById('modal-training')).hide();
   renderPreparation();
 }
+function editTraining(i) {
+  const t = APP_DATA.preparation.externalTrainings[i];
+  document.getElementById('modal-training-title').textContent = 'IATA 외부교육 수정';
+  document.getElementById('t-courseName').value = t.courseName || '';
+  document.getElementById('t-provider').value   = t.provider   || '';
+  document.getElementById('t-date').value        = t.date       || '';
+  document.getElementById('t-attendee').value    = t.attendee   || '';
+  _prepEdit.training = i;
+  new bootstrap.Modal(document.getElementById('modal-training')).show();
+}
+function deleteTraining(i) {
+  if (!confirm('이 교육 기록을 삭제하시겠습니까?')) return;
+  APP_DATA.preparation.externalTrainings.splice(i, 1);
+  DB.save(APP_DATA);
+  renderPreparation();
+}
+
+// ─── MATERIAL ─────────────────────────────────────────────────
 function saveMaterial() {
-  APP_DATA.preparation.trainingMaterials.push({
-    title: document.getElementById('m-title').value,
-    dept: document.getElementById('m-dept').value,
-    date: document.getElementById('m-date').value,
+  const m = {
+    title:  document.getElementById('m-title').value,
+    dept:   document.getElementById('m-dept').value,
+    date:   document.getElementById('m-date').value,
     status: document.getElementById('m-status').value,
-  });
+  };
+  if (!m.title) return alert('자료명을 입력하세요');
+  const arr = APP_DATA.preparation.trainingMaterials;
+  if (_prepEdit.material !== null) { arr[_prepEdit.material] = m; _prepEdit.material = null; }
+  else arr.push(m);
   DB.save(APP_DATA);
   bootstrap.Modal.getInstance(document.getElementById('modal-material')).hide();
   renderPreparation();
 }
+function editMaterial(i) {
+  const m = APP_DATA.preparation.trainingMaterials[i];
+  document.getElementById('modal-material-title').textContent = '교육자료 수정';
+  document.getElementById('m-title').value  = m.title  || '';
+  document.getElementById('m-dept').value   = m.dept   || '';
+  document.getElementById('m-date').value   = m.date   || '';
+  document.getElementById('m-status').value = m.status || 'in_progress';
+  _prepEdit.material = i;
+  new bootstrap.Modal(document.getElementById('modal-material')).show();
+}
+function deleteMaterial(i) {
+  if (!confirm('이 자료를 삭제하시겠습니까?')) return;
+  APP_DATA.preparation.trainingMaterials.splice(i, 1);
+  DB.save(APP_DATA);
+  renderPreparation();
+}
+
+// ─── APPOINTMENT ──────────────────────────────────────────────
 function saveAppointment() {
-  APP_DATA.preparation.auditorAppointments.push({
-    dept: document.getElementById('a-dept').value,
-    name: document.getElementById('a-name').value,
+  const a = {
+    dept:     document.getElementById('a-dept').value,
+    name:     document.getElementById('a-name').value,
     position: document.getElementById('a-position').value,
-    date: document.getElementById('a-date').value,
-  });
+    date:     document.getElementById('a-date').value,
+  };
+  if (!a.name) return alert('성명을 입력하세요');
+  const arr = APP_DATA.preparation.auditorAppointments;
+  if (_prepEdit.appointment !== null) { arr[_prepEdit.appointment] = a; _prepEdit.appointment = null; }
+  else arr.push(a);
   DB.save(APP_DATA);
   bootstrap.Modal.getInstance(document.getElementById('modal-appointment')).hide();
   renderPreparation();
 }
+function editAppointment(i) {
+  const a = APP_DATA.preparation.auditorAppointments[i];
+  document.getElementById('modal-appointment-title').textContent = '심사원/담당자 수정';
+  document.getElementById('a-dept').value     = a.dept     || 'ORG';
+  document.getElementById('a-name').value     = a.name     || '';
+  document.getElementById('a-position').value = a.position || '';
+  document.getElementById('a-date').value     = a.date     || '';
+  _prepEdit.appointment = i;
+  new bootstrap.Modal(document.getElementById('modal-appointment')).show();
+}
+function deleteAppointment(i) {
+  if (!confirm('이 발령 내역을 삭제하시겠습니까?')) return;
+  APP_DATA.preparation.auditorAppointments.splice(i, 1);
+  DB.save(APP_DATA);
+  renderPreparation();
+}
+
+// ─── PROPAGATION ──────────────────────────────────────────────
 function savePropagation() {
-  APP_DATA.preparation.propagationTrainings.push({
-    dept: document.getElementById('p-dept').value,
-    date: document.getElementById('p-date').value,
-    instructor: document.getElementById('p-instructor').value,
+  const t = {
+    dept:          document.getElementById('p-dept').value,
+    date:          document.getElementById('p-date').value,
+    instructor:    document.getElementById('p-instructor').value,
     attendeeCount: document.getElementById('p-count').value,
-  });
+  };
+  if (!t.dept) return alert('부문을 입력하세요');
+  const arr = APP_DATA.preparation.propagationTrainings;
+  if (_prepEdit.propagation !== null) { arr[_prepEdit.propagation] = t; _prepEdit.propagation = null; }
+  else arr.push(t);
   DB.save(APP_DATA);
   bootstrap.Modal.getInstance(document.getElementById('modal-propagation')).hide();
   renderPreparation();
 }
-function deleteTraining(i) {
-  APP_DATA.preparation.externalTrainings.splice(i,1);
+function editPropagation(i) {
+  const t = APP_DATA.preparation.propagationTrainings[i];
+  document.getElementById('modal-propagation-title').textContent = '전파교육 기록 수정';
+  document.getElementById('p-dept').value       = t.dept          || '';
+  document.getElementById('p-date').value       = t.date          || '';
+  document.getElementById('p-instructor').value = t.instructor    || '';
+  document.getElementById('p-count').value      = t.attendeeCount || '';
+  _prepEdit.propagation = i;
+  new bootstrap.Modal(document.getElementById('modal-propagation')).show();
+}
+function deletePropagation(i) {
+  if (!confirm('이 전파교육 기록을 삭제하시겠습니까?')) return;
+  APP_DATA.preparation.propagationTrainings.splice(i, 1);
   DB.save(APP_DATA);
   renderPreparation();
 }
