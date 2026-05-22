@@ -760,7 +760,7 @@ function renderPreparation() {
     <div class="status-card">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h6 class="fw-bold mb-0"><i class="fas fa-graduation-cap me-2" style="color:var(--eastar-red);"></i>IATA 외부교육 이수</h6>
-        <button class="btn btn-sm btn-iata" onclick="_prepEdit.training=null;document.getElementById('modal-training-title').textContent='IATA 외부교육 추가';document.getElementById('modal-training').querySelectorAll('input').forEach(el=>el.value='');openModal('modal-training')"><i class="fas fa-plus me-1"></i>추가</button>
+        <button class="btn btn-sm btn-iata" onclick="_prepEdit.training=null;document.getElementById('modal-training-title').textContent='IATA 외부교육 추가';['t-courseName','t-provider','t-dateFrom','t-dateTo','t-attendee'].forEach(id=>{var el=document.getElementById(id);if(el)el.value='';});openModal('modal-training')"><i class="fas fa-plus me-1"></i>추가</button>
       </div>
       <div id="training-list">
         ${p.externalTrainings.length === 0
@@ -770,7 +770,7 @@ function renderPreparation() {
               <div class="d-flex justify-content-between">
                 <div>
                   <div class="fw-bold" style="font-size:0.875rem;">${t.courseName}</div>
-                  <div style="font-size:0.78rem;color:#64748b;">${t.provider} · ${DateUtil.format(t.date)}</div>
+                  <div style="font-size:0.78rem;color:#64748b;">${t.provider} · ${t.dateFrom ? DateUtil.format(t.dateFrom) + (t.dateTo ? ' ~ ' + DateUtil.format(t.dateTo) : '') : DateUtil.format(t.date||'')}</div>
                   <div style="font-size:0.75rem;color:#64748b;">${t.attendee}</div>
                 </div>
                 <div class="d-flex align-items-start gap-2">
@@ -890,7 +890,14 @@ function buildPrepModals() {
     <div class="modal-body">
       <div class="mb-3"><label class="form-label">교육명</label><input type="text" class="form-control" id="t-courseName" placeholder="예: IOSA Standards Training"></div>
       <div class="mb-3"><label class="form-label">교육기관</label><input type="text" class="form-control" id="t-provider" placeholder="예: IATA"></div>
-      <div class="mb-3"><label class="form-label">이수일</label><input type="date" class="form-control" id="t-date"></div>
+      <div class="mb-3">
+        <label class="form-label">교육 기간</label>
+        <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;">
+          <input type="date" class="form-control" id="t-dateFrom">
+          <span style="color:#94a3b8;font-size:0.85rem;">~</span>
+          <input type="date" class="form-control" id="t-dateTo">
+        </div>
+      </div>
       <div class="mb-3"><label class="form-label">이수자</label><input type="text" class="form-control" id="t-attendee" placeholder="이름/직책"></div>
     </div>
     <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">취소</button><button class="btn btn-iata" onclick="saveTraining()">저장</button></div>
@@ -945,7 +952,8 @@ function saveTraining() {
   const t = {
     courseName: document.getElementById('t-courseName').value,
     provider:   document.getElementById('t-provider').value,
-    date:       document.getElementById('t-date').value,
+    dateFrom:   document.getElementById('t-dateFrom').value,
+    dateTo:     document.getElementById('t-dateTo').value,
     attendee:   document.getElementById('t-attendee').value,
   };
   if (!t.courseName) return alert('교육명을 입력하세요');
@@ -961,8 +969,9 @@ function editTraining(i) {
   document.getElementById('modal-training-title').textContent = 'IATA 외부교육 수정';
   document.getElementById('t-courseName').value = t.courseName || '';
   document.getElementById('t-provider').value   = t.provider   || '';
-  document.getElementById('t-date').value        = t.date       || '';
-  document.getElementById('t-attendee').value    = t.attendee   || '';
+  document.getElementById('t-dateFrom').value   = t.dateFrom   || t.date || '';
+  document.getElementById('t-dateTo').value     = t.dateTo     || '';
+  document.getElementById('t-attendee').value   = t.attendee   || '';
   _prepEdit.training = i;
   new bootstrap.Modal(document.getElementById('modal-training')).show();
 }
