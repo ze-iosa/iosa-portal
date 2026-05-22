@@ -102,8 +102,7 @@ button { font-family: var(--font); cursor: pointer; }
 
 .nav-brand-logo {
   width: 34px; height: 34px;
-  background: #fff;
-  border: 1.5px solid #e8e8e8;
+  background: var(--eastar-red);
   border-radius: var(--radius-xs);
   display: flex;
   align-items: center; justify-content: center;
